@@ -16,6 +16,7 @@ import AddTransaction from './pages/AddTransaction';
 import MoedasStore from './pages/MoedasStore';
 import Investments from './pages/Investments';
 import SurvivalMode from './pages/SurvivalMode';
+import Notifications from './pages/Notifications';
 
 import BottomNav from './components/BottomNav';
 import TopBar from './components/TopBar';
@@ -78,6 +79,7 @@ function App() {
         {currentScreen === 'moedas' && <MoedasStore />}
         {currentScreen === 'investments' && <Investments />}
         {currentScreen === 'survival' && <SurvivalMode />}
+        {currentScreen === 'notifications' && <Notifications />}
       </main>
       <BottomNav />
     </div>

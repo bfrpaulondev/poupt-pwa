@@ -3,9 +3,9 @@ import { Bell, Settings, ChevronLeft } from 'lucide-react';
 import { modeLabels, modeColors } from '../utils/helpers';
 
 export default function TopBar() {
-  const { user, currentScreen, setScreen, getModeLabel, getModeColor } = useStore();
+  const { user, currentScreen, setScreen, getModeLabel, getModeColor, notifications } = useStore();
 
-  const showBack = ['add-transaction', 'survival', 'settings', 'moedas', 'investments'].includes(currentScreen);
+  const showBack = ['add-transaction', 'survival', 'settings', 'moedas', 'investments', 'notifications'].includes(currentScreen);
 
   const screenTitles = {
     dashboard: 'PoupPT',
@@ -18,8 +18,11 @@ export default function TopBar() {
     'add-transaction': 'Nova Transacao',
     moedas: 'PoupMoedas',
     investments: 'Investimentos',
-    survival: 'Modo Sobrevivencia'
+    survival: 'Modo Sobrevivencia',
+    notifications: 'Notificacoes'
   };
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
     <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
@@ -50,10 +53,18 @@ export default function TopBar() {
       </div>
 
       <div className="flex items-center gap-2">
+        <button onClick={() => setScreen('notifications')} className="relative p-2 rounded-lg hover:bg-white/10 transition-colors">
+          <Bell size={18} style={{ color: 'var(--text-secondary)' }} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center"
+              style={{ background: '#EF4444', color: 'white' }}>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
         <button onClick={() => setScreen('moedas')}
           className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
           style={{ background: 'rgba(212,160,23,0.15)', color: 'var(--gold)' }}>
-          <span>🪙</span>
           <span>{user?.poupMoedas || 0}</span>
         </button>
         <button onClick={() => setScreen('settings')}
