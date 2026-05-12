@@ -375,7 +375,7 @@ export default function SurvivalMode() {
                 <button onClick={() => setExpandedTemplate(isExpanded ? null : template.id)}
                   className="w-full p-3 flex items-center gap-3 text-left">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ background: 'rgba(212,160,23,0.15)' }}>
+                    style={{ background: 'rgba(255,215,0,0.15)' }}>
                     <Icon size={16} style={{ color: 'var(--gold)' }} />
                   </div>
                   <div className="flex-1">
@@ -400,9 +400,9 @@ export default function SurvivalMode() {
                     <button onClick={() => copyTemplate(template.id, template.content)}
                       className="w-full py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5"
                       style={{
-                        background: isCopied ? 'rgba(16,185,129,0.15)' : 'rgba(212,160,23,0.15)',
+                        background: isCopied ? 'rgba(16,185,129,0.15)' : 'rgba(255,215,0,0.15)',
                         color: isCopied ? '#10B981' : 'var(--gold)',
-                        border: `1px solid ${isCopied ? 'rgba(16,185,129,0.3)' : 'rgba(212,160,23,0.3)'}`
+                        border: `1px solid ${isCopied ? 'rgba(16,185,129,0.3)' : 'rgba(255,215,0,0.3)'}`
                       }}>
                       {isCopied ? <Check size={12} /> : <Copy size={12} />}
                       {isCopied ? 'Copiado!' : 'Copiar template'}
@@ -551,7 +551,7 @@ export default function SurvivalMode() {
       </div>
 
       {/* Motivational */}
-      <div className="p-4 rounded-2xl text-center" style={{ background: 'rgba(212,160,23,0.1)', border: '1px solid rgba(212,160,23,0.3)' }}>
+      <div className="p-4 rounded-2xl text-center" style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)' }}>
         <BookOpen size={20} className="mx-auto mb-2" style={{ color: 'var(--gold)' }} />
         <p className="text-sm italic" style={{ color: 'var(--gold)' }}>
           {currentMotivation[motivationIdx]}

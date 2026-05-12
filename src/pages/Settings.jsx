@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 const themes = [
-  { id: 'ouro-escuro', label: 'Ouro Escuro', color: '#D4A017', bg: '#0F172A' },
+  { id: 'ouro-escuro', label: 'Ouro Escuro', color: 'var(--gold)', bg: '#121212' },
   { id: 'ouro-claro', label: 'Ouro Claro', color: '#F5D76E', bg: '#1A1A2E' },
   { id: 'azul-escuro', label: 'Azul Escuro', color: '#2563EB', bg: '#0C1222' },
   { id: 'verde-escuro', label: 'Verde Escuro', color: '#059669', bg: '#0A1A14' },
@@ -269,7 +269,7 @@ export default function Settings() {
           {notificationItems.map(({ key, label, desc, icon: Icon }) => (
             <div key={key} className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: notifications[key] ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)' }}>
+                style={{ background: notifications[key] ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
                 <Icon size={16} style={{ color: notifications[key] ? 'var(--gold)' : 'var(--text-muted)' }} />
               </div>
               <div className="flex-1 min-w-0">
@@ -295,7 +295,7 @@ export default function Settings() {
             <button key={curr.code} onClick={() => handleCurrencyChange(curr.code)}
               className="py-2.5 px-3 rounded-xl text-left transition-all flex items-center gap-2"
               style={{
-                background: currency === curr.code ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+                background: currency === curr.code ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
                 border: currency === curr.code ? '1px solid var(--gold)' : '1px solid var(--border)'
               }}>
               <span className="text-base font-bold" style={{
@@ -326,7 +326,7 @@ export default function Settings() {
             <button key={lang.code} onClick={() => handleLanguageChange(lang.code)}
               className="py-2.5 rounded-xl text-sm font-medium transition-all text-center"
               style={{
-                background: language === lang.code ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+                background: language === lang.code ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
                 color: language === lang.code ? 'var(--gold)' : 'var(--text-secondary)',
                 border: language === lang.code ? '1px solid var(--gold)' : '1px solid var(--border)'
               }}>
@@ -350,8 +350,7 @@ export default function Settings() {
               Nome do Coach
             </label>
             <input type="text" value={coachName} onChange={e => setCoachName(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl text-sm"
-              style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+              className="w-full input-field" />
           </div>
           <div>
             <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
@@ -362,7 +361,7 @@ export default function Settings() {
                 <button key={key} onClick={() => setCoachPersonality(key)}
                   className="py-2.5 px-3 rounded-xl text-left transition-all"
                   style={{
-                    background: coachPersonality === key ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                    background: coachPersonality === key ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                     border: coachPersonality === key ? '1px solid var(--gold)' : '1px solid var(--border)'
                   }}>
                   <p className="text-xs font-semibold"
@@ -440,7 +439,7 @@ export default function Settings() {
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: privacySettings.analytics ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)' }}>
+              style={{ background: privacySettings.analytics ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
               <Eye size={16} style={{ color: privacySettings.analytics ? 'var(--gold)' : 'var(--text-muted)' }} />
             </div>
             <div className="flex-1">
@@ -451,7 +450,7 @@ export default function Settings() {
           </div>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: privacySettings.personalizedTips ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)' }}>
+              style={{ background: privacySettings.personalizedTips ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
               <Heart size={16} style={{ color: privacySettings.personalizedTips ? 'var(--gold)' : 'var(--text-muted)' }} />
             </div>
             <div className="flex-1">

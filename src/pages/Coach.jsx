@@ -166,8 +166,7 @@ export default function Coach() {
           <input type="text" value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Pergunta ao ${user?.coachName || 'Coach'}...`}
-            className="flex-1 px-4 py-3 rounded-xl text-sm"
-            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+            className="flex-1 input-field" />
           <button onClick={handleSend} disabled={!input.trim() || sending}
             className="w-12 h-12 rounded-xl flex items-center justify-center gold-gradient disabled:opacity-40">
             <Send size={18} color="#000" />

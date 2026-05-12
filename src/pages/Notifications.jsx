@@ -104,7 +104,7 @@ export default function Notifications() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient animate-pulse" />
+          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient gold-shimmer" />
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>A carregar notificacoes...</p>
         </div>
       </div>
@@ -141,7 +141,7 @@ export default function Notifications() {
           <div className="flex items-center gap-2">
             <button onClick={() => setShowFilters(!showFilters)}
               className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: showFilters ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
+              style={{ background: showFilters ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
               <Filter size={14} style={{ color: showFilters ? 'var(--gold)' : 'var(--text-muted)' }} />
             </button>
             {unreadCount > 0 && (
@@ -165,7 +165,7 @@ export default function Notifications() {
             <button onClick={() => setFilterPriority('all')}
               className="px-3 py-1.5 rounded-xl text-xs font-medium"
               style={{
-                background: filterPriority === 'all' ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+                background: filterPriority === 'all' ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
                 color: filterPriority === 'all' ? 'var(--gold)' : 'var(--text-muted)',
                 border: filterPriority === 'all' ? '1px solid var(--gold)' : '1px solid var(--border)'
               }}>

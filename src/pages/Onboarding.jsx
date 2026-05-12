@@ -90,8 +90,7 @@ export default function Onboarding() {
                 <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
                 <input type="text" value={form.name} onChange={e => updateForm('name', e.target.value)}
                   placeholder="O teu nome" autoFocus
-                  className="w-full pl-10 pr-4 py-3 rounded-xl text-sm"
-                  style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+                  className="w-full input-field !pl-10" />
               </div>
               <div className="mt-6 flex gap-3">
                 {['🧑', '👩', '👨', '🧑‍💼', '👩‍💼'].map(emoji => (
@@ -117,15 +116,14 @@ export default function Onboarding() {
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold"
                   style={{ color: 'var(--gold)' }}>EUR</span>
                 <input type="number" value={form.income || ''} onChange={e => updateForm('income', Number(e.target.value))}
-                  placeholder="1100" className="w-full pl-14 pr-4 py-3 rounded-xl text-sm"
-                  style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+                  placeholder="1100" className="w-full input-field !pl-14" />
               </div>
               <div className="mt-4 grid grid-cols-3 gap-2">
                 {[800, 1100, 1500, 2000, 3000, 5000].map(val => (
                   <button key={val} onClick={() => updateForm('income', val)}
                     className="py-2.5 rounded-xl text-sm font-medium transition-all"
                     style={{
-                      background: form.income === val ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                      background: form.income === val ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                       color: form.income === val ? 'var(--gold)' : 'var(--text-secondary)',
                       border: form.income === val ? '1px solid var(--gold)' : '1px solid var(--border)'
                     }}>
@@ -174,8 +172,7 @@ export default function Onboarding() {
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold"
                       style={{ color: '#EF4444' }}>EUR</span>
                     <input type="number" value={form.totalDebt || ''} onChange={e => updateForm('totalDebt', Number(e.target.value))}
-                      placeholder="5000" className="w-full pl-14 pr-4 py-3 rounded-xl text-sm"
-                      style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+                      placeholder="5000" className="w-full input-field !pl-14" />
                   </div>
                 </div>
               )}
@@ -196,8 +193,7 @@ export default function Onboarding() {
                 Nome do Coach
               </label>
               <input type="text" value={form.coachName} onChange={e => updateForm('coachName', e.target.value)}
-                placeholder="Ricardo" className="w-full px-4 py-3 rounded-xl text-sm mb-4"
-                style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+                placeholder="Ricardo" className="w-full input-field mb-4" />
 
               <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
                 Genero
@@ -211,7 +207,7 @@ export default function Onboarding() {
                   <button key={g.value} onClick={() => updateForm('coachGender', g.value)}
                     className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all"
                     style={{
-                      background: form.coachGender === g.value ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                      background: form.coachGender === g.value ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                       color: form.coachGender === g.value ? 'var(--gold)' : 'var(--text-secondary)',
                       border: form.coachGender === g.value ? '1px solid var(--gold)' : '1px solid var(--border)'
                     }}>
@@ -233,7 +229,7 @@ export default function Onboarding() {
                   <button key={p.value} onClick={() => updateForm('coachPersonality', p.value)}
                     className="p-3 rounded-xl text-left transition-all"
                     style={{
-                      background: form.coachPersonality === p.value ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                      background: form.coachPersonality === p.value ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                       border: form.coachPersonality === p.value ? '1px solid var(--gold)' : '1px solid var(--border)'
                     }}>
                     <span className="text-sm font-semibold block"
@@ -261,9 +257,9 @@ export default function Onboarding() {
                   const suggested = key === suggestMode();
                   return (
                     <button key={key} onClick={() => updateForm('financialMode', key)}
-                      className="p-4 rounded-xl text-left transition-all"
+                      className="feature-card p-4 text-left transition-all"
                       style={{
-                        background: form.financialMode === key ? `${modeColors[key]}20` : 'var(--bg-secondary)',
+                        background: form.financialMode === key ? `${modeColors[key]}20` : 'var(--bg-card)',
                         border: form.financialMode === key ? `2px solid ${modeColors[key]}` : '1px solid var(--border)'
                       }}>
                       <div className="flex items-center gap-3">
@@ -303,12 +299,12 @@ export default function Onboarding() {
         )}
         {step < 5 ? (
           <button onClick={() => setStep(step + 1)}
-            className="flex-1 flex items-center justify-center gap-1 py-3.5 rounded-2xl text-sm font-bold text-white gold-gradient">
+            className="btn-gold flex-1 flex items-center justify-center gap-1 py-3.5">
             Continuar <ChevronRight size={16} />
           </button>
         ) : (
           <button onClick={handleComplete} disabled={loading}
-            className="flex-1 py-3.5 rounded-2xl text-sm font-bold text-white gold-gradient disabled:opacity-50">
+            className="btn-gold flex-1 py-3.5 disabled:opacity-50">
             {loading ? 'A configurar...' : 'Comecar!'}
           </button>
         )}

@@ -34,11 +34,7 @@ const typeColors = {
   real_estate: '#EF4444', ppr: '#EC4899', other: '#64748B'
 };
 
-const inputStyle = {
-  background: 'var(--bg-secondary)',
-  color: 'var(--text-primary)',
-  border: '1px solid var(--border)'
-};
+
 
 export default function Investments() {
   const { user } = useStore();
@@ -149,7 +145,7 @@ export default function Investments() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient animate-pulse" />
+          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient gold-shimmer" />
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>A carregar investimentos...</p>
         </div>
       </div>
@@ -161,7 +157,7 @@ export default function Investments() {
       {/* Premium Notice for free users */}
       {!isPremium && (
         <div className="p-4 rounded-2xl flex items-center gap-3"
-          style={{ background: 'rgba(212,160,23,0.1)', border: '1px solid rgba(212,160,23,0.3)' }}>
+          style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)' }}>
           <Crown size={20} style={{ color: 'var(--gold)' }} />
           <div className="flex-1">
             <p className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>Funcionalidade Premium</p>
@@ -249,7 +245,7 @@ export default function Investments() {
 
           <input type="text" placeholder="Nome do ativo (ex: VWCE ETF)" value={form.name}
             onChange={e => setForm({...form, name: e.target.value})} required
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
 
           {/* Type selector with PPR label */}
           <div>
@@ -285,13 +281,13 @@ export default function Investments() {
               <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Quantidade</label>
               <input type="number" placeholder="0" value={form.quantity}
                 onChange={e => setForm({...form, quantity: e.target.value})} required min="0.01" step="0.01"
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+                className="w-full input-field" />
             </div>
             <div>
               <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco medio</label>
               <input type="number" placeholder="0.00 EUR" value={form.avgPrice}
                 onChange={e => setForm({...form, avgPrice: e.target.value})} required min="0.01" step="0.01"
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+                className="w-full input-field" />
             </div>
           </div>
 
@@ -300,19 +296,19 @@ export default function Investments() {
               <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco atual</label>
               <input type="number" placeholder="0.00 EUR" value={form.currentPrice}
                 onChange={e => setForm({...form, currentPrice: e.target.value})} min="0.01" step="0.01"
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+                className="w-full input-field" />
             </div>
             <div>
               <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Dividendo/acao</label>
               <input type="number" placeholder="0.00 EUR" value={form.dividendPerShare}
                 onChange={e => setForm({...form, dividendPerShare: e.target.value})} min="0" step="0.01"
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+                className="w-full input-field" />
             </div>
           </div>
 
           <input type="text" placeholder="Plataforma (ex: Degiro, Interactive Brokers)" value={form.platform}
             onChange={e => setForm({...form, platform: e.target.value})}
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
 
           <div className="flex gap-2">
             <button type="button" onClick={() => setShowForm(false)}
@@ -413,7 +409,7 @@ export default function Investments() {
                       </p>
                     </div>
                     {totalDividends > 0 && (
-                      <div className="p-2 rounded-xl" style={{ background: 'rgba(212,160,23,0.1)' }}>
+                      <div className="p-2 rounded-xl" style={{ background: 'rgba(255,215,0,0.1)' }}>
                         <span className="text-[10px] block" style={{ color: 'var(--gold)' }}>
                           <Percent size={8} className="inline mr-0.5" />Dividendos
                         </span>
@@ -470,24 +466,24 @@ export default function Investments() {
               {isExpanded && isEditing && (
                 <div className="mt-3 pt-3 space-y-3 animate-fade-in" style={{ borderTop: '1px solid var(--border)' }}>
                   <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})}
-                    className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} placeholder="Nome" />
+                    className="w-full input-field" placeholder="Nome" />
 
                   <div className="grid grid-cols-2 gap-2">
                     <input type="number" value={editForm.quantity} onChange={e => setEditForm({...editForm, quantity: e.target.value})}
-                      className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} placeholder="Quantidade" min="0.01" step="0.01" />
+                      className="w-full input-field" placeholder="Quantidade" min="0.01" step="0.01" />
                     <input type="number" value={editForm.avgPrice} onChange={e => setEditForm({...editForm, avgPrice: e.target.value})}
-                      className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} placeholder="Preco medio" min="0.01" step="0.01" />
+                      className="w-full input-field" placeholder="Preco medio" min="0.01" step="0.01" />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <input type="number" value={editForm.currentPrice} onChange={e => setEditForm({...editForm, currentPrice: e.target.value})}
-                      className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} placeholder="Preco atual" min="0.01" step="0.01" />
+                      className="w-full input-field" placeholder="Preco atual" min="0.01" step="0.01" />
                     <input type="number" value={editForm.dividendPerShare} onChange={e => setEditForm({...editForm, dividendPerShare: e.target.value})}
-                      className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} placeholder="Dividendo/acao" min="0" step="0.01" />
+                      className="w-full input-field" placeholder="Dividendo/acao" min="0" step="0.01" />
                   </div>
 
                   <input type="text" value={editForm.platform} onChange={e => setEditForm({...editForm, platform: e.target.value})}
-                    className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} placeholder="Plataforma" />
+                    className="w-full input-field" placeholder="Plataforma" />
 
                   <div className="flex gap-2">
                     <button onClick={() => setEditingId(null)}

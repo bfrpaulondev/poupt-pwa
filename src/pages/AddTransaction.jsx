@@ -85,24 +85,20 @@ export default function AddTransaction() {
     return Icon ? <Icon size={12} /> : null;
   };
 
-  const inputStyle = {
-    background: 'var(--bg-secondary)',
-    color: 'var(--text-primary)',
-    border: '1px solid var(--border)'
-  };
+
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
       {moedasEarned && (
         <div className="p-3 rounded-xl text-sm font-medium text-center animate-fade-in flex items-center justify-center gap-2"
-          style={{ background: 'rgba(212,160,23,0.15)', color: 'var(--gold)' }}>
+          style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)' }}>
           <Coins size={14} /> +{moedasEarned} PoupMoedas ganhos!
         </div>
       )}
 
       {error && (
         <div className="p-3 rounded-xl text-sm text-center animate-fade-in"
-          style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444' }}>
+          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--danger)' }}>
           {error}
         </div>
       )}
@@ -155,7 +151,7 @@ export default function AddTransaction() {
           </label>
           <input type="text" value={form.description} onChange={e => setForm({...form, description: e.target.value})}
             placeholder={type === 'receita' ? 'Ex: Salario mensal' : 'Ex: Compras no supermercado'} required
-            className="w-full px-4 py-3 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
         </div>
 
         <div>
@@ -167,7 +163,7 @@ export default function AddTransaction() {
               <button key={cat} type="button" onClick={() => setForm({...form, category: cat})}
                 className="py-2.5 px-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
                 style={{
-                  background: form.category === cat ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                  background: form.category === cat ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                   color: form.category === cat ? 'var(--gold)' : 'var(--text-secondary)',
                   border: form.category === cat ? '1px solid var(--gold)' : '1px solid var(--border)'
                 }}>
@@ -204,7 +200,7 @@ export default function AddTransaction() {
             <Calendar size={12} className="inline mr-1" /> Data
           </label>
           <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})}
-            className="w-full px-4 py-3 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
         </div>
 
         <div>
@@ -214,8 +210,7 @@ export default function AddTransaction() {
           <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
             placeholder="Adiciona notas ou detalhes..."
             rows={2}
-            className="w-full px-4 py-3 rounded-xl text-sm resize-none"
-            style={inputStyle} />
+            className="w-full input-field resize-none" />
         </div>
 
         <div className="flex gap-3">
@@ -225,7 +220,7 @@ export default function AddTransaction() {
             <X size={14} /> Cancelar
           </button>
           <button type="submit" disabled={saving}
-            className="flex-1 py-3.5 rounded-2xl text-sm font-bold text-white gold-gradient disabled:opacity-50 flex items-center justify-center gap-2">
+            className="btn-gold flex-1 py-3.5 disabled:opacity-50 flex items-center justify-center gap-2">
             <Save size={14} /> {saving ? 'A guardar...' : 'Guardar'}
           </button>
         </div>

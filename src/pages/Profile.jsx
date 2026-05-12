@@ -96,11 +96,7 @@ export default function Profile() {
     neutro: 'Neutro'
   };
 
-  const inputStyle = {
-    background: 'var(--bg-secondary)',
-    color: 'var(--text-primary)',
-    border: '1px solid var(--border)'
-  };
+
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
@@ -128,7 +124,7 @@ export default function Profile() {
           </span>
           <span className="text-[10px] px-2 py-1 rounded-full font-medium"
             style={{
-              background: user?.plan === 'premium' ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+              background: user?.plan === 'premium' ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
               color: user?.plan === 'premium' ? 'var(--gold)' : 'var(--text-muted)',
               border: user?.plan === 'premium' ? '1px solid var(--gold)' : '1px solid var(--border)'
             }}>
@@ -239,7 +235,7 @@ export default function Profile() {
           </h3>
           <button onClick={handleDetectMode} disabled={detecting}
             className="text-[10px] font-medium px-2 py-1 rounded-lg"
-            style={{ background: 'rgba(212,160,23,0.1)', color: 'var(--gold)', border: '1px solid rgba(212,160,23,0.3)' }}>
+            style={{ background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
             {detecting ? 'A detectar...' : 'Auto-detectar'}
           </button>
         </div>
@@ -282,7 +278,7 @@ export default function Profile() {
         {!editingCoach ? (
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'rgba(212,160,23,0.15)' }}>
+              style={{ background: 'rgba(255,215,0,0.15)' }}>
               <Star size={18} style={{ color: 'var(--gold)' }} />
             </div>
             <div>
@@ -302,7 +298,7 @@ export default function Profile() {
               </label>
               <input type="text" value={coachName} onChange={e => setCoachName(e.target.value)}
                 placeholder="Da um nome ao teu coach"
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+                className="w-full input-field" />
             </div>
             <div>
               <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
@@ -313,7 +309,7 @@ export default function Profile() {
                   <button key={key} onClick={() => setCoachGender(key)}
                     className="py-2 rounded-xl text-xs font-medium"
                     style={{
-                      background: coachGender === key ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                      background: coachGender === key ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                       color: coachGender === key ? 'var(--gold)' : 'var(--text-secondary)',
                       border: coachGender === key ? '1px solid var(--gold)' : '1px solid var(--border)'
                     }}>
@@ -331,7 +327,7 @@ export default function Profile() {
                   <button key={key} onClick={() => setCoachPersonality(key)}
                     className="py-2 rounded-xl text-xs font-medium"
                     style={{
-                      background: coachPersonality === key ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                      background: coachPersonality === key ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                       color: coachPersonality === key ? 'var(--gold)' : 'var(--text-secondary)',
                       border: coachPersonality === key ? '1px solid var(--gold)' : '1px solid var(--border)'
                     }}>
@@ -341,7 +337,7 @@ export default function Profile() {
               </div>
             </div>
             <button onClick={handleSaveCoach} disabled={savingCoach}
-              className="w-full py-2.5 rounded-xl text-sm font-bold text-white gold-gradient disabled:opacity-50 flex items-center justify-center gap-2">
+              className="btn-gold w-full py-2.5 disabled:opacity-50 flex items-center justify-center gap-2">
               <Save size={14} /> {savingCoach ? 'A guardar...' : 'Guardar Coach'}
             </button>
           </div>
@@ -390,7 +386,7 @@ export default function Profile() {
           </div>
           <button onClick={() => setScreen('moedas')}
             className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
-            style={{ background: 'rgba(212,160,23,0.15)', color: 'var(--gold)', border: '1px solid rgba(212,160,23,0.3)' }}>
+            style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
             <Sparkles size={14} /> Loja
           </button>
         </div>
@@ -433,7 +429,7 @@ export default function Profile() {
       {/* Premium CTA */}
       {user?.plan !== 'premium' && (
         <div className="p-4 rounded-2xl"
-          style={{ background: 'linear-gradient(135deg, rgba(212,160,23,0.15), rgba(212,160,23,0.05))', border: '1px solid rgba(212,160,23,0.3)' }}>
+          style={{ background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05))', border: '1px solid rgba(255,215,0,0.3)' }}>
           <div className="flex items-center gap-3">
             <Crown size={24} style={{ color: 'var(--gold)' }} />
             <div className="flex-1">
@@ -538,7 +534,7 @@ export default function Profile() {
               </button>
               <button onClick={handleDeleteAccount} disabled={deletingAccount}
                 className="flex-1 py-2 rounded-xl text-xs font-bold"
-                style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.4)' }}>
+                style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.2)' }}>
                 {deletingAccount ? 'A eliminar...' : 'Eliminar permanentemente'}
               </button>
             </div>

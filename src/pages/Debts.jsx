@@ -115,7 +115,7 @@ export default function Debts() {
   const informalDebts = debts.filter(d => d.type === 'informal');
   const activeDebts = activeTab === 'formal' ? formalDebts : informalDebts;
 
-  const modeColor = modeColors[user?.financialMode] || '#D4A017';
+  const modeColor = modeColors[user?.financialMode] || 'var(--gold)';
 
   const getDebtProgress = (debt) => {
     if (!debt.amount || debt.amount === 0) return 0;
@@ -132,11 +132,6 @@ export default function Debts() {
     return getDaysUntil(debt.dueDate) < 0;
   };
 
-  const inputStyle = {
-    background: 'var(--bg-secondary)',
-    color: 'var(--text-primary)',
-    border: '1px solid var(--border)'
-  };
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
@@ -186,9 +181,9 @@ export default function Debts() {
 
       {summary && summary.overdueCount > 0 && (
         <div className="p-3 rounded-xl flex items-center gap-2"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
-          <AlertTriangle size={16} style={{ color: '#EF4444' }} />
-          <span className="text-xs font-medium" style={{ color: '#EF4444' }}>
+          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--danger)' }}>
+          <AlertTriangle size={16} style={{ color: 'var(--danger)' }} />
+          <span className="text-xs font-medium" style={{ color: 'var(--danger)' }}>
             {summary.overdueCount} divida{summary.overdueCount > 1 ? 's' : ''} em atraso - prioriza estes pagamentos
           </span>
         </div>
@@ -207,7 +202,7 @@ export default function Debts() {
         <button onClick={() => { setActiveTab('informal'); setShowForm(false); setShowInformalForm(false); }}
           className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all text-center"
           style={{
-            background: activeTab === 'informal' ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+            background: activeTab === 'informal' ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
             color: activeTab === 'informal' ? 'var(--gold)' : 'var(--text-secondary)',
             border: activeTab === 'informal' ? '1px solid var(--gold)' : '1px solid var(--border)'
           }}>
@@ -233,7 +228,7 @@ export default function Debts() {
       {activeTab === 'informal' && (
         <button onClick={() => { setShowInformalForm(!showInformalForm); setShowForm(false); }}
           className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
-          style={{ background: 'rgba(212,160,23,0.1)', color: 'var(--gold)', border: '1px solid rgba(212,160,23,0.3)' }}>
+          style={{ background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
           <Plus size={14} /> Divida Informal
         </button>
       )}
@@ -248,28 +243,28 @@ export default function Debts() {
           </div>
           <input type="text" placeholder="Nome do credor (ex: Banco CTT)" value={form.creditorName}
             onChange={e => setForm({...form, creditorName: e.target.value})} required
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
           <input type="number" placeholder="Montante total (EUR)" value={form.amount}
             onChange={e => setForm({...form, amount: e.target.value})} required min="0.01" step="0.01"
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
           <div className="grid grid-cols-2 gap-2">
             <input type="number" placeholder="Pagamento minimo" value={form.minimumPayment}
               onChange={e => setForm({...form, minimumPayment: e.target.value})} min="0" step="0.01"
-              className="px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+              className="input-field" />
             <input type="number" placeholder="Taxa juro (%)" value={form.interestRate}
               onChange={e => setForm({...form, interestRate: e.target.value})} min="0" step="0.01"
-              className="px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+              className="input-field" />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-muted)' }}>Data limite</label>
               <input type="date" value={form.dueDate} onChange={e => setForm({...form, dueDate: e.target.value})}
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+                className="w-full input-field" />
             </div>
             <div>
               <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-muted)' }}>Tipo</label>
               <select value={form.relationshipType} onChange={e => setForm({...form, relationshipType: e.target.value})}
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle}>
+                className="w-full input-field">
                 <option value="banco">Banco</option>
                 <option value="credito">Cartao Credito</option>
                 <option value="financiamento">Financiamento</option>
@@ -279,7 +274,7 @@ export default function Debts() {
           </div>
           <textarea placeholder="Notas (opcional)" value={form.notes}
             onChange={e => setForm({...form, notes: e.target.value})}
-            rows={2} className="w-full px-3 py-2.5 rounded-xl text-sm resize-none" style={inputStyle} />
+            rows={2} className="w-full input-field resize-none" />
           <div className="flex gap-2">
             <button type="button" onClick={() => setShowForm(false)}
               className="flex-1 py-2.5 rounded-xl text-sm" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
@@ -307,22 +302,22 @@ export default function Debts() {
           </p>
           <input type="text" placeholder="Nome da pessoa" value={informalForm.creditorName}
             onChange={e => setInformalForm({...informalForm, creditorName: e.target.value})} required
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
           <input type="number" placeholder="Montante (EUR)" value={informalForm.amount}
             onChange={e => setInformalForm({...informalForm, amount: e.target.value})} required min="0.01" step="0.01"
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-muted)' }}>Data limite</label>
               <input type="date" value={informalForm.dueDate}
                 onChange={e => setInformalForm({...informalForm, dueDate: e.target.value})}
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+                className="w-full input-field" />
             </div>
             <div>
               <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-muted)' }}>Relacao</label>
               <select value={informalForm.relationshipType}
                 onChange={e => setInformalForm({...informalForm, relationshipType: e.target.value})}
-                className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle}>
+                className="w-full input-field">
                 <option value="amigo">Amigo</option>
                 <option value="familia">Familia</option>
                 <option value="senhorio">Senhorio</option>
@@ -333,7 +328,7 @@ export default function Debts() {
           </div>
           <textarea placeholder="Notas (opcional)" value={informalForm.notes}
             onChange={e => setInformalForm({...informalForm, notes: e.target.value})}
-            rows={2} className="w-full px-3 py-2.5 rounded-xl text-sm resize-none" style={inputStyle} />
+            rows={2} className="w-full input-field resize-none" />
           <div className="flex gap-2">
             <button type="button" onClick={() => setShowInformalForm(false)}
               className="flex-1 py-2.5 rounded-xl text-sm" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
@@ -494,10 +489,10 @@ export default function Debts() {
                         <div className="space-y-2 p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
                           <input type="number" placeholder="Montante a pagar (EUR)" value={paymentAmount}
                             onChange={e => setPaymentAmount(e.target.value)} min="0.01" step="0.01"
-                            className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} />
+                            className="w-full input-field" />
                           <input type="text" placeholder="Notas (opcional)" value={paymentNotes}
                             onChange={e => setPaymentNotes(e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} />
+                            className="w-full input-field" />
                           <div className="flex gap-2">
                             <button onClick={() => { setPaymentDebtId(null); setPaymentAmount(''); setPaymentNotes(''); }}
                               className="flex-1 py-2 rounded-xl text-xs" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
@@ -536,7 +531,7 @@ export default function Debts() {
                 onClick={() => setExpandedId(expandedId === debt._id ? null : debt._id)}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ background: debt.status === 'pago' ? 'rgba(16,185,129,0.15)' : 'rgba(212,160,23,0.15)' }}>
+                    style={{ background: debt.status === 'pago' ? 'rgba(16,185,129,0.15)' : 'rgba(255,215,0,0.15)' }}>
                     {debt.status === 'pago' ? <Check size={18} style={{ color: '#10B981' }} /> :
                       <User size={18} style={{ color: 'var(--gold)' }} />}
                   </div>
@@ -605,10 +600,10 @@ export default function Debts() {
                         <div className="space-y-2 p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
                           <input type="number" placeholder="Montante a pagar (EUR)" value={paymentAmount}
                             onChange={e => setPaymentAmount(e.target.value)} min="0.01" step="0.01"
-                            className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} />
+                            className="w-full input-field" />
                           <input type="text" placeholder="Notas (opcional)" value={paymentNotes}
                             onChange={e => setPaymentNotes(e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl text-sm" style={inputStyle} />
+                            className="w-full input-field" />
                           <div className="flex gap-2">
                             <button onClick={() => { setPaymentDebtId(null); setPaymentAmount(''); setPaymentNotes(''); }}
                               className="flex-1 py-2 rounded-xl text-xs" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
@@ -623,7 +618,7 @@ export default function Debts() {
                       ) : (
                         <button onClick={() => setPaymentDebtId(debt._id)}
                           className="w-full py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2"
-                          style={{ background: 'rgba(212,160,23,0.1)', color: 'var(--gold)', border: '1px solid rgba(212,160,23,0.3)' }}>
+                          style={{ background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
                           <Banknote size={12} /> Registar Pagamento
                         </button>
                       )}
@@ -650,7 +645,7 @@ export default function Debts() {
 
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 rounded-xl gold-gradient animate-pulse" />
+          <div className="w-8 h-8 rounded-xl gold-gradient gold-shimmer" />
         </div>
       )}
     </div>

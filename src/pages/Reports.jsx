@@ -11,7 +11,7 @@ import {
   TrendingDown, ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
-const CHART_COLORS = ['#D4A017', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444', '#EC4899', '#F97316', '#64748B'];
+const CHART_COLORS = ['var(--gold)', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444', '#EC4899', '#F97316', '#64748B'];
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -107,7 +107,7 @@ export default function Reports() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient animate-pulse" />
+          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient gold-shimmer" />
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>A carregar relatorios...</p>
         </div>
       </div>
@@ -150,8 +150,8 @@ export default function Reports() {
           <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Despesas</p>
         </div>
         <div className="glass-card p-3 text-center">
-          <TrendingUp size={14} className="mx-auto mb-1" style={{ color: savingsRate >= 0 ? '#D4A017' : '#EF4444' }} />
-          <p className="text-sm font-bold" style={{ color: savingsRate >= 0 ? '#D4A017' : '#EF4444' }}>
+          <TrendingUp size={14} className="mx-auto mb-1" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }} />
+          <p className="text-sm font-bold" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }}>
             {savingsRate.toFixed(1)}%
           </p>
           <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Poupanca</p>
@@ -164,9 +164,9 @@ export default function Reports() {
           <button key={id} onClick={() => setActiveTab(id)}
             className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
             style={{
-              background: activeTab === id ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+              background: activeTab === id ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
               color: activeTab === id ? 'var(--gold)' : 'var(--text-secondary)',
-              border: activeTab === id ? '1px solid rgba(212,160,23,0.4)' : '1px solid var(--border)'
+              border: activeTab === id ? '1px solid rgba(255,215,0,0.4)' : '1px solid var(--border)'
             }}>
             <Icon size={12} /> {label}
           </button>
@@ -250,8 +250,8 @@ export default function Reports() {
                   <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }}
                     unit="%" />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="rate" name="Taxa de Poupanca" stroke="#D4A017"
-                    strokeWidth={2} dot={{ fill: '#D4A017', r: 3 }} activeDot={{ r: 5 }} />
+                  <Line type="monotone" dataKey="rate" name="Taxa de Poupanca" stroke="var(--gold)"
+                    strokeWidth={2} dot={{ fill: 'var(--gold)', r: 3 }} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -417,7 +417,7 @@ export default function Reports() {
                           </div>
                           <div className="w-full rounded-full h-2" style={{ background: 'var(--border)' }}>
                             <div className="h-2 rounded-full transition-all"
-                              style={{ width: `${pct}%`, background: pct >= 100 ? '#10B981' : '#D4A017' }} />
+                              style={{ width: `${pct}%`, background: pct >= 100 ? '#10B981' : 'var(--gold)' }} />
                           </div>
                           <div className="flex justify-between text-[10px] mt-1">
                             <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(paid)} pago</span>
@@ -445,7 +445,7 @@ export default function Reports() {
             <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
               Paga primeiro as dividas menores para criar momento
             </p>
-            <div className="p-3 rounded-xl text-center" style={{ background: 'rgba(212,160,23,0.1)' }}>
+            <div className="p-3 rounded-xl text-center" style={{ background: 'rgba(255,215,0,0.1)' }}>
               <p className="text-xs" style={{ color: 'var(--gold)' }}>
                 Acede a estrategia detalhada na pagina de Dividas
               </p>

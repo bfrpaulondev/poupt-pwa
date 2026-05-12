@@ -291,7 +291,7 @@ export default function MoedasStore() {
                   disabled={!canAfford || isPurchasing}
                   className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"
                   style={{
-                    background: canAfford ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                    background: canAfford ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                     color: canAfford ? 'var(--gold)' : 'var(--text-muted)',
                     border: canAfford ? '1px solid var(--gold)' : '1px solid var(--border)',
                     opacity: isPurchasing ? 0.5 : 1
@@ -305,7 +305,7 @@ export default function MoedasStore() {
           {/* Premium CTA */}
           {user?.plan !== 'premium' && (
             <div className="p-4 rounded-2xl flex items-center gap-3 mt-3"
-              style={{ background: 'rgba(212,160,23,0.1)', border: '1px solid rgba(212,160,23,0.3)' }}>
+              style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)' }}>
               <Crown size={20} style={{ color: 'var(--gold)' }} />
               <div className="flex-1">
                 <p className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>Premium</p>

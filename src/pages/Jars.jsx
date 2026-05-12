@@ -63,7 +63,7 @@ export default function Jars() {
         {jarOrder.map(key => {
           const amount = (user?.income || 0) * percentages[key] / 100;
           return (
-            <div key={key} className="glass-card p-4">
+            <div key={key} className="feature-card p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ background: jarColors[key] }} />
@@ -94,12 +94,11 @@ export default function Jars() {
       {/* Actions */}
       <div className="flex gap-3">
         <button onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium"
-          style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+          className="btn-gold-outline flex items-center gap-2 px-4 py-3">
           <RotateCcw size={14} /> Reset
         </button>
         <button onClick={handleSave} disabled={!isValid || saving}
-          className="flex-1 py-3 rounded-2xl text-sm font-bold text-white gold-gradient disabled:opacity-50 flex items-center justify-center gap-2">
+          className="btn-gold flex-1 py-3 disabled:opacity-50 flex items-center justify-center gap-2">
           <Save size={14} /> {saving ? 'A guardar...' : saved ? 'Guardado!' : 'Guardar'}
         </button>
       </div>

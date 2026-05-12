@@ -1,6 +1,5 @@
 import useStore from '../store/useStore';
 import { Bell, Settings, ChevronLeft } from 'lucide-react';
-import { modeLabels, modeColors } from '../utils/helpers';
 
 export default function TopBar() {
   const { user, currentScreen, setScreen, getModeLabel, getModeColor, notifications } = useStore();
@@ -28,14 +27,20 @@ export default function TopBar() {
     <header className="sticky top-0 z-50 px-4 py-3 flex items-center justify-between"
       style={{ background: 'var(--bg-primary)', borderBottom: '1px solid var(--border)' }}>
       <div className="flex items-center gap-3">
-        {showBack && (
+        {showBack ? (
           <button onClick={() => setScreen('dashboard')}
-            className="p-1 rounded-lg hover:bg-white/10 transition-colors">
-            <ChevronLeft size={20} style={{ color: 'var(--text-secondary)' }} />
+            className="p-1.5 rounded-xl transition-colors"
+            style={{ color: 'var(--text-secondary)' }}
+            onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.05)'}
+            onMouseLeave={e => e.target.style.background = 'transparent'}>
+            <ChevronLeft size={20} />
           </button>
-        )}
-        {!showBack && (
-          <div className="w-8 h-8 rounded-xl gold-gradient flex items-center justify-center">
+        ) : (
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, #FF69B4, #FF85C8)',
+              boxShadow: '0 2px 10px rgba(255,105,180,0.25)'
+            }}>
             <span className="text-sm font-bold text-white">P</span>
           </div>
         )}
@@ -45,30 +50,35 @@ export default function TopBar() {
           </h1>
           {user && currentScreen === 'dashboard' && (
             <span className="text-xs mode-badge"
-              style={{ background: `${getModeColor()}20`, color: getModeColor() }}>
+              style={{ background: `${getModeColor()}18`, color: getModeColor() }}>
               {getModeLabel()}
             </span>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button onClick={() => setScreen('notifications')} className="relative p-2 rounded-lg hover:bg-white/10 transition-colors">
+      <div className="flex items-center gap-1.5">
+        <button onClick={() => setScreen('notifications')}
+          className="relative p-2 rounded-xl transition-colors"
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
           <Bell size={18} style={{ color: 'var(--text-secondary)' }} />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[10px] font-bold flex items-center justify-center"
-              style={{ background: '#EF4444', color: 'white' }}>
+              style={{ background: 'var(--danger)', color: 'white' }}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </button>
         <button onClick={() => setScreen('moedas')}
           className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold"
-          style={{ background: 'rgba(212,160,23,0.15)', color: 'var(--gold)' }}>
+          style={{ background: 'rgba(255,215,0,0.1)', color: 'var(--gold)' }}>
           <span>{user?.poupMoedas || 0}</span>
         </button>
         <button onClick={() => setScreen('settings')}
-          className="p-2 rounded-lg hover:bg-white/10 transition-colors">
+          className="p-2 rounded-xl transition-colors"
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
           <Settings size={18} style={{ color: 'var(--text-secondary)' }} />
         </button>
       </div>

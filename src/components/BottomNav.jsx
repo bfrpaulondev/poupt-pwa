@@ -14,15 +14,19 @@ export default function BottomNav() {
   const activeColor = getModeColor();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-2 px-1"
-      style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border)' }}>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-1.5 px-1"
+      style={{
+        background: 'var(--bg-secondary)',
+        borderTop: '1px solid var(--border)',
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.4)'
+      }}>
       {navItems.map(({ id, icon: Icon, label }) => {
         const isActive = currentScreen === id;
         return (
           <button key={id} onClick={() => setScreen(id)}
-            className="flex flex-col items-center gap-0.5 py-1 px-2 rounded-xl transition-all duration-200"
+            className="flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-2xl transition-all duration-200"
             style={{
-              background: isActive ? `${activeColor}15` : 'transparent',
+              background: isActive ? `${activeColor}12` : 'transparent',
               color: isActive ? activeColor : 'var(--text-muted)'
             }}>
             <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />

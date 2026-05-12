@@ -148,11 +148,7 @@ export default function Goals() {
   const activeGoals = goals.filter(g => !g.isCompleted);
   const completedGoals = goals.filter(g => g.isCompleted);
 
-  const inputStyle = {
-    background: 'var(--bg-secondary)',
-    color: 'var(--text-primary)',
-    border: '1px solid var(--border)'
-  };
+
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
@@ -175,7 +171,7 @@ export default function Goals() {
         <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Metas Financeiras</h2>
         <button onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium"
-          style={{ background: 'rgba(212,160,23,0.15)', color: 'var(--gold)' }}>
+          style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)' }}>
           <Plus size={14} /> Nova Meta
         </button>
       </div>
@@ -208,9 +204,9 @@ export default function Goals() {
           <button onClick={() => setFilterType('all')}
             className="px-3 py-1.5 rounded-full text-[10px] font-medium whitespace-nowrap shrink-0"
             style={{
-              background: filterType === 'all' ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+              background: filterType === 'all' ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
               color: filterType === 'all' ? 'var(--gold)' : 'var(--text-muted)',
-              border: filterType === 'all' ? '1px solid rgba(212,160,23,0.4)' : '1px solid var(--border)'
+              border: filterType === 'all' ? '1px solid rgba(255,215,0,0.4)' : '1px solid var(--border)'
             }}>
             Todas
           </button>
@@ -244,7 +240,7 @@ export default function Goals() {
 
           <input type="text" placeholder="Nome da meta (ex: Fundo emergencia 6 meses)" value={form.name}
             onChange={e => setForm({...form, name: e.target.value})} required
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
 
           {/* Type Selector */}
           <div>
@@ -272,22 +268,22 @@ export default function Goals() {
 
           <input type="number" placeholder="Montante alvo (EUR)" value={form.targetAmount}
             onChange={e => setForm({...form, targetAmount: e.target.value})} required min="1" step="0.01"
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
 
           <input type="number" placeholder="Montante inicial (EUR)" value={form.currentAmount || ''}
             onChange={e => setForm({...form, currentAmount: e.target.value})} min="0" step="0.01"
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
 
           <input type="number" placeholder="Contribuicao mensal (EUR)" value={form.monthlyContribution}
             onChange={e => setForm({...form, monthlyContribution: e.target.value})} min="0" step="0.01"
-            className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            className="w-full input-field" />
 
           <div>
             <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
               <Calendar size={12} className="inline mr-1" /> Prazo (opcional)
             </label>
             <input type="date" value={form.deadline} onChange={e => setForm({...form, deadline: e.target.value})}
-              className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+              className="w-full input-field" />
           </div>
 
           {/* Icon Picker */}
@@ -300,7 +296,7 @@ export default function Goals() {
                 <button key={icon} type="button" onClick={() => setForm({...form, icon})}
                   className="w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all"
                   style={{
-                    background: form.icon === icon ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                    background: form.icon === icon ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                     border: form.icon === icon ? '1px solid var(--gold)' : '1px solid var(--border)'
                   }}>
                   {icon}
@@ -449,7 +445,7 @@ export default function Goals() {
                         <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>EUR</span>
                         <input type="number" placeholder="0.00" value={addAmount}
                           onChange={e => setAddAmount(e.target.value)} min="0.01" step="0.01"
-                          className="flex-1 px-2 py-2 rounded-xl text-sm" style={inputStyle} />
+                          className="flex-1 input-field" />
                       </div>
                       {/* Quick amount buttons */}
                       <div className="flex gap-1.5">
@@ -530,7 +526,7 @@ export default function Goals() {
 
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 rounded-xl gold-gradient animate-pulse" />
+          <div className="w-8 h-8 rounded-xl gold-gradient gold-shimmer" />
         </div>
       )}
     </div>

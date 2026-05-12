@@ -31,7 +31,7 @@ export default function Dashboard() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient animate-pulse" />
+          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-shimmer animate-pulse" />
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>A carregar dashboard...</p>
         </div>
       </div>
@@ -43,15 +43,19 @@ export default function Dashboard() {
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
       {/* Mode Banner */}
-      <div className="p-4 rounded-2xl" style={{ background: `${modeColor}15`, border: `1px solid ${modeColor}30` }}>
+      <div className="p-4 rounded-2xl" style={{
+        background: `${modeColor}10`,
+        border: `1px solid ${modeColor}25`,
+        boxShadow: `0 4px 15px ${modeColor}10`
+      }}>
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs font-semibold" style={{ color: modeColor }}>MODO</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: modeColor }}>MODO</span>
             <h2 className="text-lg font-bold" style={{ color: modeColor }}>{modeLabel}</h2>
           </div>
           <div className="text-right">
             <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Balanço mensal</span>
-            <p className="text-lg font-bold" style={{ color: s.balance >= 0 ? '#10B981' : '#EF4444' }}>
+            <p className="text-lg font-bold" style={{ color: s.balance >= 0 ? 'var(--success)' : 'var(--danger)' }}>
               {formatCurrency(s.balance)}
             </p>
           </div>
@@ -62,17 +66,17 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-3">
         <div className="glass-card p-4">
           <div className="flex items-center gap-2 mb-1">
-            <TrendingUp size={14} style={{ color: '#10B981' }} />
+            <TrendingUp size={14} style={{ color: 'var(--success)' }} />
             <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Receitas</span>
           </div>
-          <p className="text-lg font-bold" style={{ color: '#10B981' }}>{formatCurrency(s.income)}</p>
+          <p className="text-lg font-bold" style={{ color: 'var(--success)' }}>{formatCurrency(s.income)}</p>
         </div>
         <div className="glass-card p-4">
           <div className="flex items-center gap-2 mb-1">
-            <TrendingDown size={14} style={{ color: '#EF4444' }} />
+            <TrendingDown size={14} style={{ color: 'var(--danger)' }} />
             <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Despesas</span>
           </div>
-          <p className="text-lg font-bold" style={{ color: '#EF4444' }}>{formatCurrency(s.expenses)}</p>
+          <p className="text-lg font-bold" style={{ color: 'var(--danger)' }}>{formatCurrency(s.expenses)}</p>
         </div>
       </div>
 
@@ -90,7 +94,7 @@ export default function Dashboard() {
             const labels = { necessities: 'Necess.', freedom: 'Liberd.', savings: 'Poupanca', education: 'Educ.', play: 'Lazer', give: 'Doar' };
             const pct = s.jarPercentages?.[key] || 0;
             return (
-              <div key={key} className="p-2 rounded-xl text-center" style={{ background: `${colors[key]}10` }}>
+              <div key={key} className="p-2.5 rounded-xl text-center" style={{ background: `${colors[key]}0D` }}>
                 <p className="text-xs font-medium" style={{ color: colors[key] }}>{labels[key]}</p>
                 <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(amount)}</p>
                 <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{pct}%</p>
@@ -100,12 +104,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Debt Summary - if in survival/recovery mode */}
+      {/* Debt Summary */}
       {['sobrevivencia', 'recuperacao'].includes(user?.financialMode) && (
         <div className="glass-card p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <CreditCard size={16} style={{ color: '#EF4444' }} />
+              <CreditCard size={16} style={{ color: 'var(--danger)' }} />
               <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Dividas</h3>
             </div>
             <button onClick={() => setScreen('debts')} className="text-xs font-medium flex items-center gap-1"
@@ -115,12 +119,12 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total em divida</span>
-            <span className="text-base font-bold" style={{ color: '#EF4444' }}>{formatCurrency(s.totalDebt)}</span>
+            <span className="text-base font-bold" style={{ color: 'var(--danger)' }}>{formatCurrency(s.totalDebt)}</span>
           </div>
           {s.overdueDebts > 0 && (
-            <div className="flex items-center gap-2 p-2 rounded-xl" style={{ background: 'rgba(239,68,68,0.1)' }}>
-              <AlertTriangle size={14} style={{ color: '#EF4444' }} />
-              <span className="text-xs" style={{ color: '#EF4444' }}>
+            <div className="flex items-center gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)' }}>
+              <AlertTriangle size={14} style={{ color: 'var(--danger)' }} />
+              <span className="text-xs" style={{ color: 'var(--danger)' }}>
                 {s.overdueDebts} divida{s.overdueDebts > 1 ? 's' : ''} em atraso
               </span>
             </div>
@@ -128,12 +132,12 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Investment Summary - if in growth/prosperity mode */}
+      {/* Investment Summary */}
       {['crescimento', 'prosperidade'].includes(user?.financialMode) && s.investmentData && (
         <div className="glass-card p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <TrendingUp size={16} style={{ color: '#10B981' }} />
+              <TrendingUp size={16} style={{ color: 'var(--success)' }} />
               <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Investimentos</h3>
             </div>
             <button onClick={() => setScreen('investments')} className="text-xs font-medium flex items-center gap-1"
@@ -144,12 +148,12 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Valor atual</span>
-              <p className="text-base font-bold" style={{ color: '#10B981' }}>{formatCurrency(s.investmentData.currentValue)}</p>
+              <p className="text-base font-bold" style={{ color: 'var(--success)' }}>{formatCurrency(s.investmentData.currentValue)}</p>
             </div>
             <div>
               <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Ganho/Perda</span>
               <p className="text-base font-bold"
-                style={{ color: s.investmentData.profitLoss >= 0 ? '#10B981' : '#EF4444' }}>
+                style={{ color: s.investmentData.profitLoss >= 0 ? 'var(--success)' : 'var(--danger)' }}>
                 {formatCurrency(s.investmentData.profitLoss)}
               </p>
             </div>
@@ -161,13 +165,13 @@ export default function Dashboard() {
       {user?.financialMode === 'sobrevivencia' && (
         <button onClick={() => setScreen('survival')}
           className="w-full p-4 rounded-2xl flex items-center gap-3"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
-          <Shield size={24} style={{ color: '#EF4444' }} />
+          style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}>
+          <Shield size={24} style={{ color: 'var(--danger)' }} />
           <div className="text-left flex-1">
-            <p className="text-sm font-bold" style={{ color: '#EF4444' }}>Modo Sobrevivencia</p>
+            <p className="text-sm font-bold" style={{ color: 'var(--danger)' }}>Modo Sobrevivencia</p>
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Acoes imediatas para estabilizar</p>
           </div>
-          <ArrowRight size={16} style={{ color: '#EF4444' }} />
+          <ArrowRight size={16} style={{ color: 'var(--danger)' }} />
         </button>
       )}
 
@@ -202,9 +206,9 @@ export default function Dashboard() {
 
       {/* FAB */}
       <button onClick={() => setScreen('add-transaction')}
-        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl gold-gradient shadow-lg flex items-center justify-center"
-        style={{ boxShadow: '0 4px 20px rgba(212,160,23,0.4)' }}>
-        <Plus size={24} color="white" />
+        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl gold-gradient flex items-center justify-center"
+        style={{ boxShadow: '0 4px 20px rgba(255,215,0,0.35)' }}>
+        <Plus size={24} color="#000" />
       </button>
     </div>
   );

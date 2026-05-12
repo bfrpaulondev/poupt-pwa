@@ -33,20 +33,31 @@ export default function Register() {
   return (
     <div className="min-h-screen flex flex-col px-6 py-6" style={{ background: 'var(--bg-primary)' }}>
       <button onClick={() => setScreen('landing')}
-        className="mb-8 p-2 rounded-lg hover:bg-white/10 w-fit transition-colors">
+        className="mb-6 p-2 rounded-xl w-fit transition-colors"
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
         <ArrowLeft size={20} style={{ color: 'var(--text-secondary)' }} />
       </button>
 
-      <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
-        <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+      <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full animate-fade-in">
+        {/* Logo */}
+        <div className="w-14 h-14 mx-auto mb-6 rounded-2xl flex items-center justify-center"
+          style={{
+            background: 'linear-gradient(135deg, #FF69B4, #FF85C8)',
+            boxShadow: '0 4px 15px rgba(255,105,180,0.25)'
+          }}>
+          <span className="text-xl font-bold text-white">P</span>
+        </div>
+
+        <h1 className="text-2xl font-bold mb-2 text-center" style={{ color: 'var(--text-primary)' }}>
           Criar conta gratuita
         </h1>
-        <p className="text-sm mb-8" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-sm mb-8 text-center" style={{ color: 'var(--text-secondary)' }}>
           Comeca a tua jornada para a liberdade financeira.
         </p>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444' }}>
+          <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.2)' }}>
             {error}
           </div>
         )}
@@ -57,11 +68,10 @@ export default function Register() {
               Nome
             </label>
             <div className="relative">
-              <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+              <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
               <input type="text" value={name} onChange={e => setName(e.target.value)}
                 placeholder="O teu nome" required
-                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm"
-                style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+                className="input-field !pl-10" />
             </div>
           </div>
 
@@ -70,11 +80,10 @@ export default function Register() {
               Email
             </label>
             <div className="relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="nome@exemplo.pt" required
-                className="w-full pl-10 pr-4 py-3 rounded-xl text-sm"
-                style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+                className="input-field !pl-10" />
             </div>
           </div>
 
@@ -83,20 +92,19 @@ export default function Register() {
               Palavra-passe
             </label>
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
               <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="Minimo 6 caracteres" required minLength={6}
-                className="w-full pl-10 pr-12 py-3 rounded-xl text-sm"
-                style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }} />
+                className="input-field !pl-10 !pr-12" />
               <button type="button" onClick={() => setShowPass(!showPass)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1">
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1">
                 {showPass ? <EyeOff size={16} style={{ color: 'var(--text-muted)' }} /> : <Eye size={16} style={{ color: 'var(--text-muted)' }} />}
               </button>
             </div>
           </div>
 
           <button type="submit" disabled={loading}
-            className="w-full py-3.5 rounded-2xl text-sm font-bold text-white gold-gradient mt-2 disabled:opacity-50">
+            className="btn-gold !w-full mt-2 disabled:opacity-50">
             {loading ? 'A criar conta...' : 'Criar Conta'}
           </button>
         </form>
