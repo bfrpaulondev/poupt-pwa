@@ -1,215 +1,236 @@
-import { useState, useEffect } from 'react';
+import React from 'react';
+import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { api } from '../services/api';
-import { formatCurrency, modeLabels, modeColors, categoryLabels } from '../utils/helpers';
-import { TrendingUp, TrendingDown, CreditCard, Target, Trophy, Plus, AlertTriangle, ArrowRight, Shield, Flame } from 'lucide-react';
+import { themes } from '../themes';
+import { Plus, Camera, BarChart3, Target, ChevronRight, AlertTriangle } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user, setScreen, getModeColor, getModeLabel, transactions, setTransactions } = useStore();
-  const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { mockUser, jars, transactions, setScreen } = useStore();
+  const theme = themes.darkGold;
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
 
-  const loadDashboard = async () => {
-    try {
-      const res = await api.getReportSummary();
-      setSummary(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const totalSpent = jars.reduce((s, j) => s + j.spent, 0);
+  const totalAllocated = jars.reduce((s, j) => s + j.allocated, 0);
+  const available = totalAllocated - totalSpent;
+  const spentPercent = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
 
-  const modeColor = getModeColor();
-  const modeLabel = getModeLabel();
+  const barColor =
+    spentPercent > 80 ? '#FF4444' : spentPercent > 50 ? '#FFB020' : '#4CAF50';
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-shimmer animate-pulse" />
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>A carregar dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const s = summary || {};
+  const recentTx = transactions.slice(0, 5);
+  const hasOverdueDebts = true;
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
-      {/* Mode Banner */}
-      <div className="p-4 rounded-2xl" style={{
-        background: `${modeColor}10`,
-        border: `1px solid ${modeColor}25`,
-        boxShadow: `0 4px 15px ${modeColor}10`
-      }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: modeColor }}>MODO</span>
-            <h2 className="text-lg font-bold" style={{ color: modeColor }}>{modeLabel}</h2>
-          </div>
-          <div className="text-right">
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Balanço mensal</span>
-            <p className="text-lg font-bold" style={{ color: s.balance >= 0 ? 'var(--success)' : 'var(--danger)' }}>
-              {formatCurrency(s.balance)}
-            </p>
+    <div className="px-4 py-3" style={{ background: theme.background }}>
+      {/* Greeting row */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-bold" style={{ color: theme.text }}>
+            {greeting}, Ana 🌅
+          </h2>
+          <div className="flex items-center gap-3 mt-1">
+            <span
+              className="text-xs font-semibold px-2 py-0.5 rounded-full coin-sparkle"
+              style={{ background: `${theme.primary}20`, color: theme.primary }}
+            >
+              🪙 {mockUser.poupMoedas} PoupMoedas
+            </span>
+            <span className="text-xs" style={{ color: theme.textMuted }}>
+              🔥 {mockUser.streak} dias
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp size={14} style={{ color: 'var(--success)' }} />
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Receitas</span>
-          </div>
-          <p className="text-lg font-bold" style={{ color: 'var(--success)' }}>{formatCurrency(s.income)}</p>
+      {/* Survival mode banner */}
+      {hasOverdueDebts && (
+        <motion.button
+          onClick={() => setScreen('survival')}
+          className="w-full mb-4 p-3 rounded-xl flex items-center gap-2 survival-pulse"
+          style={{ background: '#FF444418', border: '1.5px solid #FF444460' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <AlertTriangle size={16} color="#FF4444" />
+          <span className="text-xs font-bold" style={{ color: '#FF6B6B' }}>
+            ⚠️ MODO SOBREVIVENCIA ATIVO
+          </span>
+          <ChevronRight size={14} color="#FF6B6B" className="ml-auto" />
+        </motion.button>
+      )}
+
+      {/* Balance card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass rounded-2xl p-5 mb-4"
+      >
+        <p className="text-xs font-medium mb-1" style={{ color: theme.textMuted }}>
+          Disponivel este mes
+        </p>
+        <h2
+          className="text-3xl font-extrabold mb-3 gradient-text"
+          style={{
+            backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+          }}
+        >
+          €{available.toFixed(2)}
+        </h2>
+
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs" style={{ color: theme.textMuted }}>
+            Ja gastei: €{totalSpent.toFixed(2)} / €{totalAllocated.toFixed(2)}
+          </span>
+          <span className="text-xs font-bold" style={{ color: barColor }}>
+            {spentPercent.toFixed(0)}%
+          </span>
         </div>
-        <div className="glass-card p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingDown size={14} style={{ color: 'var(--danger)' }} />
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Despesas</span>
-          </div>
-          <p className="text-lg font-bold" style={{ color: 'var(--danger)' }}>{formatCurrency(s.expenses)}</p>
+
+        <div
+          className="w-full h-2.5 rounded-full overflow-hidden"
+          style={{ background: theme.surface }}
+        >
+          <motion.div
+            className="h-full rounded-full"
+            style={{ background: barColor }}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(spentPercent, 100)}%` }}
+            transition={{ duration: 1 }}
+          />
         </div>
+
+        {/* Mini jar icons */}
+        <div className="flex items-center gap-2 mt-3">
+          {jars.map((jar) => {
+            const pct = jar.allocated > 0 ? (jar.spent / jar.allocated) * 100 : 0;
+            return (
+              <div key={jar.name} className="flex-1 flex flex-col items-center">
+                <span className="text-xs">{jar.icon}</span>
+                <div className="w-full h-1 rounded-full mt-1" style={{ background: theme.surface }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.min(pct, 100)}%`,
+                      background: jar.color,
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* Quick actions */}
+      <div className="grid grid-cols-4 gap-3 mb-4">
+        {[
+          { icon: Camera, label: 'Scanner', screen: 'poupMoedas' },
+          { icon: Plus, label: 'Adicionar', screen: 'addTransaction' },
+          { icon: BarChart3, label: 'Relatorio', screen: 'reports' },
+          { icon: Target, label: 'Plano', screen: 'goals' },
+        ].map((action) => (
+          <motion.button
+            key={action.label}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setScreen(action.screen)}
+            className="flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors duration-150"
+            style={{ background: theme.surface }}
+          >
+            <action.icon size={20} style={{ color: theme.primary }} />
+            <span className="text-[10px] font-medium" style={{ color: theme.textMuted }}>
+              {action.label}
+            </span>
+          </motion.button>
+        ))}
       </div>
 
-      {/* 6 Frascos Preview */}
-      <div className="glass-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>6 Frascos</h3>
-          <button onClick={() => setScreen('jars')} className="text-xs font-medium" style={{ color: 'var(--gold)' }}>
-            Ver detalhes
+      {/* Recent transactions */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-bold" style={{ color: theme.text }}>
+            Transacoes Recentes
+          </h3>
+          <button
+            onClick={() => setScreen('reports')}
+            className="text-xs font-medium"
+            style={{ color: theme.primary }}
+          >
+            Ver todas →
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {s.jarAllocations && Object.entries(s.jarAllocations).map(([key, amount]) => {
-            const colors = { necessities: '#3B82F6', freedom: '#10B981', savings: '#F59E0B', education: '#8B5CF6', play: '#EF4444', give: '#EC4899' };
-            const labels = { necessities: 'Necess.', freedom: 'Liberd.', savings: 'Poupanca', education: 'Educ.', play: 'Lazer', give: 'Doar' };
-            const pct = s.jarPercentages?.[key] || 0;
+
+        <div className="flex flex-col gap-2">
+          {recentTx.map((tx) => {
+            const jarObj = jars.find((j) => j.name === tx.jar);
             return (
-              <div key={key} className="p-2.5 rounded-xl text-center" style={{ background: `${colors[key]}0D` }}>
-                <p className="text-xs font-medium" style={{ color: colors[key] }}>{labels[key]}</p>
-                <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(amount)}</p>
-                <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{pct}%</p>
+              <div
+                key={tx.id}
+                className="flex items-center gap-3 p-3 rounded-xl"
+                style={{ background: theme.surface }}
+              >
+                <div
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: jarObj?.color || theme.textMuted }}
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-medium" style={{ color: theme.text }}>
+                    {tx.description}
+                  </p>
+                  <p className="text-xs" style={{ color: theme.textMuted }}>
+                    {tx.category} • {tx.jar}
+                  </p>
+                </div>
+                <span
+                  className="text-sm font-bold"
+                  style={{
+                    color: tx.type === 'income' ? '#4CAF50' : '#FF6B6B',
+                  }}
+                >
+                  {tx.type === 'income' ? '+' : ''}€{Math.abs(tx.amount).toFixed(2)}
+                </span>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Debt Summary */}
-      {['sobrevivencia', 'recuperacao'].includes(user?.financialMode) && (
-        <div className="glass-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <CreditCard size={16} style={{ color: 'var(--danger)' }} />
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Dividas</h3>
-            </div>
-            <button onClick={() => setScreen('debts')} className="text-xs font-medium flex items-center gap-1"
-              style={{ color: 'var(--gold)' }}>
-              Gerir <ArrowRight size={12} />
-            </button>
-          </div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total em divida</span>
-            <span className="text-base font-bold" style={{ color: 'var(--danger)' }}>{formatCurrency(s.totalDebt)}</span>
-          </div>
-          {s.overdueDebts > 0 && (
-            <div className="flex items-center gap-2 p-2.5 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)' }}>
-              <AlertTriangle size={14} style={{ color: 'var(--danger)' }} />
-              <span className="text-xs" style={{ color: 'var(--danger)' }}>
-                {s.overdueDebts} divida{s.overdueDebts > 1 ? 's' : ''} em atraso
-              </span>
-            </div>
-          )}
+      {/* AI Coach mini card */}
+      <motion.button
+        onClick={() => setScreen('coach')}
+        whileTap={{ scale: 0.98 }}
+        className="w-full glass rounded-xl p-4 mb-4 flex items-center gap-3"
+      >
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
+          style={{ background: `${theme.primary}20` }}
+        >
+          🤖
         </div>
-      )}
-
-      {/* Investment Summary */}
-      {['crescimento', 'prosperidade'].includes(user?.financialMode) && s.investmentData && (
-        <div className="glass-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp size={16} style={{ color: 'var(--success)' }} />
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Investimentos</h3>
-            </div>
-            <button onClick={() => setScreen('investments')} className="text-xs font-medium flex items-center gap-1"
-              style={{ color: 'var(--gold)' }}>
-              Ver <ArrowRight size={12} />
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Valor atual</span>
-              <p className="text-base font-bold" style={{ color: 'var(--success)' }}>{formatCurrency(s.investmentData.currentValue)}</p>
-            </div>
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Ganho/Perda</span>
-              <p className="text-base font-bold"
-                style={{ color: s.investmentData.profitLoss >= 0 ? 'var(--success)' : 'var(--danger)' }}>
-                {formatCurrency(s.investmentData.profitLoss)}
-              </p>
-            </div>
-          </div>
+        <div className="flex-1 text-left">
+          <p className="text-xs font-medium" style={{ color: theme.textMuted }}>
+            {mockUser.coachMode === 'sargento' ? 'Sargento diz:' : 'Amigavel diz:'}
+          </p>
+          <p className="text-xs mt-0.5" style={{ color: theme.text }}>
+            A WiZink vence em 3 dias. Tens os €85, soldado?
+          </p>
         </div>
-      )}
+        <ChevronRight size={16} style={{ color: theme.textMuted }} />
+      </motion.button>
 
-      {/* Survival Mode CTA */}
-      {user?.financialMode === 'sobrevivencia' && (
-        <button onClick={() => setScreen('survival')}
-          className="w-full p-4 rounded-2xl flex items-center gap-3"
-          style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}>
-          <Shield size={24} style={{ color: 'var(--danger)' }} />
-          <div className="text-left flex-1">
-            <p className="text-sm font-bold" style={{ color: 'var(--danger)' }}>Modo Sobrevivencia</p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Acoes imediatas para estabilizar</p>
-          </div>
-          <ArrowRight size={16} style={{ color: 'var(--danger)' }} />
-        </button>
-      )}
-
-      {/* Gamification */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Flame size={16} style={{ color: 'var(--gold)' }} />
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Streak</span>
-              <p className="text-sm font-bold" style={{ color: 'var(--gold)' }}>{user?.streak || 0} dias</p>
-            </div>
-          </div>
-          <div className="w-px h-8" style={{ background: 'var(--border)' }} />
-          <div className="flex items-center gap-2">
-            <Trophy size={16} style={{ color: 'var(--gold)' }} />
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Nivel</span>
-              <p className="text-sm font-bold" style={{ color: 'var(--gold)' }}>{user?.level || 1}</p>
-            </div>
-          </div>
-          <div className="w-px h-8" style={{ background: 'var(--border)' }} />
-          <div className="flex items-center gap-2">
-            <Target size={16} style={{ color: 'var(--gold)' }} />
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>XP</span>
-              <p className="text-sm font-bold" style={{ color: 'var(--gold)' }}>{user?.xp || 0}</p>
-            </div>
-          </div>
+      {/* Alert card */}
+      <motion.div
+        className="rounded-xl p-4 mb-4"
+        style={{ background: '#FF444412', border: '1px solid #FF444430' }}
+      >
+        <div className="flex items-center gap-2">
+          <AlertTriangle size={14} color="#FF6B6B" />
+          <p className="text-xs font-bold" style={{ color: '#FF6B6B' }}>
+            WiZink vence em 3 dias
+          </p>
         </div>
-      </div>
-
-      {/* FAB */}
-      <button onClick={() => setScreen('add-transaction')}
-        className="fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl gold-gradient flex items-center justify-center"
-        style={{ boxShadow: '0 4px 20px rgba(255,215,0,0.35)' }}>
-        <Plus size={24} color="#000" />
-      </button>
+      </motion.div>
     </div>
   );
 }
