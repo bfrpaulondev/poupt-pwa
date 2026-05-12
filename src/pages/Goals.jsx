@@ -5,7 +5,7 @@ import { formatCurrency, formatDate, getDaysUntil } from '../utils/helpers';
 import {
   Target, Plus, Check, Trash2, X, Banknote, Calendar, Clock,
   Shield, PiggyBank, TrendingUp, CreditCard, ShoppingBag, Sparkles,
-  Coins
+  Coins, Filter, Heart, Palette, Search, PartyPopper, AlertCircle
 } from 'lucide-react';
 
 const goalTypes = [
@@ -14,7 +14,11 @@ const goalTypes = [
   { value: 'investimento', label: 'Investimento', color: '#8B5CF6', icon: TrendingUp },
   { value: 'divida', label: 'Eliminar Divida', color: '#EF4444', icon: CreditCard },
   { value: 'compra', label: 'Compra Especifica', color: '#F59E0B', icon: ShoppingBag },
+  { value: 'outro', label: 'Outro', color: '#64748B', icon: Target },
 ];
+
+const goalIcons = ['🎯', '🏠', '🚗', '✈️', '💍', '🎓', '💼', '🏥', '📱', '🎮', '🏠', '💎'];
+const goalColors = ['#10B981', '#3B82F6', '#8B5CF6', '#EF4444', '#F59E0B', '#EC4899', '#F97316', '#64748B'];
 
 export default function Goals() {
   const { user, updateUser } = useStore();
@@ -25,10 +29,13 @@ export default function Goals() {
   const [addAmount, setAddAmount] = useState('');
   const [adding, setAdding] = useState(false);
   const [completedGoal, setCompletedGoal] = useState(null);
+  const [filterType, setFilterType] = useState('all');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const [form, setForm] = useState({
     name: '', type: 'fundo_emergencia', targetAmount: '', currentAmount: 0,
-    monthlyContribution: '', deadline: ''
+    monthlyContribution: '', deadline: '', icon: '🎯', color: '#10B981'
   });
 
   useEffect(() => { loadGoals(); }, []);
@@ -46,6 +53,7 @@ export default function Goals() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    if (!form.name.trim()) return;
     try {
       await api.createGoal({
         ...form,
@@ -54,7 +62,7 @@ export default function Goals() {
         monthlyContribution: Number(form.monthlyContribution || 0)
       });
       setShowForm(false);
-      setForm({ name: '', type: 'fundo_emergencia', targetAmount: '', currentAmount: 0, monthlyContribution: '', deadline: '' });
+      setForm({ name: '', type: 'fundo_emergencia', targetAmount: '', currentAmount: 0, monthlyContribution: '', deadline: '', icon: '🎯', color: '#10B981' });
 
       try {
         const moedasRes = await api.earnMoedas('create_goal', 10);
@@ -100,6 +108,23 @@ export default function Goals() {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (showDeleteConfirm !== id) {
+      setShowDeleteConfirm(id);
+      return;
+    }
+    setDeleting(true);
+    try {
+      await api.deleteGoal(id);
+      setShowDeleteConfirm(null);
+      loadGoals();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const getTypeInfo = (type) => {
     return goalTypes.find(t => t.value === type) || goalTypes[0];
   };
@@ -116,6 +141,13 @@ export default function Goals() {
     return Math.ceil(remaining / goal.monthlyContribution);
   };
 
+  const filteredGoals = filterType === 'all'
+    ? goals
+    : goals.filter(g => g.type === filterType);
+
+  const activeGoals = goals.filter(g => !g.isCompleted);
+  const completedGoals = goals.filter(g => g.isCompleted);
+
   const inputStyle = {
     background: 'var(--bg-secondary)',
     color: 'var(--text-primary)',
@@ -124,19 +156,21 @@ export default function Goals() {
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
+      {/* Completion Celebration */}
       {completedGoal && (
         <div className="p-4 rounded-2xl text-center animate-fade-in"
           style={{ background: 'rgba(16,185,129,0.15)', border: '2px solid #10B981' }}>
-          <Sparkles size={28} className="mx-auto mb-2" style={{ color: '#10B981' }} />
-          <p className="text-sm font-bold" style={{ color: '#10B981' }}>Meta concluida!</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{completedGoal.name}</p>
+          <PartyPopper size={32} className="mx-auto mb-2" style={{ color: '#10B981' }} />
+          <p className="text-base font-bold" style={{ color: '#10B981' }}>Meta concluida!</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>{completedGoal.name}</p>
           <div className="flex items-center justify-center gap-1 mt-2">
-            <Coins size={12} style={{ color: 'var(--gold)' }} />
-            <span className="text-xs font-medium" style={{ color: 'var(--gold)' }}>+50 PoupMoedas</span>
+            <Coins size={14} style={{ color: 'var(--gold)' }} />
+            <span className="text-sm font-medium" style={{ color: 'var(--gold)' }}>+50 PoupMoedas</span>
           </div>
         </div>
       )}
 
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Metas Financeiras</h2>
         <button onClick={() => setShowForm(!showForm)}
@@ -146,21 +180,59 @@ export default function Goals() {
         </button>
       </div>
 
+      {/* Stats Grid */}
       {goals.length > 0 && (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           <div className="glass-card p-3 text-center">
-            <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{goals.length}</p>
-            <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Metas ativas</p>
+            <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{activeGoals.length}</p>
+            <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Ativas</p>
           </div>
           <div className="glass-card p-3 text-center">
-            <p className="text-lg font-bold" style={{ color: '#10B981' }}>
-              {goals.filter(g => g.isCompleted).length}
-            </p>
+            <p className="text-lg font-bold" style={{ color: '#10B981' }}>{completedGoals.length}</p>
             <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Concluidas</p>
+          </div>
+          <div className="glass-card p-3 text-center">
+            <p className="text-lg font-bold" style={{ color: 'var(--gold)' }}>
+              {goals.reduce((sum, g) => sum + (g.currentAmount || 0), 0) > 0
+                ? formatCurrency(goals.reduce((sum, g) => sum + (g.currentAmount || 0), 0))
+                : '0€'}
+            </p>
+            <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Total poupado</p>
           </div>
         </div>
       )}
 
+      {/* Filter by Type */}
+      {goals.length > 1 && (
+        <div className="flex gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+          <button onClick={() => setFilterType('all')}
+            className="px-3 py-1.5 rounded-full text-[10px] font-medium whitespace-nowrap shrink-0"
+            style={{
+              background: filterType === 'all' ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+              color: filterType === 'all' ? 'var(--gold)' : 'var(--text-muted)',
+              border: filterType === 'all' ? '1px solid rgba(212,160,23,0.4)' : '1px solid var(--border)'
+            }}>
+            Todas
+          </button>
+          {goalTypes.map(t => {
+            const count = goals.filter(g => g.type === t.value).length;
+            if (count === 0) return null;
+            return (
+              <button key={t.value} onClick={() => setFilterType(t.value)}
+                className="px-3 py-1.5 rounded-full text-[10px] font-medium whitespace-nowrap shrink-0 flex items-center gap-1"
+                style={{
+                  background: filterType === t.value ? `${t.color}15` : 'var(--bg-secondary)',
+                  color: filterType === t.value ? t.color : 'var(--text-muted)',
+                  border: filterType === t.value ? `1px solid ${t.color}40` : '1px solid var(--border)'
+                }}>
+                {t.label} ({count})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Create Form */}
       {showForm && (
         <form onSubmit={handleCreate} className="glass-card p-4 space-y-3 animate-fade-in">
           <div className="flex items-center justify-between">
@@ -174,22 +246,23 @@ export default function Goals() {
             onChange={e => setForm({...form, name: e.target.value})} required
             className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
 
+          {/* Type Selector */}
           <div>
             <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
               Tipo de meta
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {goalTypes.map(t => {
                 const Icon = t.icon;
                 return (
                   <button key={t.value} type="button" onClick={() => setForm({...form, type: t.value})}
-                    className="py-2.5 px-2 rounded-xl text-xs font-medium transition-all flex items-center gap-2"
+                    className="py-2 px-2 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5"
                     style={{
                       background: form.type === t.value ? `${t.color}20` : 'var(--bg-secondary)',
                       color: form.type === t.value ? t.color : 'var(--text-secondary)',
                       border: form.type === t.value ? `1px solid ${t.color}` : '1px solid var(--border)'
                     }}>
-                    <Icon size={14} />
+                    <Icon size={12} />
                     <span className="truncate">{t.label}</span>
                   </button>
                 );
@@ -217,6 +290,46 @@ export default function Goals() {
               className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
           </div>
 
+          {/* Icon Picker */}
+          <div>
+            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+              Icone
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {goalIcons.map(icon => (
+                <button key={icon} type="button" onClick={() => setForm({...form, icon})}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all"
+                  style={{
+                    background: form.icon === icon ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                    border: form.icon === icon ? '1px solid var(--gold)' : '1px solid var(--border)'
+                  }}>
+                  {icon}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Color Picker */}
+          <div>
+            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+              <Palette size={12} className="inline mr-1" /> Cor
+            </label>
+            <div className="flex gap-2">
+              {goalColors.map(color => (
+                <button key={color} type="button" onClick={() => setForm({...form, color})}
+                  className="w-7 h-7 rounded-full relative transition-all"
+                  style={{
+                    background: color,
+                    boxShadow: form.color === color ? `0 0 0 2px var(--bg-primary), 0 0 0 4px ${color}` : 'none'
+                  }}>
+                  {form.color === color && (
+                    <Check size={12} className="absolute inset-0 m-auto text-white" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <button type="button" onClick={() => setShowForm(false)}
               className="flex-1 py-2.5 rounded-xl text-sm" style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
@@ -229,29 +342,32 @@ export default function Goals() {
         </form>
       )}
 
+      {/* Goals List */}
       <div className="space-y-3">
-        {goals.map(goal => {
+        {filteredGoals.map(goal => {
           const progress = getProgress(goal);
           const typeInfo = getTypeInfo(goal.type);
           const Icon = typeInfo.icon;
           const monthsLeft = getMonthsRemaining(goal);
           const daysUntilDeadline = getDaysUntil(goal.deadline);
+          const goalColor = goal.color || typeInfo.color;
+          const goalIcon = goal.icon;
+          const isConfirmDelete = showDeleteConfirm === goal._id;
 
           return (
             <div key={goal._id} className="glass-card p-4"
-              style={{ borderLeft: `3px solid ${goal.isCompleted ? '#10B981' : typeInfo.color}` }}>
+              style={{ borderLeft: `3px solid ${goal.isCompleted ? '#10B981' : goalColor}` }}>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: `${typeInfo.color}20` }}>
-                  {goal.isCompleted ? <Check size={20} style={{ color: '#10B981' }} /> :
-                    <Icon size={20} style={{ color: typeInfo.color }} />}
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
+                  style={{ background: `${goalColor}20` }}>
+                  {goal.isCompleted ? '✅' : goalIcon || <Icon size={20} style={{ color: goalColor }} />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                     {goal.name}
                   </p>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs" style={{ color: typeInfo.color }}>{typeInfo.label}</span>
+                    <span className="text-xs" style={{ color: goalColor }}>{typeInfo.label}</span>
                     {goal.isCompleted && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
                         style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981' }}>
@@ -260,13 +376,24 @@ export default function Goals() {
                     )}
                   </div>
                 </div>
-                {goal.isCompleted && (
-                  <Sparkles size={18} style={{ color: '#10B981' }} />
-                )}
+                {/* Delete button */}
+                <button onClick={() => handleDelete(goal._id)} disabled={deleting}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all"
+                  style={{
+                    background: isConfirmDelete ? 'rgba(239,68,68,0.15)' : 'transparent',
+                    color: isConfirmDelete ? '#EF4444' : 'var(--text-muted)'
+                  }}>
+                  {isConfirmDelete ? (
+                    <AlertCircle size={16} />
+                  ) : (
+                    <Trash2 size={14} />
+                  )}
+                </button>
               </div>
 
+              {/* Progress Bar */}
               <div className="flex justify-between text-xs mb-1.5">
-                <span style={{ color: typeInfo.color }}>{formatCurrency(goal.currentAmount)}</span>
+                <span style={{ color: goalColor }}>{formatCurrency(goal.currentAmount)}</span>
                 <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(goal.targetAmount)}</span>
               </div>
 
@@ -274,7 +401,7 @@ export default function Goals() {
                 <div className="h-2.5 rounded-full transition-all"
                   style={{
                     width: `${progress}%`,
-                    background: goal.isCompleted ? '#10B981' : typeInfo.color
+                    background: goal.isCompleted ? '#10B981' : goalColor
                   }} />
               </div>
 
@@ -313,6 +440,7 @@ export default function Goals() {
                 </div>
               )}
 
+              {/* Quick Add Funds */}
               {!goal.isCompleted && (
                 <div className="mt-3">
                   {addingToGoal === goal._id ? (
@@ -322,6 +450,20 @@ export default function Goals() {
                         <input type="number" placeholder="0.00" value={addAmount}
                           onChange={e => setAddAmount(e.target.value)} min="0.01" step="0.01"
                           className="flex-1 px-2 py-2 rounded-xl text-sm" style={inputStyle} />
+                      </div>
+                      {/* Quick amount buttons */}
+                      <div className="flex gap-1.5">
+                        {[5, 10, 25, 50].map(amt => (
+                          <button key={amt} type="button" onClick={() => setAddAmount(String(amt))}
+                            className="flex-1 py-1.5 rounded-lg text-[10px] font-medium"
+                            style={{
+                              background: addAmount === String(amt) ? `${goalColor}20` : 'var(--bg-primary)',
+                              color: addAmount === String(amt) ? goalColor : 'var(--text-muted)',
+                              border: `1px solid ${addAmount === String(amt) ? goalColor : 'var(--border)'}`
+                            }}>
+                            €{amt}
+                          </button>
+                        ))}
                       </div>
                       <div className="flex gap-2">
                         <button onClick={() => { setAddingToGoal(null); setAddAmount(''); }}
@@ -337,10 +479,31 @@ export default function Goals() {
                   ) : (
                     <button onClick={() => setAddingToGoal(goal._id)}
                       className="w-full py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-all"
-                      style={{ background: `${typeInfo.color}15`, color: typeInfo.color, border: `1px solid ${typeInfo.color}30` }}>
+                      style={{ background: `${goalColor}15`, color: goalColor, border: `1px solid ${goalColor}30` }}>
                       <Banknote size={12} /> Adicionar Fundos
                     </button>
                   )}
+                </div>
+              )}
+
+              {/* Delete Confirmation */}
+              {isConfirmDelete && (
+                <div className="mt-3 p-3 rounded-xl flex items-center gap-3 animate-fade-in"
+                  style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                  <AlertCircle size={16} style={{ color: '#EF4444' }} />
+                  <p className="text-xs flex-1" style={{ color: '#EF4444' }}>
+                    Eliminar esta meta?
+                  </p>
+                  <button onClick={() => setShowDeleteConfirm(null)}
+                    className="px-2 py-1 rounded-lg text-[10px]"
+                    style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+                    Nao
+                  </button>
+                  <button onClick={() => handleDelete(goal._id)} disabled={deleting}
+                    className="px-2 py-1 rounded-lg text-[10px] font-bold"
+                    style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.4)' }}>
+                    {deleting ? '...' : 'Sim'}
+                  </button>
                 </div>
               )}
             </div>
@@ -348,6 +511,7 @@ export default function Goals() {
         })}
       </div>
 
+      {/* Empty State */}
       {goals.length === 0 && !loading && (
         <div className="text-center py-12">
           <Target size={48} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
@@ -357,6 +521,10 @@ export default function Goals() {
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             Ter objectivos claros ajuda-te a manter o foco
           </p>
+          <button onClick={() => setShowForm(true)}
+            className="mt-4 px-6 py-2.5 rounded-xl text-sm font-bold text-white gold-gradient">
+            Criar Meta
+          </button>
         </div>
       )}
 

@@ -5,17 +5,22 @@ import { formatCurrency, modeLabels, modeColors, modeDescriptions, calculateLeve
 import {
   User, Trophy, Flame, Target, Coins, Settings, ChevronRight, Award,
   Star, Shield, CreditCard, Sparkles, Crown, TrendingUp, MessageCircle,
-  Save, Zap, Calendar
+  Save, Zap, Calendar, Camera, Mail, Clock, AlertCircle, Check,
+  Edit3, Lock, Trash2, Eye, EyeOff
 } from 'lucide-react';
 
 export default function Profile() {
-  const { user, setScreen, getModeColor, getModeLabel, updateUser, transactions, goals, debts } = useStore();
+  const { user, setScreen, getModeColor, getModeLabel, updateUser, transactions, goals, debts, logout } = useStore();
   const levelInfo = calculateLevel(user?.xp || 0);
   const [editingCoach, setEditingCoach] = useState(false);
   const [coachName, setCoachName] = useState(user?.coachName || '');
   const [coachPersonality, setCoachPersonality] = useState(user?.coachPersonality || 'disciplinado');
+  const [coachGender, setCoachGender] = useState(user?.coachGender || 'masculino');
   const [savingCoach, setSavingCoach] = useState(false);
   const [stats, setStats] = useState(null);
+  const [detecting, setDetecting] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     loadStats();
@@ -31,13 +36,42 @@ export default function Profile() {
   const handleSaveCoach = async () => {
     setSavingCoach(true);
     try {
-      await api.updateCoach({ coachName, coachPersonality });
-      updateUser({ coachName, coachPersonality });
+      await api.updateCoach({ coachName, coachPersonality, coachGender });
+      updateUser({ coachName, coachPersonality, coachGender });
       setEditingCoach(false);
     } catch (err) {
       console.error(err);
     } finally {
       setSavingCoach(false);
+    }
+  };
+
+  const handleDetectMode = async () => {
+    setDetecting(true);
+    try {
+      const res = await api.detectMode();
+      if (res.data?.financialMode) {
+        updateUser({ financialMode: res.data.financialMode });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetecting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'https://poupt-api.onrender.com/api'}/auth/me`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${localStorage.getItem('poupt_token')}` }
+      });
+      logout();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -56,6 +90,12 @@ export default function Profile() {
     espiritual: 'Espiritual'
   };
 
+  const genderLabels = {
+    masculino: 'Masculino',
+    feminino: 'Feminino',
+    neutro: 'Neutro'
+  };
+
   const inputStyle = {
     background: 'var(--bg-secondary)',
     color: 'var(--text-primary)',
@@ -64,16 +104,23 @@ export default function Profile() {
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
+      {/* Avatar & Identity Card */}
       <div className="glass-card p-6 text-center">
-        <div className="w-20 h-20 mx-auto mb-3 rounded-full flex items-center justify-center text-3xl font-bold"
-          style={{ background: `${modeColor}20`, color: modeColor }}>
-          {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+        <div className="relative inline-block mb-3">
+          <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-3xl font-bold"
+            style={{ background: `${modeColor}20`, color: modeColor }}>
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          </div>
+          <button className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
+            style={{ background: 'var(--gold)', color: '#fff' }}>
+            <Camera size={12} />
+          </button>
         </div>
         <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
           {user?.name || 'Utilizador'}
         </h2>
-        <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-          {user?.email || ''}
+        <p className="text-xs mt-0.5 flex items-center justify-center gap-1" style={{ color: 'var(--text-secondary)' }}>
+          <Mail size={10} /> {user?.email || ''}
         </p>
         <div className="flex items-center justify-center gap-2 mt-3">
           <span className="mode-badge" style={{ background: `${modeColor}20`, color: modeColor }}>
@@ -85,11 +132,12 @@ export default function Profile() {
               color: user?.plan === 'premium' ? 'var(--gold)' : 'var(--text-muted)',
               border: user?.plan === 'premium' ? '1px solid var(--gold)' : '1px solid var(--border)'
             }}>
-            {user?.plan === 'premium' ? 'Premium' : 'Gratuito'}
+            {user?.plan === 'premium' ? '✨ Premium' : 'Gratuito'}
           </span>
         </div>
       </div>
 
+      {/* Gamification Stats */}
       <div className="glass-card p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -102,15 +150,18 @@ export default function Profile() {
             {levelInfo.currentLevelXp}/{levelInfo.xpForNext} XP
           </span>
         </div>
-        <div className="w-full rounded-full h-2.5" style={{ background: 'var(--border)' }}>
-          <div className="h-2.5 rounded-full transition-all gold-gradient"
-            style={{ width: `${levelInfo.progress}%` }} />
+        <div className="w-full rounded-full h-3" style={{ background: 'var(--border)' }}>
+          <div className="h-3 rounded-full transition-all gold-gradient relative"
+            style={{ width: `${levelInfo.progress}%` }}>
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-lg" />
+          </div>
         </div>
         <p className="text-[10px] mt-1 text-right" style={{ color: 'var(--text-muted)' }}>
           {levelInfo.xpForNext - levelInfo.currentLevelXp} XP para o proximo nivel
         </p>
       </div>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-4 gap-2">
         <div className="glass-card p-3 text-center">
           <Flame size={16} className="mx-auto mb-1" style={{ color: '#F97316' }} />
@@ -134,6 +185,7 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Financial Mode */}
       <div className="glass-card p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -179,6 +231,43 @@ export default function Profile() {
         )}
       </div>
 
+      {/* Change Mode Section */}
+      <div className="glass-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <Edit3 size={14} style={{ color: 'var(--gold)' }} /> Alterar Modo
+          </h3>
+          <button onClick={handleDetectMode} disabled={detecting}
+            className="text-[10px] font-medium px-2 py-1 rounded-lg"
+            style={{ background: 'rgba(212,160,23,0.1)', color: 'var(--gold)', border: '1px solid rgba(212,160,23,0.3)' }}>
+            {detecting ? 'A detectar...' : 'Auto-detectar'}
+          </button>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5">
+          {modeOrder.map((mode) => (
+            <button key={mode} onClick={async () => {
+              try {
+                await api.updateMode(mode);
+                updateUser({ financialMode: mode });
+              } catch (err) { console.error(err); }
+            }}
+              className="py-2 rounded-xl text-center transition-all"
+              style={{
+                background: currentMode === mode ? `${modeColors[mode]}20` : 'var(--bg-secondary)',
+                border: currentMode === mode ? `1px solid ${modeColors[mode]}` : '1px solid var(--border)'
+              }}>
+              <div className="w-3 h-3 rounded-full mx-auto mb-1" style={{ background: modeColors[mode] }} />
+              <span className="text-[8px] font-medium" style={{
+                color: currentMode === mode ? modeColors[mode] : 'var(--text-muted)'
+              }}>
+                {modeLabels[mode].substring(0, 4)}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Coach Settings */}
       <div className="glass-card p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -201,7 +290,7 @@ export default function Profile() {
                 {user?.coachName || 'Coach'}
               </p>
               <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                Personalidade: {personalityLabels[user?.coachPersonality] || 'Disciplinado'}
+                {personalityLabels[user?.coachPersonality] || 'Disciplinado'} • {genderLabels[user?.coachGender] || 'Masculino'}
               </p>
             </div>
           </div>
@@ -212,8 +301,26 @@ export default function Profile() {
                 Nome do Coach
               </label>
               <input type="text" value={coachName} onChange={e => setCoachName(e.target.value)}
-                placeholder="Dá um nome ao teu coach"
+                placeholder="Da um nome ao teu coach"
                 className="w-full px-3 py-2.5 rounded-xl text-sm" style={inputStyle} />
+            </div>
+            <div>
+              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
+                Genero
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {Object.entries(genderLabels).map(([key, label]) => (
+                  <button key={key} onClick={() => setCoachGender(key)}
+                    className="py-2 rounded-xl text-xs font-medium"
+                    style={{
+                      background: coachGender === key ? 'rgba(212,160,23,0.2)' : 'var(--bg-secondary)',
+                      color: coachGender === key ? 'var(--gold)' : 'var(--text-secondary)',
+                      border: coachGender === key ? '1px solid var(--gold)' : '1px solid var(--border)'
+                    }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
@@ -241,6 +348,7 @@ export default function Profile() {
         )}
       </div>
 
+      {/* Trophies */}
       {user?.trophies?.length > 0 && (
         <div>
           <h3 className="text-xs font-semibold mb-2 uppercase" style={{ color: 'var(--text-muted)' }}>
@@ -269,6 +377,7 @@ export default function Profile() {
         </div>
       )}
 
+      {/* PoupMoedas */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Coins size={16} style={{ color: 'var(--gold)' }} />
@@ -287,6 +396,41 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Account Info */}
+      <div className="glass-card p-4">
+        <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>
+          Informacoes da Conta
+        </h3>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Mail size={14} style={{ color: 'var(--text-muted)' }} />
+            <div className="flex-1">
+              <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Email</p>
+              <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{user?.email || '-'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Crown size={14} style={{ color: user?.plan === 'premium' ? 'var(--gold)' : 'var(--text-muted)' }} />
+            <div className="flex-1">
+              <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Plano</p>
+              <p className="text-sm" style={{ color: user?.plan === 'premium' ? 'var(--gold)' : 'var(--text-primary)' }}>
+                {user?.plan === 'premium' ? 'Premium' : 'Gratuito'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
+            <div className="flex-1">
+              <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>Membro desde</p>
+              <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' }) : '-'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Premium CTA */}
       {user?.plan !== 'premium' && (
         <div className="p-4 rounded-2xl"
           style={{ background: 'linear-gradient(135deg, rgba(212,160,23,0.15), rgba(212,160,23,0.05))', border: '1px solid rgba(212,160,23,0.3)' }}>
@@ -303,6 +447,7 @@ export default function Profile() {
         </div>
       )}
 
+      {/* Quick Summary */}
       <div className="glass-card p-4">
         <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>
           Resumo Rapido
@@ -341,6 +486,7 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Quick Navigation */}
       <div className="space-y-2">
         <button onClick={() => setScreen('settings')}
           className="w-full glass-card p-4 flex items-center gap-3 text-left">
@@ -358,6 +504,46 @@ export default function Profile() {
           </div>
           <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
         </button>
+        <button onClick={() => setScreen('reports')}
+          className="w-full glass-card p-4 flex items-center gap-3 text-left">
+          <TrendingUp size={18} style={{ color: '#3B82F6' }} />
+          <div className="flex-1">
+            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Ver Relatorios</span>
+          </div>
+          <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+        </button>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="glass-card p-4">
+        <h3 className="text-xs font-semibold mb-3 uppercase flex items-center gap-1" style={{ color: '#EF4444' }}>
+          <AlertCircle size={12} /> Zona de Perigo
+        </h3>
+        {!showDeleteAccount ? (
+          <button onClick={() => setShowDeleteAccount(true)}
+            className="w-full py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2"
+            style={{ color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            <Trash2 size={12} /> Eliminar conta
+          </button>
+        ) : (
+          <div className="space-y-2 animate-fade-in">
+            <p className="text-xs" style={{ color: '#EF4444' }}>
+              Tens a certeza? Esta accao e irreversivel e todos os teus dados serao eliminados permanentemente.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setShowDeleteAccount(false)}
+                className="flex-1 py-2 rounded-xl text-xs"
+                style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+                Cancelar
+              </button>
+              <button onClick={handleDeleteAccount} disabled={deletingAccount}
+                className="flex-1 py-2 rounded-xl text-xs font-bold"
+                style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.4)' }}>
+                {deletingAccount ? 'A eliminar...' : 'Eliminar permanentemente'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {user?.createdAt && (

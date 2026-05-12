@@ -3,20 +3,22 @@ import useStore from '../store/useStore';
 import { api } from '../services/api';
 import { modeLabels, modeColors, modeDescriptions } from '../utils/helpers';
 import {
-  Save, Moon, Sun, Globe, Shield, Bell, Trash2, LogOut,
-  Palette, Download, Info, ChevronRight, Volume2, VolumeX,
-  MessageSquare, Target, FileText, Calendar, User, Sparkles
+  Save, Shield, Bell, Trash2, LogOut,
+  Palette, Download, Info, ChevronRight,
+  MessageSquare, Target, FileText, Calendar, Sparkles,
+  Euro, Languages, Lock, Eye, Heart, ExternalLink,
+  Check
 } from 'lucide-react';
 
 const themes = [
-  { id: 'ouro-escuro', label: 'Ouro Escuro', color: '#D4A017' },
-  { id: 'ouro-claro', label: 'Ouro Claro', color: '#F5D76E' },
-  { id: 'azul-royal', label: 'Azul Royal', color: '#2563EB' },
-  { id: 'verde-esmeralda', label: 'Verde Esmeralda', color: '#059669' },
-  { id: 'roxo', label: 'Roxo', color: '#7C3AED' },
-  { id: 'rosa', label: 'Rosa', color: '#DB2777' },
-  { id: 'sunset', label: 'Sunset', color: '#EA580C' },
-  { id: 'ocean', label: 'Ocean', color: '#0891B2' },
+  { id: 'ouro-escuro', label: 'Ouro Escuro', color: '#D4A017', bg: '#0F172A' },
+  { id: 'ouro-claro', label: 'Ouro Claro', color: '#F5D76E', bg: '#1A1A2E' },
+  { id: 'azul-escuro', label: 'Azul Escuro', color: '#2563EB', bg: '#0C1222' },
+  { id: 'verde-escuro', label: 'Verde Escuro', color: '#059669', bg: '#0A1A14' },
+  { id: 'rosa-escuro', label: 'Rosa Escuro', color: '#DB2777', bg: '#1A0C16' },
+  { id: 'roxo-escuro', label: 'Roxo Escuro', color: '#7C3AED', bg: '#120C22' },
+  { id: 'vermelho-escuro', label: 'Vermelho Escuro', color: '#DC2626', bg: '#1A0C0C' },
+  { id: 'branco', label: 'Branco', color: '#1E293B', bg: '#F8FAFC' },
 ];
 
 const personalityLabels = {
@@ -40,20 +42,33 @@ export default function Settings() {
   const [coachPersonality, setCoachPersonality] = useState(user?.coachPersonality || 'disciplinado');
   const [selectedMode, setSelectedMode] = useState(user?.financialMode || 'sobrevivencia');
   const [selectedTheme, setSelectedTheme] = useState(user?.theme || 'ouro-escuro');
+  const [currency, setCurrency] = useState(user?.currency || 'EUR');
+  const [language, setLanguage] = useState(user?.language || 'pt');
   const [notifications, setNotifications] = useState({
     debtReminders: user?.notificationSettings?.debtReminders ?? true,
-    coachMessages: user?.notificationSettings?.coachMessages ?? true,
+    coachTips: user?.notificationSettings?.coachTips ?? true,
+    goalAlerts: user?.notificationSettings?.goalAlerts ?? true,
     weeklyReports: user?.notificationSettings?.weeklyReports ?? true,
-    goalMilestones: user?.notificationSettings?.goalMilestones ?? true,
+  });
+  const [privacySettings, setPrivacySettings] = useState({
+    analytics: user?.privacySettings?.analytics ?? true,
+    personalizedTips: user?.privacySettings?.personalizedTips ?? true,
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(null);
+
+  const showSuccess = (msg) => {
+    setSaveSuccess(msg);
+    setTimeout(() => setSaveSuccess(null), 2000);
+  };
 
   const handleSaveCoach = async () => {
     setSaving(true);
     try {
       await api.updateCoach({ coachName, coachPersonality });
       updateUser({ coachName, coachPersonality });
+      showSuccess('Coach actualizado!');
     } catch (err) {
       console.error(err);
     } finally {
@@ -66,6 +81,7 @@ export default function Settings() {
       await api.updateMode(mode);
       updateUser({ financialMode: mode });
       setSelectedMode(mode);
+      showSuccess('Modo actualizado!');
     } catch (err) {
       console.error(err);
     }
@@ -76,6 +92,29 @@ export default function Settings() {
     try {
       await api.updateMe({ theme: themeId });
       updateUser({ theme: themeId });
+      showSuccess('Tema alterado!');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCurrencyChange = async (curr) => {
+    setCurrency(curr);
+    try {
+      await api.updateMe({ currency: curr });
+      updateUser({ currency: curr });
+      showSuccess('Moeda actualizada!');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleLanguageChange = async (lang) => {
+    setLanguage(lang);
+    try {
+      await api.updateMe({ language: lang });
+      updateUser({ language: lang });
+      showSuccess('Idioma actualizado!');
     } catch (err) {
       console.error(err);
     }
@@ -87,6 +126,17 @@ export default function Settings() {
     try {
       await api.updateMe({ notificationSettings: updated });
       updateUser({ notificationSettings: updated });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePrivacyToggle = async (key) => {
+    const updated = { ...privacySettings, [key]: !privacySettings[key] };
+    setPrivacySettings(updated);
+    try {
+      await api.updateMe({ privacySettings: updated });
+      updateUser({ privacySettings: updated });
     } catch (err) {
       console.error(err);
     }
@@ -104,6 +154,7 @@ export default function Settings() {
       a.download = `poupt-dados-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      showSuccess('Dados exportados!');
     } catch (err) {
       console.error(err);
     } finally {
@@ -122,7 +173,7 @@ export default function Settings() {
       return;
     }
     try {
-      await fetch('/api/auth/me', {
+      await fetch(`${import.meta.env.VITE_API_URL || 'https://poupt-api.onrender.com/api'}/auth/me`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${localStorage.getItem('poupt_token')}` }
       });
@@ -132,15 +183,44 @@ export default function Settings() {
     }
   };
 
-  const toggleItems = [
+  const notificationItems = [
     { key: 'debtReminders', label: 'Lembretes de dividas', desc: 'Avisos quando dividas estao prestes a vencer', icon: FileText },
-    { key: 'coachMessages', label: 'Mensagens do Coach', desc: 'Dicas e motivacao do teu AI Coach', icon: MessageSquare },
+    { key: 'goalAlerts', label: 'Alertas de metas', desc: 'Notificacao ao atingir marcos de objetivos', icon: Target },
+    { key: 'coachTips', label: 'Dicas do Coach', desc: 'Sugestoes e motivacao do teu AI Coach', icon: MessageSquare },
     { key: 'weeklyReports', label: 'Relatorios semanais', desc: 'Resumo semanal das tuas financas', icon: Calendar },
-    { key: 'goalMilestones', label: 'Marcos de objetivos', desc: 'Notificacao ao atingir metas', icon: Target },
   ];
+
+  const currencies = [
+    { code: 'EUR', label: 'Euro (EUR)', symbol: '€' },
+    { code: 'USD', label: 'Dolar (USD)', symbol: '$' },
+    { code: 'BRL', label: 'Real (BRL)', symbol: 'R$' },
+    { code: 'GBP', label: 'Libra (GBP)', symbol: '£' },
+  ];
+
+  const languages = [
+    { code: 'pt', label: 'Portugues' },
+    { code: 'en', label: 'English' },
+    { code: 'es', label: 'Espanol' },
+  ];
+
+  const Toggle = ({ isOn, onToggle }) => (
+    <button onClick={onToggle} className="w-11 h-6 rounded-full relative transition-all shrink-0"
+      style={{ background: isOn ? 'var(--gold)' : 'var(--border)' }}>
+      <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all"
+        style={{ left: isOn ? '22px' : '2px' }} />
+    </button>
+  );
 
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
+      {/* Success Toast */}
+      {saveSuccess && (
+        <div className="p-3 rounded-xl text-xs font-medium text-center animate-fade-in"
+          style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981' }}>
+          <Check size={12} className="inline mr-1" /> {saveSuccess}
+        </div>
+      )}
+
       {/* Tema */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
@@ -152,16 +232,19 @@ export default function Settings() {
         <div className="grid grid-cols-4 gap-2">
           {themes.map(theme => (
             <button key={theme.id} onClick={() => handleThemeChange(theme.id)}
-              className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all"
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all"
               style={{
                 background: selectedTheme === theme.id ? `${theme.color}15` : 'transparent',
                 border: selectedTheme === theme.id ? `1px solid ${theme.color}` : '1px solid transparent'
               }}>
-              <div className="w-8 h-8 rounded-full relative"
-                style={{ background: theme.color, boxShadow: selectedTheme === theme.id ? `0 0 12px ${theme.color}50` : 'none' }}>
+              <div className="w-8 h-8 rounded-full relative border"
+                style={{ background: `linear-gradient(135deg, ${theme.color}, ${theme.bg})`,
+                  boxShadow: selectedTheme === theme.id ? `0 0 12px ${theme.color}50` : 'none',
+                  borderColor: theme.id === 'branco' ? '#CBD5E1' : 'transparent'
+                }}>
                 {selectedTheme === theme.id && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-3 h-3 rounded-full bg-white" />
+                    <Check size={12} className="text-white" />
                   </div>
                 )}
               </div>
@@ -183,23 +266,72 @@ export default function Settings() {
           </h3>
         </div>
         <div className="space-y-3">
-          {toggleItems.map(({ key, label, desc, icon: Icon }) => (
+          {notificationItems.map(({ key, label, desc, icon: Icon }) => (
             <div key={key} className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: notifications[key] ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)' }}>
                 <Icon size={16} style={{ color: notifications[key] ? 'var(--gold)' : 'var(--text-muted)' }} />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{label}</p>
                 <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</p>
               </div>
-              <button onClick={() => handleNotificationToggle(key)}
-                className="w-11 h-6 rounded-full relative transition-all"
-                style={{ background: notifications[key] ? 'var(--gold)' : 'var(--border)' }}>
-                <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all"
-                  style={{ left: notifications[key] ? '22px' : '2px' }} />
-              </button>
+              <Toggle isOn={notifications[key]} onToggle={() => handleNotificationToggle(key)} />
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Moeda */}
+      <div className="glass-card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Euro size={16} style={{ color: 'var(--gold)' }} />
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+            Moeda de Referencia
+          </h3>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {currencies.map(curr => (
+            <button key={curr.code} onClick={() => handleCurrencyChange(curr.code)}
+              className="py-2.5 px-3 rounded-xl text-left transition-all flex items-center gap-2"
+              style={{
+                background: currency === curr.code ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+                border: currency === curr.code ? '1px solid var(--gold)' : '1px solid var(--border)'
+              }}>
+              <span className="text-base font-bold" style={{
+                color: currency === curr.code ? 'var(--gold)' : 'var(--text-primary)'
+              }}>
+                {curr.symbol}
+              </span>
+              <span className="text-xs font-medium" style={{
+                color: currency === curr.code ? 'var(--gold)' : 'var(--text-secondary)'
+              }}>
+                {curr.label}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Idioma */}
+      <div className="glass-card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Languages size={16} style={{ color: 'var(--gold)' }} />
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+            Idioma
+          </h3>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {languages.map(lang => (
+            <button key={lang.code} onClick={() => handleLanguageChange(lang.code)}
+              className="py-2.5 rounded-xl text-sm font-medium transition-all text-center"
+              style={{
+                background: language === lang.code ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
+                color: language === lang.code ? 'var(--gold)' : 'var(--text-secondary)',
+                border: language === lang.code ? '1px solid var(--gold)' : '1px solid var(--border)'
+              }}>
+              {lang.label}
+            </button>
           ))}
         </div>
       </div>
@@ -281,45 +413,57 @@ export default function Settings() {
         </div>
       </div>
 
+      {/* Exportar Dados */}
+      <div className="glass-card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Download size={16} style={{ color: 'var(--gold)' }} />
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+            Exportar Dados
+          </h3>
+        </div>
+        <button onClick={handleExportData} disabled={exporting}
+          className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+          style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
+          <Download size={14} style={{ color: 'var(--gold)' }} />
+          {exporting ? 'A exportar...' : 'Exportar os meus dados (JSON)'}
+        </button>
+      </div>
+
       {/* Privacidade */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Globe size={16} style={{ color: 'var(--gold)' }} />
+          <Lock size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Privacidade e Dados
+            Privacidade
           </h3>
         </div>
-        <div className="space-y-2">
-          <button onClick={handleExportData} disabled={exporting}
-            className="w-full py-3 rounded-xl text-sm font-medium flex items-center gap-3 px-4"
-            style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
-            <Download size={16} style={{ color: 'var(--gold)' }} />
-            <span className="flex-1 text-left">{exporting ? 'A exportar...' : 'Exportar os meus dados'}</span>
-            <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} />
-          </button>
-          <button onClick={handleDeleteAccount}
-            className="w-full py-3 rounded-xl text-sm font-medium flex items-center gap-3 px-4"
-            style={{
-              background: showDeleteConfirm ? 'rgba(239,68,68,0.1)' : 'transparent',
-              color: showDeleteConfirm ? '#EF4444' : 'var(--text-muted)',
-              border: showDeleteConfirm ? '1px solid rgba(239,68,68,0.5)' : '1px solid var(--border)'
-            }}>
-            <Trash2 size={16} />
-            <span className="flex-1 text-left">
-              {showDeleteConfirm ? 'Tens a certeza? Clica novamente para eliminar' : 'Eliminar conta'}
-            </span>
-          </button>
-          {showDeleteConfirm && (
-            <button onClick={() => setShowDeleteConfirm(false)}
-              className="w-full py-2 rounded-xl text-xs"
-              style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-              Cancelar
-            </button>
-          )}
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: privacySettings.analytics ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)' }}>
+              <Eye size={16} style={{ color: privacySettings.analytics ? 'var(--gold)' : 'var(--text-muted)' }} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Analise de uso</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Ajuda-nos a melhorar a app</p>
+            </div>
+            <Toggle isOn={privacySettings.analytics} onToggle={() => handlePrivacyToggle('analytics')} />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: privacySettings.personalizedTips ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)' }}>
+              <Heart size={16} style={{ color: privacySettings.personalizedTips ? 'var(--gold)' : 'var(--text-muted)' }} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Dicas personalizadas</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sugestoes baseadas nos teus habitos</p>
+            </div>
+            <Toggle isOn={privacySettings.personalizedTips} onToggle={() => handlePrivacyToggle('personalizedTips')} />
+          </div>
         </div>
       </div>
 
-      {/* Informacoes da App */}
+      {/* About */}
       <div className="glass-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Info size={16} style={{ color: 'var(--gold)' }} />
@@ -330,7 +474,7 @@ export default function Settings() {
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span style={{ color: 'var(--text-secondary)' }}>Versao</span>
-            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>1.2.0</span>
+            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>1.3.0</span>
           </div>
           <div className="flex justify-between text-sm">
             <span style={{ color: 'var(--text-secondary)' }}>Ambiente</span>
@@ -343,23 +487,47 @@ export default function Settings() {
           <div className="pt-2" style={{ borderTop: '1px solid var(--border)' }}>
             <a href="https://poupt.pt/termos" target="_blank" rel="noopener noreferrer"
               className="text-xs flex items-center gap-1 mb-1.5" style={{ color: 'var(--gold)' }}>
-              Termos e Condicoes <ChevronRight size={10} />
+              Termos e Condicoes <ExternalLink size={10} />
             </a>
             <a href="https://poupt.pt/privacidade" target="_blank" rel="noopener noreferrer"
               className="text-xs flex items-center gap-1" style={{ color: 'var(--gold)' }}>
-              Politica de Privacidade <ChevronRight size={10} />
+              Politica de Privacidade <ExternalLink size={10} />
             </a>
           </div>
         </div>
       </div>
 
-      {/* Terminar Sessao */}
+      {/* Logout */}
       <div className="glass-card p-4">
         <button onClick={handleLogout}
           className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
           style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
           <LogOut size={14} /> Terminar Sessao
         </button>
+      </div>
+
+      {/* Delete Account */}
+      <div className="glass-card p-4">
+        <h3 className="text-xs font-semibold mb-2 uppercase" style={{ color: '#EF4444' }}>
+          Zona de Perigo
+        </h3>
+        <button onClick={handleDeleteAccount}
+          className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+          style={{
+            background: showDeleteConfirm ? 'rgba(239,68,68,0.1)' : 'transparent',
+            color: showDeleteConfirm ? '#EF4444' : 'var(--text-muted)',
+            border: showDeleteConfirm ? '1px solid rgba(239,68,68,0.5)' : '1px solid var(--border)'
+          }}>
+          <Trash2 size={14} />
+          {showDeleteConfirm ? 'Tens a certeza? Clica novamente para eliminar' : 'Eliminar conta'}
+        </button>
+        {showDeleteConfirm && (
+          <button onClick={() => setShowDeleteConfirm(false)}
+            className="w-full py-2 mt-2 rounded-xl text-xs"
+            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+            Cancelar
+          </button>
+        )}
       </div>
     </div>
   );

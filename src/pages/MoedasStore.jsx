@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import {
   Coins, Play, Gift, Star, Shield, CreditCard, MessageCircle, Palette,
   Check, Camera, FileBarChart, Users, Zap, CalendarDays, Flame,
-  TrendingUp, ArrowDownLeft, ArrowUpRight, Clock
+  TrendingUp, ArrowDownLeft, ArrowUpRight, Clock, Crown, Sparkles,
+  Share2
 } from 'lucide-react';
 
 const earnActions = [
@@ -14,6 +15,7 @@ const earnActions = [
   { id: 'add_transaction', label: 'Registar transacao', reward: 5, icon: CreditCard, desc: 'Regista uma transacao na app', color: '#F59E0B' },
   { id: 'complete_challenge', label: 'Completar desafio', reward: 100, icon: Zap, desc: 'Completa desafios semanais', color: '#8B5CF6' },
   { id: 'streak_bonus', label: 'Streak bonus', reward: 30, icon: Flame, desc: 'Bonus por streak de 7 dias', color: '#EF4444' },
+  { id: 'share_achievement', label: 'Partilhar conquista', reward: 20, icon: Share2, desc: 'Partilha uma conquista com amigos', color: '#EC4899' },
 ];
 
 const spendItems = [
@@ -24,8 +26,34 @@ const spendItems = [
   { id: 'premium_theme', label: 'Tema premium', cost: 200, icon: Palette, desc: 'Desbloqueia um tema exclusivo', color: '#EC4899' },
 ];
 
+function AnimatedCounter({ target }) {
+  const [count, setCount] = useState(0);
+  const prevTarget = useRef(0);
+
+  useEffect(() => {
+    if (target === prevTarget.current) return;
+    const start = prevTarget.current;
+    const end = target;
+    prevTarget.current = target;
+
+    const duration = 800;
+    const startTime = Date.now();
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(start + (end - start) * eased));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [target]);
+
+  return <span>{count}</span>;
+}
+
 export default function MoedasStore() {
-  const { user, updateUser } = useStore();
+  const { user, updateUser, setScreen } = useStore();
   const [watchingAd, setWatchingAd] = useState(false);
   const [adProgress, setAdProgress] = useState(0);
   const [purchasing, setPurchasing] = useState(null);
@@ -34,6 +62,8 @@ export default function MoedasStore() {
   const [activeTab, setActiveTab] = useState('earn');
   const [transactions, setTransactions] = useState([]);
   const [coinSpin, setCoinSpin] = useState(false);
+
+  const balance = user?.poupMoedas || 0;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -67,7 +97,7 @@ export default function MoedasStore() {
         const res = await api.earnMoedas('watch_ad');
         updateUser({ poupMoedas: res.data.balance });
         setTransactions(prev => [{ type: 'earn', amount: 50, action: 'Ver anuncio', date: new Date() }, ...prev]);
-        showSuccess(`+${res.data.earned} PoupMoedas!`);
+        showSuccess(`+${res.data.earned || 50} PoupMoedas!`);
       } catch (err) {
         console.error(err);
       }
@@ -114,9 +144,15 @@ export default function MoedasStore() {
     return `ha ${days} dia${days > 1 ? 's' : ''}`;
   };
 
+  const tabs = [
+    { id: 'earn', label: 'Ganhar', icon: ArrowDownLeft, activeColor: '#10B981' },
+    { id: 'spend', label: 'Gastar', icon: ArrowUpRight, activeColor: 'var(--gold)' },
+    { id: 'history', label: 'Historico', icon: Clock, activeColor: '#3B82F6' },
+  ];
+
   return (
     <div className="px-4 py-4 space-y-4 animate-fade-in">
-      {/* Balance Card */}
+      {/* Balance Card with Animated Counter */}
       <div className="gold-gradient p-6 rounded-2xl text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10"
           style={{ background: 'radial-gradient(circle at 30% 50%, white 0%, transparent 50%)' }} />
@@ -126,7 +162,9 @@ export default function MoedasStore() {
             <Coins size={32} className="text-white"
               style={{ transform: coinSpin ? 'rotateY(180deg)' : 'rotateY(0deg)', transition: 'transform 0.6s' }} />
           </div>
-          <p className="text-4xl font-bold text-white">{user?.poupMoedas || 0}</p>
+          <p className="text-4xl font-bold text-white">
+            <AnimatedCounter target={balance} />
+          </p>
           <p className="text-sm text-white/80 mt-1">PoupMoedas</p>
           <div className="flex items-center justify-center gap-1 mt-2">
             <TrendingUp size={12} className="text-white/60" />
@@ -146,36 +184,20 @@ export default function MoedasStore() {
 
       {/* Tabs */}
       <div className="flex gap-2">
-        <button onClick={() => setActiveTab('earn')}
-          className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center transition-all"
-          style={{
-            background: activeTab === 'earn' ? 'rgba(16,185,129,0.15)' : 'var(--bg-secondary)',
-            color: activeTab === 'earn' ? '#10B981' : 'var(--text-secondary)',
-            border: activeTab === 'earn' ? '1px solid rgba(16,185,129,0.4)' : '1px solid var(--border)'
-          }}>
-          <ArrowDownLeft size={12} className="inline mr-1" /> Ganhar
-        </button>
-        <button onClick={() => setActiveTab('spend')}
-          className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center transition-all"
-          style={{
-            background: activeTab === 'spend' ? 'rgba(212,160,23,0.15)' : 'var(--bg-secondary)',
-            color: activeTab === 'spend' ? 'var(--gold)' : 'var(--text-secondary)',
-            border: activeTab === 'spend' ? '1px solid rgba(212,160,23,0.4)' : '1px solid var(--border)'
-          }}>
-          <ArrowUpRight size={12} className="inline mr-1" /> Gastar
-        </button>
-        <button onClick={() => setActiveTab('history')}
-          className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center transition-all"
-          style={{
-            background: activeTab === 'history' ? 'rgba(59,130,246,0.15)' : 'var(--bg-secondary)',
-            color: activeTab === 'history' ? '#3B82F6' : 'var(--text-secondary)',
-            border: activeTab === 'history' ? '1px solid rgba(59,130,246,0.4)' : '1px solid var(--border)'
-          }}>
-          <Clock size={12} className="inline mr-1" /> Historico
-        </button>
+        {tabs.map(({ id, label, icon: Icon, activeColor }) => (
+          <button key={id} onClick={() => setActiveTab(id)}
+            className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1"
+            style={{
+              background: activeTab === id ? `${activeColor}15` : 'var(--bg-secondary)',
+              color: activeTab === id ? activeColor : 'var(--text-secondary)',
+              border: activeTab === id ? `1px solid ${activeColor}40` : '1px solid var(--border)'
+            }}>
+            <Icon size={12} /> {label}
+          </button>
+        ))}
       </div>
 
-      {/* Ganhar PoupMoedas */}
+      {/* Ganhar Tab */}
       {activeTab === 'earn' && (
         <div className="space-y-2">
           <h3 className="text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
@@ -245,7 +267,7 @@ export default function MoedasStore() {
         </div>
       )}
 
-      {/* Gastar PoupMoedas */}
+      {/* Gastar Tab */}
       {activeTab === 'spend' && (
         <div className="space-y-2">
           <h3 className="text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
@@ -253,7 +275,7 @@ export default function MoedasStore() {
           </h3>
           {spendItems.map(item => {
             const Icon = item.icon;
-            const canAfford = (user?.poupMoedas || 0) >= item.cost;
+            const canAfford = balance >= item.cost;
             const isPurchasing = purchasing === item.id;
             return (
               <div key={item.id} className="glass-card p-4 flex items-center gap-3">
@@ -279,35 +301,52 @@ export default function MoedasStore() {
               </div>
             );
           })}
+
+          {/* Premium CTA */}
+          {user?.plan !== 'premium' && (
+            <div className="p-4 rounded-2xl flex items-center gap-3 mt-3"
+              style={{ background: 'rgba(212,160,23,0.1)', border: '1px solid rgba(212,160,23,0.3)' }}>
+              <Crown size={20} style={{ color: 'var(--gold)' }} />
+              <div className="flex-1">
+                <p className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>Premium</p>
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  Desbloqueia tudo com moedas ilimitadas
+                </p>
+              </div>
+              <Sparkles size={16} style={{ color: 'var(--gold)' }} />
+            </div>
+          )}
         </div>
       )}
 
-      {/* Historico */}
+      {/* Historico Tab */}
       {activeTab === 'history' && (
         <div className="space-y-2">
           <h3 className="text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
             Historico de Transacoes
           </h3>
           {transactions.length > 0 ? (
-            transactions.map((tx, idx) => (
-              <div key={idx} className="glass-card p-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: tx.type === 'earn' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)' }}>
-                  {tx.type === 'earn'
-                    ? <ArrowDownLeft size={14} style={{ color: '#10B981' }} />
-                    : <ArrowUpRight size={14} style={{ color: '#EF4444' }} />
-                  }
+            <div className="max-h-96 overflow-y-auto space-y-2" style={{ scrollbarWidth: 'thin' }}>
+              {transactions.map((tx, idx) => (
+                <div key={idx} className="glass-card p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{ background: tx.type === 'earn' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)' }}>
+                    {tx.type === 'earn'
+                      ? <ArrowDownLeft size={14} style={{ color: '#10B981' }} />
+                      : <ArrowUpRight size={14} style={{ color: '#EF4444' }} />
+                    }
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{tx.action}</p>
+                    <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{getTimeAgo(tx.date)}</p>
+                  </div>
+                  <p className="text-xs font-bold"
+                    style={{ color: tx.type === 'earn' ? '#10B981' : '#EF4444' }}>
+                    {tx.type === 'earn' ? '+' : '-'}{tx.amount}
+                  </p>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{tx.action}</p>
-                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{getTimeAgo(tx.date)}</p>
-                </div>
-                <p className="text-xs font-bold"
-                  style={{ color: tx.type === 'earn' ? '#10B981' : '#EF4444' }}>
-                  {tx.type === 'earn' ? '+' : '-'}{tx.amount}
-                </p>
-              </div>
-            ))
+              ))}
+            </div>
           ) : (
             <div className="text-center py-8">
               <Clock size={40} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />

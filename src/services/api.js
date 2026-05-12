@@ -124,5 +124,25 @@ export const api = {
   getReportSummary: () => request('/reports/summary'),
   getReportMonthly: (month, year) =>
     request(`/reports/monthly?month=${month}&year=${year}`),
-  getDebtProgress: () => request('/reports/debt-progress')
+  getDebtProgress: () => request('/reports/debt-progress'),
+
+  // Mode Detection
+  detectMode: () => request('/auth/me/detect-mode', { method: 'POST' }),
+
+  // Creditor Interactions
+  getCreditors: () => request('/creditors'),
+  createCreditor: (data) => request('/creditors', { method: 'POST', body: data }),
+  updateCreditor: (id, data) => request(`/creditors/${id}`, { method: 'PUT', body: data }),
+
+  // Password Reset
+  forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email } }),
+  resetPassword: (token, password) => request('/auth/reset-password', { method: 'PUT', body: { token, password } }),
+
+  // Snowball Detailed
+  getSnowballDetailed: (extraBudget) =>
+    request(`/debts/snowball-detailed${extraBudget ? `?extraBudget=${extraBudget}` : ''}`),
+
+  // Goal Progress
+  updateGoalProgress: (id, amount) =>
+    request(`/goals/${id}/progress`, { method: 'POST', body: { amount } }),
 };
