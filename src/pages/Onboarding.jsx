@@ -1,21 +1,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
+import useThemeColors, { alpha } from '../utils/useThemeColors';
 
 const avatars = ['👩', '👨', '🧑', '👩‍🦰', '👨‍🦱', '👩‍🦳', '🧔', '👱‍♀️'];
-
-const colors = {
-  background: '#07070C',
-  gold: '#E4B94F',
-  goldLight: '#F4D77B',
-  text: '#FFFFFF',
-  muted: '#AAA6D8',
-  surface: '#18172E',
-  surfaceLight: '#1E1D38',
-  border: '#2F2D55',
-};
-
-const stepIcons = ['👋', '💰', '💳', '🤖'];
 
 const getProgress = (step, total) => ((step + 1) / total) * 100;
 
@@ -30,6 +18,8 @@ export default function Onboarding() {
     setOnboardingComplete,
     setScreen,
   } = useStore();
+
+  const { colors } = useThemeColors();
 
   const steps = 4;
   const progress = getProgress(onboardingStep, steps);
@@ -118,7 +108,7 @@ export default function Onboarding() {
               width: '100%',
               height: 7,
               borderRadius: 999,
-              background: '#191631',
+              background: colors.surface,
               overflow: 'hidden',
             }}
           >
@@ -143,10 +133,10 @@ export default function Onboarding() {
             exit={{ opacity: 0, x: -26 }}
             transition={{ duration: 0.22 }}
           >
-            {onboardingStep === 0 && <StepName />}
-            {onboardingStep === 1 && <StepIncome />}
-            {onboardingStep === 2 && <StepDebts />}
-            {onboardingStep === 3 && <StepCoach />}
+            {onboardingStep === 0 && <StepName colors={colors} />}
+            {onboardingStep === 1 && <StepIncome colors={colors} />}
+            {onboardingStep === 2 && <StepDebts colors={colors} />}
+            {onboardingStep === 3 && <StepCoach colors={colors} />}
           </motion.div>
         </AnimatePresence>
 
@@ -160,11 +150,11 @@ export default function Onboarding() {
             borderRadius: 15,
             border: '2px solid rgba(255,255,255,0.92)',
             background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
-            color: '#000000',
+            color: colors.inverse,
             fontSize: 16,
             fontWeight: 800,
             cursor: 'pointer',
-            boxShadow: '0 13px 30px rgba(228,185,79,0.22)',
+            boxShadow: `0 13px 30px ${alpha(colors.gold, 0.22)}`,
           }}
         >
           {onboardingStep === steps - 1 ? 'Começar!' : 'Próximo →'}
@@ -174,7 +164,7 @@ export default function Onboarding() {
   );
 }
 
-function StepName() {
+function StepName({ colors }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   const firstRow = avatars.slice(0, 5);
@@ -193,7 +183,7 @@ function StepName() {
           height: 47,
           borderRadius: 12,
           border: isSelected ? `2px solid ${colors.gold}` : `2px solid ${colors.border}`,
-          background: isSelected ? 'rgba(228,185,79,0.13)' : colors.surface,
+          background: isSelected ? alpha(colors.gold, 0.13) : colors.surface,
           color: colors.text,
           fontSize: 25,
           display: 'flex',
@@ -218,20 +208,11 @@ function StepName() {
         alignItems: 'center',
       }}
     >
-      <div
-        style={{
-          fontSize: 45,
-          lineHeight: '45px',
-          marginBottom: 15,
-          userSelect: 'none',
-        }}
-      >
-        {stepIcons[0]}
-      </div>
+      <div style={stepIconStyle}>👋</div>
 
-      <Title>Como te chamas?</Title>
+      <Title colors={colors}>Como te chamas?</Title>
 
-      <Subtitle>Vamos personalizar a tua experiência</Subtitle>
+      <Subtitle colors={colors}>Vamos personalizar a tua experiência</Subtitle>
 
       <div
         style={{
@@ -249,7 +230,7 @@ function StepName() {
       <input
         type="text"
         value={onboardingData.name}
-        onChange={(e) => setOnboardingData({ name: e.target.value })}
+        onChange={(event) => setOnboardingData({ name: event.target.value })}
         placeholder="O teu nome..."
         style={{
           width: '100%',
@@ -269,7 +250,7 @@ function StepName() {
   );
 }
 
-function StepIncome() {
+function StepIncome({ colors }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   const min = 500;
@@ -285,20 +266,11 @@ function StepIncome() {
         alignItems: 'center',
       }}
     >
-      <div
-        style={{
-          fontSize: 46,
-          lineHeight: '46px',
-          marginBottom: 17,
-          userSelect: 'none',
-        }}
-      >
-        {stepIcons[1]}
-      </div>
+      <div style={stepIconStyle}>💰</div>
 
-      <Title>Qual o teu rendimento?</Title>
+      <Title colors={colors}>Qual o teu rendimento?</Title>
 
-      <Subtitle>Mensal, após impostos</Subtitle>
+      <Subtitle colors={colors}>Mensal, após impostos</Subtitle>
 
       <div
         style={{
@@ -319,7 +291,9 @@ function StepIncome() {
         max={max}
         step={50}
         value={onboardingData.income}
-        onChange={(e) => setOnboardingData({ income: parseInt(e.target.value, 10) })}
+        onChange={(event) =>
+          setOnboardingData({ income: parseInt(event.target.value, 10) })
+        }
         style={{
           width: '100%',
           marginTop: 25,
@@ -345,7 +319,9 @@ function StepIncome() {
       <input
         type="number"
         value={onboardingData.income}
-        onChange={(e) => setOnboardingData({ income: parseInt(e.target.value, 10) || 500 })}
+        onChange={(event) =>
+          setOnboardingData({ income: parseInt(event.target.value, 10) || 500 })
+        }
         style={{
           width: '100%',
           height: 50,
@@ -364,7 +340,7 @@ function StepIncome() {
   );
 }
 
-function StepDebts() {
+function StepDebts({ colors }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   return (
@@ -376,20 +352,11 @@ function StepDebts() {
         alignItems: 'center',
       }}
     >
-      <div
-        style={{
-          fontSize: 44,
-          lineHeight: '44px',
-          marginBottom: 16,
-          userSelect: 'none',
-        }}
-      >
-        {stepIcons[2]}
-      </div>
+      <div style={stepIconStyle}>💳</div>
 
-      <Title>Tens dívidas?</Title>
+      <Title colors={colors}>Tens dívidas?</Title>
 
-      <Subtitle>Sem julgamentos. Vamos resolver isso.</Subtitle>
+      <Subtitle colors={colors}>Sem julgamentos. Vamos resolver isso.</Subtitle>
 
       <div
         style={{
@@ -403,6 +370,7 @@ function StepDebts() {
         <ChoiceButton
           active={onboardingData.hasDebts}
           onClick={() => setOnboardingData({ hasDebts: true })}
+          colors={colors}
         >
           😔 Sim
         </ChoiceButton>
@@ -410,6 +378,7 @@ function StepDebts() {
         <ChoiceButton
           active={!onboardingData.hasDebts}
           onClick={() => setOnboardingData({ hasDebts: false })}
+          colors={colors}
         >
           😊 Não
         </ChoiceButton>
@@ -447,13 +416,14 @@ function StepDebts() {
               marginTop: 12,
               padding: '13px 14px',
               borderRadius: 9,
-              background: 'rgba(228,185,79,0.09)',
+              background: alpha(colors.gold, 0.09),
               display: 'flex',
               alignItems: 'center',
               gap: 10,
             }}
           >
             <span style={{ fontSize: 17 }}>❄️</span>
+
             <span
               style={{
                 color: colors.gold,
@@ -471,7 +441,7 @@ function StepDebts() {
   );
 }
 
-function StepCoach() {
+function StepCoach({ colors }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   return (
@@ -483,20 +453,11 @@ function StepCoach() {
         alignItems: 'center',
       }}
     >
-      <div
-        style={{
-          fontSize: 46,
-          lineHeight: '46px',
-          marginBottom: 17,
-          userSelect: 'none',
-        }}
-      >
-        {stepIcons[3]}
-      </div>
+      <div style={stepIconStyle}>🤖</div>
 
-      <Title>Escolhe o teu treinador</Title>
+      <Title colors={colors}>Escolhe o teu treinador</Title>
 
-      <Subtitle>Podes mudar a qualquer momento</Subtitle>
+      <Subtitle colors={colors}>Podes mudar a qualquer momento</Subtitle>
 
       <div
         style={{
@@ -511,8 +472,9 @@ function StepCoach() {
           icon="💪"
           title="Sargento"
           description="Firme e direto"
-          color="#EF4444"
+          color={colors.danger}
           onClick={() => setOnboardingData({ coachMode: 'sargento' })}
+          colors={colors}
         />
 
         <CoachCard
@@ -520,8 +482,9 @@ function StepCoach() {
           icon="🤗"
           title="Amigável"
           description="Apoio e calma"
-          color="#10B981"
+          color={colors.success}
           onClick={() => setOnboardingData({ coachMode: 'amigavel' })}
+          colors={colors}
         />
       </div>
 
@@ -553,7 +516,7 @@ function StepCoach() {
   );
 }
 
-function Title({ children }) {
+function Title({ children, colors }) {
   return (
     <h2
       style={{
@@ -572,7 +535,7 @@ function Title({ children }) {
   );
 }
 
-function Subtitle({ children }) {
+function Subtitle({ children, colors }) {
   return (
     <p
       style={{
@@ -589,7 +552,7 @@ function Subtitle({ children }) {
   );
 }
 
-function ChoiceButton({ active, onClick, children }) {
+function ChoiceButton({ active, onClick, children, colors }) {
   return (
     <button
       type="button"
@@ -599,7 +562,7 @@ function ChoiceButton({ active, onClick, children }) {
         height: 46,
         borderRadius: 14,
         border: active ? `1.5px solid ${colors.gold}` : `1.5px solid ${colors.border}`,
-        background: active ? 'rgba(228,185,79,0.1)' : colors.surface,
+        background: active ? alpha(colors.gold, 0.1) : colors.surface,
         color: active ? colors.gold : colors.muted,
         fontSize: 14,
         fontWeight: 800,
@@ -611,7 +574,7 @@ function ChoiceButton({ active, onClick, children }) {
   );
 }
 
-function CoachCard({ active, icon, title, description, color, onClick }) {
+function CoachCard({ active, icon, title, description, color, onClick, colors }) {
   return (
     <button
       type="button"
@@ -622,12 +585,14 @@ function CoachCard({ active, icon, title, description, color, onClick }) {
         padding: 14,
         borderRadius: 15,
         border: active ? `2px solid ${color}` : `1.5px solid ${colors.border}`,
-        background: active ? `${color}16` : colors.surface,
+        background: active ? alpha(color, 0.09) : colors.surface,
         cursor: 'pointer',
         textAlign: 'center',
       }}
     >
-      <div style={{ fontSize: 35, lineHeight: '35px', marginBottom: 10 }}>{icon}</div>
+      <div style={{ fontSize: 35, lineHeight: '35px', marginBottom: 10 }}>
+        {icon}
+      </div>
 
       <p
         style={{
@@ -655,3 +620,10 @@ function CoachCard({ active, icon, title, description, color, onClick }) {
     </button>
   );
 }
+
+const stepIconStyle = {
+  fontSize: 46,
+  lineHeight: '46px',
+  marginBottom: 17,
+  userSelect: 'none',
+};

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { themes } from '../themes';
 import { Mail, Lock, User, ArrowLeft, ArrowRight } from 'lucide-react';
+import useThemeColors, { alpha } from '../utils/useThemeColors';
 
 export default function Register() {
   const { setScreen, login } = useStore();
-  const theme = themes.darkGold;
+  const { colors } = useThemeColors();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,8 +19,10 @@ export default function Register() {
       setError('Preenche todos os campos');
       return;
     }
+
     setLoading(true);
     setError('');
+
     try {
       const mockUser = {
         name,
@@ -27,9 +30,9 @@ export default function Register() {
         onboardingComplete: false,
         financialMode: 'sobrevivencia',
       };
-      const mockToken = 'mock-token-123';
-      login(mockUser, mockToken);
-    } catch (err) {
+
+      login(mockUser, 'mock-token-123');
+    } catch {
       setError('Erro ao criar conta. Tenta novamente.');
     } finally {
       setLoading(false);
@@ -38,127 +41,275 @@ export default function Register() {
 
   return (
     <div
-      className="flex flex-col min-h-full px-5 py-4 poupt-scroll"
-      style={{ background: theme.background }}
+      style={{
+        minHeight: '100dvh',
+        width: '100%',
+        background: `radial-gradient(circle at 50% 0%, ${alpha(colors.gold, 0.06)} 0%, transparent 38%), ${colors.background}`,
+        display: 'flex',
+        justifyContent: 'center',
+        overflowY: 'auto',
+      }}
     >
-      {/* Back button */}
-      <button
-        onClick={() => setScreen('landing')}
-        className="flex items-center gap-1 mb-6 text-sm font-medium py-2"
-        style={{ color: theme.textMuted }}
+      <main
+        style={{
+          width: '100%',
+          maxWidth: 361,
+          minHeight: '100dvh',
+          padding: '18px 15px 22px',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
-        <ArrowLeft size={16} />
-        Voltar
-      </button>
-
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
-      >
-        <div className="text-6xl mb-4 select-none">🐷</div>
-        <h1
-          className="text-3xl font-extrabold gradient-text mb-2"
+        <button
+          type="button"
+          onClick={() => setScreen('landing')}
           style={{
-            backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+            width: 'fit-content',
+            border: 'none',
+            background: 'transparent',
+            color: colors.gold,
+            fontSize: 13,
+            fontWeight: 700,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            padding: 0,
+            cursor: 'pointer',
           }}
         >
-          Criar Conta
-        </h1>
-        <p className="text-sm font-medium" style={{ color: theme.textMuted }}>
-          Comeca a tua jornada financeira
-        </p>
-      </motion.div>
+          <ArrowLeft size={15} />
+          Voltar
+        </button>
 
-      {/* Form */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="flex flex-col gap-4"
-      >
-        <div
-          className="flex items-center gap-3 px-4 py-3.5 rounded-xl"
-          style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}
+        <motion.section
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          style={{
+            marginTop: 48,
+            textAlign: 'center',
+          }}
         >
-          <User size={18} style={{ color: theme.textMuted }} />
-          <input
+          <div
+            style={{
+              fontSize: 58,
+              lineHeight: '58px',
+              marginBottom: 14,
+              userSelect: 'none',
+            }}
+          >
+            🐷
+          </div>
+
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 34,
+              lineHeight: '38px',
+              fontWeight: 900,
+              letterSpacing: '-0.7px',
+              color: colors.gold,
+            }}
+          >
+            Criar Conta
+          </h1>
+
+          <p
+            style={{
+              margin: '7px 0 0',
+              fontSize: 14,
+              lineHeight: '18px',
+              fontWeight: 500,
+              color: colors.muted,
+            }}
+          >
+            Começa a tua jornada financeira
+          </p>
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          style={{
+            marginTop: 35,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+          }}
+        >
+          <Field
+            icon={<User size={18} />}
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(event) => setName(event.target.value)}
             placeholder="Nome"
-            className="flex-1 bg-transparent outline-none text-sm font-medium"
-            style={{ color: theme.text }}
             autoComplete="name"
+            colors={colors}
           />
-        </div>
 
-        <div
-          className="flex items-center gap-3 px-4 py-3.5 rounded-xl"
-          style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}
-        >
-          <Mail size={18} style={{ color: theme.textMuted }} />
-          <input
+          <Field
+            icon={<Mail size={18} />}
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
             placeholder="Email"
-            className="flex-1 bg-transparent outline-none text-sm font-medium"
-            style={{ color: theme.text }}
             autoComplete="email"
+            colors={colors}
           />
+
+          <Field
+            icon={<Lock size={18} />}
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Palavra-passe"
+            autoComplete="new-password"
+            colors={colors}
+          />
+
+          {error && (
+            <p
+              style={{
+                margin: 0,
+                color: colors.danger,
+                fontSize: 12,
+                lineHeight: '16px',
+                fontWeight: 700,
+                textAlign: 'center',
+              }}
+            >
+              {error}
+            </p>
+          )}
+
+          <button
+            type="button"
+            onClick={handleRegister}
+            disabled={loading}
+            style={{
+              width: '100%',
+              height: 58,
+              marginTop: 8,
+              border: 'none',
+              borderRadius: 29,
+              background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
+              color: colors.inverse,
+              fontSize: 16,
+              fontWeight: 900,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.65 : 1,
+              boxShadow: `0 12px 32px ${alpha(colors.gold, 0.22)}`,
+            }}
+          >
+            {loading ? 'A criar conta...' : 'Começar Grátis'}
+            {!loading && <ArrowRight size={17} strokeWidth={2.5} />}
+          </button>
+        </motion.section>
+
+        <div
+          style={{
+            marginTop: 18,
+            textAlign: 'center',
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              color: colors.muted,
+              fontSize: 12,
+              lineHeight: '16px',
+              fontWeight: 500,
+            }}
+          >
+            Já tens conta?{' '}
+            <button
+              type="button"
+              onClick={() => setScreen('login')}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                color: colors.gold,
+                fontSize: 12,
+                lineHeight: '16px',
+                fontWeight: 900,
+                padding: 0,
+                cursor: 'pointer',
+              }}
+            >
+              Entrar
+            </button>
+          </p>
         </div>
 
         <div
-          className="flex items-center gap-3 px-4 py-3.5 rounded-xl"
-          style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}
+          style={{
+            marginTop: 7,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 19,
+          }}
         >
-          <Lock size={18} style={{ color: theme.textMuted }} />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Palavra-passe"
-            className="flex-1 bg-transparent outline-none text-sm font-medium"
-            style={{ color: theme.text }}
-            autoComplete="new-password"
-          />
+          <span style={badgeStyle(colors)}>✓ Gratuito</span>
+          <span style={badgeStyle(colors)}>✓ Sem cartão</span>
         </div>
-
-        {error && (
-          <p className="text-xs text-center font-medium" style={{ color: '#EF4444' }}>{error}</p>
-        )}
-
-        <button
-          onClick={handleRegister}
-          disabled={loading}
-          className="btn-gold w-full flex items-center justify-center gap-2"
-        >
-          {loading ? 'A criar conta...' : 'Comecar Gratis'}
-          {!loading && <ArrowRight size={16} />}
-        </button>
-      </motion.div>
-
-      {/* Login link */}
-      <div className="mt-8 text-center">
-        <p className="text-xs" style={{ color: theme.textMuted }}>
-          Ja tens conta?{' '}
-          <button
-            onClick={() => setScreen('login')}
-            className="font-bold"
-            style={{ color: theme.primary }}
-          >
-            Entrar
-          </button>
-        </p>
-      </div>
-
-      {/* Trust badges */}
-      <div className="mt-auto pt-6 flex items-center justify-center gap-5">
-        <span className="text-[11px]" style={{ color: theme.textMuted }}>&#10003; Gratuito</span>
-        <span className="text-[11px]" style={{ color: theme.textMuted }}>&#10003; Sem cartao</span>
-      </div>
+      </main>
     </div>
   );
+}
+
+function Field({ icon, colors, ...props }) {
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: 51,
+        borderRadius: 13,
+        border: `1.5px solid ${colors.border}`,
+        background: colors.surface,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 11,
+        padding: '0 15px',
+      }}
+    >
+      <span
+        style={{
+          color: colors.muted,
+          display: 'flex',
+          alignItems: 'center',
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </span>
+
+      <input
+        {...props}
+        style={{
+          width: '100%',
+          border: 'none',
+          outline: 'none',
+          background: 'transparent',
+          color: colors.text,
+          fontSize: 15,
+          fontWeight: 700,
+        }}
+      />
+    </div>
+  );
+}
+
+function badgeStyle(colors) {
+  return {
+    color: colors.muted,
+    fontSize: 11,
+    lineHeight: '14px',
+    fontWeight: 400,
+  };
 }

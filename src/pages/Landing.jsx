@@ -2,8 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { Bot, Snowflake, Sparkles } from 'lucide-react';
+import useThemeColors, { alpha } from '../utils/useThemeColors';
 
-function FlaskIcon({ color = '#E4B94F', size = 21 }) {
+function FlaskIcon({ color, size = 21 }) {
   return (
     <svg
       width={size}
@@ -23,6 +24,7 @@ function FlaskIcon({ color = '#E4B94F', size = 21 }) {
 
 export default function Landing() {
   const { setScreen, setOnboardingStep } = useStore();
+  const { colors } = useThemeColors();
 
   const handleStart = () => {
     setOnboardingStep(0);
@@ -35,17 +37,17 @@ export default function Landing() {
 
   const features = [
     {
-      icon: <FlaskIcon />,
+      icon: <FlaskIcon color={colors.gold} />,
       title: '6 Frascos',
       desc: 'Método de gestão financeira comprovado',
     },
     {
-      icon: <Bot size={21} color="#E4B94F" />,
+      icon: <Bot size={21} color={colors.gold} />,
       title: 'AI Coach',
       desc: 'Treinador pessoal com 2 personalidades',
     },
     {
-      icon: <Snowflake size={21} color="#E4B94F" />,
+      icon: <Snowflake size={21} color={colors.gold} />,
       title: 'Snowball',
       desc: 'Método bola de neve para eliminar dívidas',
     },
@@ -56,8 +58,7 @@ export default function Landing() {
       style={{
         minHeight: '100dvh',
         width: '100%',
-        background:
-          'radial-gradient(circle at 50% 0%, rgba(228,185,79,0.06) 0%, rgba(7,7,12,0) 38%), #07070C',
+        background: `radial-gradient(circle at 50% 0%, ${alpha(colors.gold, 0.06)} 0%, transparent 38%), ${colors.background}`,
         display: 'flex',
         justifyContent: 'center',
         overflowY: 'auto',
@@ -100,7 +101,7 @@ export default function Landing() {
               lineHeight: '38px',
               fontWeight: 800,
               letterSpacing: '-0.7px',
-              color: '#E4B94F',
+              color: colors.gold,
             }}
           >
             PoupPT
@@ -112,7 +113,7 @@ export default function Landing() {
               fontSize: 13,
               lineHeight: '18px',
               fontWeight: 400,
-              color: '#A8A4D6',
+              color: colors.muted,
             }}
           >
             O teu treinador financeiro pessoal
@@ -139,7 +140,7 @@ export default function Landing() {
               fontSize: 20,
               lineHeight: '24px',
               fontWeight: 800,
-              color: '#FFFFFF',
+              color: colors.text,
               letterSpacing: '-0.35px',
             }}
           >
@@ -167,7 +168,7 @@ export default function Landing() {
                     width: 41,
                     height: 41,
                     borderRadius: 13,
-                    background: 'rgba(228,185,79,0.13)',
+                    background: alpha(colors.gold, 0.13),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -189,7 +190,7 @@ export default function Landing() {
                       fontSize: 14,
                       lineHeight: '17px',
                       fontWeight: 800,
-                      color: '#FFFFFF',
+                      color: colors.text,
                     }}
                   >
                     {feature.title}
@@ -201,7 +202,7 @@ export default function Landing() {
                       fontSize: 12,
                       lineHeight: '16px',
                       fontWeight: 400,
-                      color: '#A8A4D6',
+                      color: colors.muted,
                     }}
                   >
                     {feature.desc}
@@ -232,8 +233,8 @@ export default function Landing() {
               height: 55,
               border: 'none',
               borderRadius: 14,
-              background: 'linear-gradient(135deg, #DFAF3C 0%, #F5D77B 100%)',
-              color: '#000000',
+              background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
+              color: colors.inverse,
               fontSize: 15,
               fontWeight: 800,
               display: 'flex',
@@ -241,7 +242,7 @@ export default function Landing() {
               justifyContent: 'center',
               gap: 8,
               cursor: 'pointer',
-              boxShadow: '0 8px 26px rgba(228,185,79,0.18)',
+              boxShadow: `0 8px 26px ${alpha(colors.gold, 0.18)}`,
             }}
           >
             <Sparkles size={17} strokeWidth={2.4} />
@@ -256,8 +257,8 @@ export default function Landing() {
               height: 46,
               borderRadius: 15,
               background: 'transparent',
-              border: '1px solid rgba(228,185,79,0.58)',
-              color: '#E4B94F',
+              border: `1px solid ${alpha(colors.gold, 0.58)}`,
+              color: colors.gold,
               fontSize: 13,
               fontWeight: 800,
               cursor: 'pointer',
@@ -287,7 +288,7 @@ export default function Landing() {
                 fontSize: 11,
                 lineHeight: '14px',
                 fontWeight: 400,
-                color: '#A8A4D6',
+                color: colors.muted,
                 whiteSpace: 'nowrap',
               }}
             >
@@ -306,43 +307,32 @@ export default function Landing() {
             width: '100%',
           }}
         >
-          <div
-            style={{
-              height: 34,
-              padding: '0 14px',
-              borderRadius: 9,
-              background: 'rgba(42,39,78,0.72)',
-              border: '1px solid rgba(255,255,255,0.09)',
-              color: '#A8A4D6',
-              fontSize: 12,
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-            }}
-          >
-            🍎 App Store
-          </div>
-
-          <div
-            style={{
-              height: 34,
-              padding: '0 14px',
-              borderRadius: 9,
-              background: 'rgba(42,39,78,0.72)',
-              border: '1px solid rgba(255,255,255,0.09)',
-              color: '#A8A4D6',
-              fontSize: 12,
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-            }}
-          >
-            ▶️ Google Play
-          </div>
+          <StoreBadge colors={colors}>🍎 App Store</StoreBadge>
+          <StoreBadge colors={colors}>▶️ Google Play</StoreBadge>
         </section>
       </main>
+    </div>
+  );
+}
+
+function StoreBadge({ children, colors }) {
+  return (
+    <div
+      style={{
+        height: 34,
+        padding: '0 14px',
+        borderRadius: 9,
+        background: colors.surface,
+        border: `1px solid ${colors.border}`,
+        color: colors.muted,
+        fontSize: 12,
+        fontWeight: 500,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 5,
+      }}
+    >
+      {children}
     </div>
   );
 }

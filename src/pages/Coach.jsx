@@ -1,195 +1,415 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { themes } from '../themes';
 import { Send, Trash2, Sparkles, Bot } from 'lucide-react';
+import useThemeColors, { alpha } from '../utils/useThemeColors';
 
 export default function Coach() {
-  const { mockUser, chatMessages, addChatMessage, getModeColor } = useStore();
-  const theme = themes.darkGold;
+  const { mockUser, chatMessages, addChatMessage } = useStore();
+  const { colors } = useThemeColors();
+
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState(false);
+
   const messagesEndRef = useRef(null);
+
+  const coachName = mockUser?.coachMode === 'sargento' ? 'Sargento' : 'Amigável';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatMessages, typing]);
+
   const handleSend = async () => {
     if (!input.trim() || sending) return;
 
-    const userMessage = { role: 'user', content: input.trim(), timestamp: new Date() };
-    addChatMessage(userMessage);
+    const message = input.trim();
+
+    addChatMessage({
+      role: 'user',
+      content: message,
+      timestamp: new Date(),
+    });
+
     setInput('');
     setSending(true);
     setTyping(true);
 
-    // Simulate AI coach response (mock)
     setTimeout(() => {
       const isSargento = mockUser?.coachMode === 'sargento';
+
       const responses = isSargento
         ? [
-            'Soldado! Cada euro conta na guerra contra as dividas. Corta o desnecessario e foca!',
-            'A disciplina financeira nao e opcional, e obrigacao! Mais esforco!',
-            'Verifica as tuas dividas — a WiZink precisa de atencao imediata!',
-            'Se poupares 5 EUR por dia, sao 150 EUR por mes. Isso paga uma divida!',
+            'Cada euro conta. Corta o que não é essencial e foca-te no próximo pagamento.',
+            'Disciplina financeira primeiro. Revê as despesas pequenas antes de pensares nas grandes.',
+            'Atenção às dívidas ativas. Começa pela mais pequena e mantém consistência.',
+            'Se poupares 5€ por dia, no fim do mês tens cerca de 150€ para atacar uma dívida.',
           ]
         : [
-            'Vais conseguir! Cada passo conta, mesmo os pequenos.',
-            'Ja fizeste progresso incrivel! Continua assim!',
-            'Lembra-te: poupar nao e privacao, e investimento no teu futuro.',
-            'Que tal definires uma meta pequena para esta semana? Vais sentir-te otimo ao cumpri-la!',
+            'Vais no caminho certo. Pequenas decisões repetidas todos os dias mudam o teu mês.',
+            'Já fizeste progresso. Agora mantém o foco numa meta simples e realista.',
+            'Poupar não é castigo. É criar margem para viver com menos pressão.',
+            'Define uma meta pequena para esta semana e acompanha todos os gastos.',
           ];
+
       const reply = responses[Math.floor(Math.random() * responses.length)];
+
       addChatMessage({
         role: 'assistant',
         content: reply,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
+
       setSending(false);
       setTyping(false);
-      setTimeout(scrollToBottom, 100);
-    }, 1500);
+    }, 1200);
   };
 
   const handleClear = () => {
     useStore.setState({ chatMessages: [] });
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       handleSend();
     }
   };
 
-  const modeColor = getModeColor();
-  const coachName = mockUser?.coachMode === 'sargento' ? 'Sargento' : 'Amigavel';
-
   return (
-    <div className="flex flex-col" style={{ minHeight: '100%', background: theme.background }}>
-      {/* Coach Header */}
-      <div
-        className="px-4 py-3 flex items-center justify-between shrink-0"
-        style={{ borderBottom: `1px solid ${theme.border}` }}
+    <div
+      style={{
+        minHeight: '100%',
+        width: '100%',
+        background: colors.background,
+        display: 'flex',
+        justifyContent: 'center',
+      }}
+    >
+      <motion.main
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        style={{
+          width: '100%',
+          maxWidth: 361,
+          minHeight: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
-        <div className="flex items-center gap-3">
+        <header
+          style={{
+            padding: '15px 15px 14px',
+            borderBottom: `1px solid ${colors.border}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+          }}
+        >
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(255,215,0,0.1)' }}
-          >
-            <Bot size={20} style={{ color: theme.primary }} />
-          </div>
-          <div>
-            <p className="text-sm font-bold" style={{ color: theme.text }}>
-              {coachName}
-            </p>
-            <p className="text-xs" style={{ color: theme.primary }}>
-              O teu alter ego financeiro
-            </p>
-          </div>
-        </div>
-        <button onClick={handleClear} className="p-2 rounded-lg" style={{ color: theme.textMuted }}>
-          <Trash2 size={16} />
-        </button>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto poupt-scroll px-4 py-4 space-y-3">
-        {chatMessages.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-8"
-          >
-            <div
-              className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
-              style={{ background: 'rgba(255,215,0,0.08)' }}
-            >
-              <Sparkles size={28} style={{ color: theme.primary }} />
-            </div>
-            <h3 className="text-base font-bold mb-2" style={{ color: theme.text }}>
-              Ola, {mockUser?.name || 'amigo'}!
-            </h3>
-            <p className="text-sm max-w-xs mx-auto" style={{ color: theme.textMuted }}>
-              Eu sou o {coachName}, o teu alter ego financeiro.
-              Pergunta-me qualquer coisa sobre as tuas financas.
-            </p>
-          </motion.div>
-        )}
-
-        {chatMessages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`max-w-[85%] px-4 py-3 rounded-2xl ${
-                msg.role === 'user' ? 'rounded-br-sm' : 'rounded-bl-sm'
-              }`}
-              style={{
-                background: msg.role === 'user'
-                  ? `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`
-                  : theme.surface,
-                color: msg.role === 'user' ? '#000' : theme.text,
-                border: msg.role === 'assistant' ? `1px solid ${theme.border}` : 'none',
-              }}
-            >
-              {msg.role === 'assistant' && (
-                <p className="text-[10px] font-bold mb-1" style={{ color: theme.primary }}>
-                  {coachName}
-                </p>
-              )}
-              <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-            </div>
-          </div>
-        ))}
-
-        {typing && (
-          <div className="flex justify-start">
-            <div
-              className="px-4 py-3 rounded-2xl rounded-bl-sm"
-              style={{ background: theme.surface, border: `1px solid ${theme.border}` }}
-            >
-              <div className="flex gap-1.5">
-                <div className="w-2 h-2 rounded-full typing-dot" style={{ background: theme.primary }} />
-                <div className="w-2 h-2 rounded-full typing-dot" style={{ background: theme.primary }} />
-                <div className="w-2 h-2 rounded-full typing-dot" style={{ background: theme.primary }} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input */}
-      <div
-        className="px-4 py-3 shrink-0"
-        style={{ borderTop: `1px solid ${theme.border}` }}
-      >
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={`Pergunta ao ${coachName}...`}
-            className="input-field flex-1"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || sending}
-            className="w-12 h-12 rounded-xl flex items-center justify-center disabled:opacity-40 shrink-0"
             style={{
-              background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
             }}
           >
-            <Send size={18} color="#000" />
+            <div
+              style={{
+                width: 43,
+                height: 43,
+                borderRadius: 14,
+                background: alpha(colors.gold, 0.12),
+                border: `1px solid ${alpha(colors.gold, 0.18)}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Bot size={22} color={colors.gold} />
+            </div>
+
+            <div>
+              <h1
+                style={{
+                  margin: 0,
+                  color: colors.text,
+                  fontSize: 16,
+                  lineHeight: '20px',
+                  fontWeight: 900,
+                }}
+              >
+                {coachName}
+              </h1>
+
+              <p
+                style={{
+                  margin: '2px 0 0',
+                  color: colors.gold,
+                  fontSize: 12,
+                  lineHeight: '15px',
+                  fontWeight: 700,
+                }}
+              >
+                O teu alter ego financeiro
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleClear}
+            style={{
+              width: 38,
+              height: 38,
+              border: 'none',
+              borderRadius: 12,
+              background: colors.surface,
+              color: colors.muted,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <Trash2 size={17} />
           </button>
-        </div>
-        <p className="text-[10px] mt-1.5 text-center" style={{ color: theme.textMuted }}>
-          {mockUser?.plan === 'premium' ? 'Mensagens ilimitadas' : '3 mensagens/dia (gratuito)'}
-        </p>
-      </div>
+        </header>
+
+        <section
+          style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '16px 15px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
+          {chatMessages.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              style={{
+                paddingTop: 48,
+                textAlign: 'center',
+              }}
+            >
+              <div
+                style={{
+                  width: 67,
+                  height: 67,
+                  margin: '0 auto 16px',
+                  borderRadius: 20,
+                  background: alpha(colors.gold, 0.1),
+                  border: `1px solid ${alpha(colors.gold, 0.16)}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Sparkles size={30} color={colors.gold} />
+              </div>
+
+              <h2
+                style={{
+                  margin: 0,
+                  color: colors.text,
+                  fontSize: 21,
+                  lineHeight: '26px',
+                  fontWeight: 900,
+                  letterSpacing: '-0.4px',
+                }}
+              >
+                Olá, {mockUser?.name || 'amigo'}!
+              </h2>
+
+              <p
+                style={{
+                  maxWidth: 282,
+                  margin: '9px auto 0',
+                  color: colors.muted,
+                  fontSize: 14,
+                  lineHeight: '20px',
+                  fontWeight: 500,
+                }}
+              >
+                Eu sou o {coachName}, o teu treinador financeiro. Pergunta-me
+                qualquer coisa sobre as tuas finanças.
+              </p>
+            </motion.div>
+          )}
+
+          {chatMessages.map((message, index) => {
+            const isUser = message.role === 'user';
+
+            return (
+              <div
+                key={`${message.timestamp}-${index}`}
+                style={{
+                  display: 'flex',
+                  justifyContent: isUser ? 'flex-end' : 'flex-start',
+                }}
+              >
+                <div
+                  style={{
+                    maxWidth: '84%',
+                    padding: '12px 14px',
+                    borderRadius: isUser
+                      ? '17px 17px 5px 17px'
+                      : '17px 17px 17px 5px',
+                    background: isUser
+                      ? `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`
+                      : colors.surface,
+                    border: isUser ? 'none' : `1.5px solid ${colors.border}`,
+                    color: isUser ? colors.inverse : colors.text,
+                    boxShadow: isUser
+                      ? `0 8px 22px ${alpha(colors.gold, 0.16)}`
+                      : 'none',
+                  }}
+                >
+                  {!isUser && (
+                    <p
+                      style={{
+                        margin: '0 0 5px',
+                        color: colors.gold,
+                        fontSize: 10,
+                        lineHeight: '13px',
+                        fontWeight: 900,
+                      }}
+                    >
+                      {coachName}
+                    </p>
+                  )}
+
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 14,
+                      lineHeight: '20px',
+                      fontWeight: 600,
+                      whiteSpace: 'pre-wrap',
+                    }}
+                  >
+                    {message.content}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+
+          {typing && (
+            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+              <div
+                style={{
+                  padding: '13px 15px',
+                  borderRadius: '17px 17px 17px 5px',
+                  background: colors.surface,
+                  border: `1.5px solid ${colors.border}`,
+                }}
+              >
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <span className="typing-dot" style={typingDotStyle(colors)} />
+                  <span className="typing-dot" style={typingDotStyle(colors)} />
+                  <span className="typing-dot" style={typingDotStyle(colors)} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </section>
+
+        <footer
+          style={{
+            padding: '12px 15px 14px',
+            borderTop: `1px solid ${colors.border}`,
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              gap: 9,
+              alignItems: 'center',
+            }}
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={`Pergunta ao ${coachName}...`}
+              style={{
+                flex: 1,
+                height: 51,
+                borderRadius: 15,
+                border: `1.5px solid ${colors.border}`,
+                background: colors.surface,
+                color: colors.text,
+                padding: '0 15px',
+                fontSize: 14,
+                fontWeight: 700,
+                outline: 'none',
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={!input.trim() || sending}
+              style={{
+                width: 51,
+                height: 51,
+                borderRadius: 15,
+                border: 'none',
+                background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
+                color: colors.inverse,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: !input.trim() || sending ? 'not-allowed' : 'pointer',
+                opacity: !input.trim() || sending ? 0.45 : 1,
+                boxShadow: `0 10px 26px ${alpha(colors.gold, 0.18)}`,
+              }}
+            >
+              <Send size={19} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          <p
+            style={{
+              margin: '7px 0 0',
+              color: colors.muted,
+              fontSize: 10,
+              lineHeight: '13px',
+              fontWeight: 500,
+              textAlign: 'center',
+            }}
+          >
+            {mockUser?.plan === 'premium'
+              ? 'Mensagens ilimitadas'
+              : '3 mensagens/dia no plano gratuito'}
+          </p>
+        </footer>
+      </motion.main>
     </div>
   );
+}
+
+function typingDotStyle(colors) {
+  return {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    background: colors.gold,
+    display: 'block',
+  };
 }

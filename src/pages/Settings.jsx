@@ -1,218 +1,293 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import useStore from '../store/useStore';
-import { themes, themeKeys } from '../themes';
-import {
-  Palette, Bell, LogOut, Info, ChevronRight,
-  MessageSquare, Sparkles, Crown, Check, Shield, Globe, Lock
-} from 'lucide-react';
+import { create } from 'zustand';
 
-const coachModes = [
-  { id: 'sargento', label: 'Sargento', desc: 'Firme e direto' },
-  { id: 'amigavel', label: 'Amigavel', desc: 'Acolhedor e motivador' },
+const mockUser = {
+  name: 'Ana Silva',
+  email: 'ana.silva@email.pt',
+  avatar: '\u{1F469}',
+  income: 1100,
+  poupMoedas: 145,
+  streak: 12,
+  level: 5,
+  xp: 340,
+  trophies: ['first_savings', 'week_streak', 'debt_warrior', 'jar_master'],
+  plan: 'free',
+  coachMode: 'sargento',
+};
+
+const mockJars = [
+  { name: 'Necessidades', percentage: 50, allocated: 550, spent: 487, icon: '\u{1F3E0}', color: '#FF6B6B' },
+  { name: 'Liberdade Financeira', percentage: 10, allocated: 110, spent: 45, icon: '\u{1F3E6}', color: '#4ECDC4' },
+  { name: 'Poupança Longo Prazo', percentage: 10, allocated: 110, spent: 0, icon: '\u{1F3DB}\u{FE0F}', color: '#45B7D1' },
+  { name: 'Educação', percentage: 10, allocated: 110, spent: 29, icon: '\u{1F4DA}', color: '#96CEB4' },
+  { name: 'Lazer', percentage: 10, allocated: 110, spent: 78, icon: '\u{1F3AE}', color: '#FFEAA7' },
+  { name: 'Ofertas', percentage: 5, allocated: 55, spent: 15, icon: '\u{1F381}', color: '#DDA0DD' },
 ];
 
-export default function Settings() {
-  const theme = themes.darkGold;
-  const { user, updateUser, logout, setScreen } = useStore();
-  const [selectedTheme, setSelectedTheme] = useState('darkGold');
-  const [coachMode, setCoachMode] = useState(user?.coachMode || 'sargento');
-  const [notifications, setNotifications] = useState(true);
-  const [saveSuccess, setSaveSuccess] = useState(null);
+const mockDebts = [
+  { name: 'WiZink Cartão', total: 3200, remaining: 2847, monthlyPayment: 85, interestRate: 21.9, creditor: 'WiZink', daysOverdue: 62 },
+  { name: 'Intrum - Telecom', total: 487, remaining: 487, monthlyPayment: 0, interestRate: 0, creditor: 'Intrum', daysOverdue: 120 },
+  { name: 'Cofidis Pessoal', total: 4500, remaining: 3890, monthlyPayment: 135, interestRate: 12.5, creditor: 'Cofidis', daysOverdue: 0 },
+  { name: 'Renda em atraso', total: 1100, remaining: 550, monthlyPayment: 550, interestRate: 0, creditor: 'Senhorio', daysOverdue: 15 },
+];
 
-  const s = (color, alpha) => `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+const mockTransactions = [
+  { id: '1', description: 'Salário', amount: 1100, category: 'Salário', jar: 'Necessidades', date: '2026-05-01', type: 'income' },
+  { id: '2', description: 'Renda', amount: -550, category: 'Habitação', jar: 'Necessidades', date: '2026-05-02', type: 'expense' },
+  { id: '3', description: 'Lidl Compras', amount: -67.3, category: 'Supermercado', jar: 'Necessidades', date: '2026-05-03', type: 'expense' },
+  { id: '4', description: 'WiZink Mensalidade', amount: -85, category: 'Dívida', jar: 'Liberdade Financeira', date: '2026-05-04', type: 'expense' },
+  { id: '5', description: 'Cofidis Mensalidade', amount: -135, category: 'Dívida', jar: 'Liberdade Financeira', date: '2026-05-04', type: 'expense' },
+  { id: '6', description: 'Uber', amount: -12.5, category: 'Transportes', jar: 'Necessidades', date: '2026-05-05', type: 'expense' },
+  { id: '7', description: 'Udemy Curso', amount: -29, category: 'Educação', jar: 'Educação', date: '2026-05-06', type: 'expense' },
+  { id: '8', description: 'Netflix', amount: -7.99, category: 'Subscrição', jar: 'Lazer', date: '2026-05-07', type: 'expense' },
+  { id: '9', description: 'Farmácia', amount: -18.4, category: 'Saúde', jar: 'Necessidades', date: '2026-05-08', type: 'expense' },
+  { id: '10', description: 'Pingo Doce', amount: -43.2, category: 'Supermercado', jar: 'Necessidades', date: '2026-05-09', type: 'expense' },
+];
 
-  const showSuccess = (msg) => {
-    setSaveSuccess(msg);
-    setTimeout(() => setSaveSuccess(null), 2000);
-  };
+const mockNotifications = [
+  { id: '1', title: '⚠️ Conta no negativo', message: 'O teu saldo bancário está -€180. Ativa o Modo Sobrevivência.', type: 'alert', read: false, date: '2026-05-10' },
+  { id: '2', title: '🏆 Novo Troféu', message: 'Conseguiste o troféu "Guerreiro de Dívidas" — pagaste 3 dívidas este mês.', type: 'achievement', read: false, date: '2026-05-09' },
+  { id: '3', title: '📅 Lembrete', message: 'A mensalidade da WiZink vence amanhã. Tens €85 disponíveis?', type: 'reminder', read: true, date: '2026-05-08' },
+  { id: '4', title: '💡 Dica do Sargento', message: 'Se cortares 1 café por dia, poupas €30/mês. Isso é €360/ano.', type: 'tip', read: true, date: '2026-05-07' },
+];
 
-  const Toggle = ({ isOn, onToggle }) => (
-    <button onClick={onToggle} style={{
-      width: 44, height: 24, borderRadius: 20, position: 'relative',
-      transition: 'background 0.2s', background: isOn ? theme.primary : theme.border,
-      border: 'none', cursor: 'pointer', flexShrink: 0
-    }}>
-      <div style={{
-        width: 20, height: 20, borderRadius: '50%', background: '#fff',
-        position: 'absolute', top: 2, transition: 'left 0.2s',
-        left: isOn ? 22 : 2
-      }} />
-    </button>
-  );
+const mockCoachMessages = [
+  {
+    id: '1',
+    role: 'coach',
+    content: 'Bom dia, Soldado Silva. O teu relatório diário: ontem gastaste €67 no Lidl e €12 no Uber. Ainda estás dentro do orçamento de Necessidades, mas apertado. A WiZink vence em 3 dias.',
+    timestamp: '2026-05-10T08:00:00',
+  },
+  {
+    id: '2',
+    role: 'coach',
+    content: 'Dica: se cancelares a Netflix (€7.99) e usares o RTP Play, aplicas esses €8 na dívida do Intrum.',
+    timestamp: '2026-05-10T08:01:00',
+  },
+];
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16, overflowX: 'hidden' }}
-    >
-      {/* Success Toast */}
-      {saveSuccess && (
-        <div style={{
-          padding: 12, borderRadius: 12, fontSize: 12, fontWeight: 500, textAlign: 'center',
-          background: s('#10B981', 0.15), color: '#10B981'
-        }}>
-          <Check size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} /> {saveSuccess}
-        </div>
-      )}
+const useStore = create((set, get) => ({
+  user: null,
+  token: null,
+  isAuthenticated: false,
 
-      {/* Theme Selector */}
-      <div className="glass-card" style={{ padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Palette size={16} style={{ color: theme.primary }} />
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Tema</h3>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-          {themeKeys.map(key => {
-            const t = themes[key];
-            const isActive = selectedTheme === key;
-            return (
-              <button key={key} onClick={() => { setSelectedTheme(key); showSuccess('Tema alterado!'); }} style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: 8,
-                borderRadius: 12, transition: 'all 0.2s', cursor: 'pointer',
-                background: isActive ? s(t.primary, 0.1) : 'transparent',
-                border: isActive ? `1px solid ${t.primary}` : '1px solid transparent'
-              }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: '50%', position: 'relative',
-                  background: `linear-gradient(135deg, ${t.primary}, ${t.background})`,
-                  border: key === 'arcticWhite' ? '1px solid #CBD5E1' : 'none',
-                  boxShadow: isActive ? `0 0 12px ${s(t.primary, 0.5)}` : 'none'
-                }}>
-                  {isActive && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Check size={12} color="#fff" />
-                    </div>
-                  )}
-                </div>
-                <span style={{ fontSize: 10, fontWeight: 500, color: isActive ? t.primary : theme.textMuted, textAlign: 'center', lineHeight: 1.2 }}>
-                  {t.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+  currentScreen: 'landing',
+  currentTheme: localStorage.getItem('poupt_theme') || 'darkGold',
+  menuOpen: false,
+  isLoading: false,
 
-      {/* Coach Mode */}
-      <div className="glass-card" style={{ padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Sparkles size={16} style={{ color: theme.primary }} />
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Modo do Coach</h3>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-          {coachModes.map(mode => (
-            <button key={mode.id} onClick={() => { setCoachMode(mode.id); updateUser({ coachMode: mode.id }); showSuccess('Coach actualizado!'); }} style={{
-              padding: 12, borderRadius: 12, textAlign: 'left', cursor: 'pointer',
-              background: coachMode === mode.id ? s(theme.primary, 0.15) : theme.surface,
-              border: coachMode === mode.id ? `1px solid ${theme.primary}` : `1px solid ${theme.border}`
-            }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: coachMode === mode.id ? theme.primary : theme.text, margin: 0 }}>
-                {mode.label}
-              </p>
-              <p style={{ fontSize: 10, color: theme.textMuted, margin: '4px 0 0' }}>{mode.desc}</p>
-            </button>
-          ))}
-        </div>
-      </div>
+  onboardingComplete: false,
+  onboardingStep: 0,
+  onboardingData: {
+    name: '',
+    income: 1100,
+    hasDebts: true,
+    coachMode: 'sargento',
+    avatar: '\u{1F469}',
+  },
 
-      {/* Notifications */}
-      <div className="glass-card" style={{ padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Bell size={16} style={{ color: theme.primary }} />
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Notificacoes</h3>
-        </div>
-        {[
-          { label: 'Alertas de dividas', desc: 'Avisos de pagamentos proximos' },
-          { label: 'Dicas do Coach', desc: 'Sugestoes e motivacao' },
-          { label: 'Relatorios semanais', desc: 'Resumo semanal das financas' },
-        ].map(item => (
-          <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0' }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 12, display: 'flex',
-              alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              background: notifications ? s(theme.primary, 0.15) : theme.surface
-            }}>
-              <MessageSquare size={14} style={{ color: notifications ? theme.primary : theme.textMuted }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 13, fontWeight: 500, color: theme.text, margin: 0 }}>{item.label}</p>
-              <p style={{ fontSize: 10, color: theme.textMuted, margin: 0 }}>{item.desc}</p>
-            </div>
-            <Toggle isOn={notifications} onToggle={() => { setNotifications(!notifications); showSuccess('Notificacoes actualizadas!'); }} />
-          </div>
-        ))}
-      </div>
+  mockUser,
+  jars: mockJars,
+  debts: mockDebts,
+  transactions: mockTransactions,
+  notifications: mockNotifications,
+  coachMessages: mockCoachMessages,
+  chatMessages: [],
+  goals: [],
 
-      {/* Language */}
-      <div className="glass-card" style={{ padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Globe size={16} style={{ color: theme.primary }} />
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Idioma</h3>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-          {[
-            { code: 'pt', label: 'Portugues' },
-            { code: 'en', label: 'English' },
-            { code: 'es', label: 'Espanol' },
-          ].map(lang => (
-            <button key={lang.code} style={{
-              padding: '10px 0', borderRadius: 12, fontSize: 12, fontWeight: 500, textAlign: 'center', cursor: 'pointer',
-              background: lang.code === 'pt' ? s(theme.primary, 0.15) : theme.surface,
-              color: lang.code === 'pt' ? theme.primary : theme.textMuted,
-              border: lang.code === 'pt' ? `1px solid ${theme.primary}` : `1px solid ${theme.border}`
-            }}>
-              {lang.label}
-            </button>
-          ))}
-        </div>
-      </div>
+  getModeColor: () => {
+    const modeColors = {
+      sobrevivencia: '#EF4444',
+      recuperacao: '#F97316',
+      estabilidade: '#F59E0B',
+      crescimento: '#10B981',
+      prosperidade: '#D4A843',
+    };
 
-      {/* Premium Upsell */}
-      <div style={{
-        padding: 16, borderRadius: 16,
-        background: `linear-gradient(135deg, ${s(theme.primary, 0.15)}, ${s(theme.primary, 0.05)})`,
-        border: `1px solid ${s(theme.primary, 0.3)}`
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Crown size={20} style={{ color: theme.primary }} />
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 13, fontWeight: 700, color: theme.primary, margin: 0 }}>Premium</p>
-            <p style={{ fontSize: 11, color: theme.textMuted, margin: 0 }}>Temas exclusivos, coach avancado, relatorios completos</p>
-          </div>
-          <ChevronRight size={16} style={{ color: theme.primary }} />
-        </div>
-      </div>
+    const user = get().user;
+    return modeColors[user?.financialMode] || modeColors.sobrevivencia;
+  },
 
-      {/* About */}
-      <div className="glass-card" style={{ padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Info size={16} style={{ color: theme.primary }} />
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Sobre o PoupPT</h3>
-        </div>
-        {[
-          { label: 'Versao', value: '1.3.0' },
-          { label: 'Ambiente', value: 'Producao' },
-          { label: 'Licenca', value: 'Pessoal' },
-        ].map(row => (
-          <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-            <span style={{ fontSize: 13, color: theme.textMuted }}>{row.label}</span>
-            <span style={{ fontSize: 13, fontWeight: 500, color: theme.text }}>{row.value}</span>
-          </div>
-        ))}
-      </div>
+  getModeLabel: () => {
+    const modeLabels = {
+      sobrevivencia: 'Sobrevivência',
+      recuperacao: 'Recuperação',
+      estabilidade: 'Estabilidade',
+      crescimento: 'Crescimento',
+      prosperidade: 'Prosperidade',
+    };
 
-      {/* Logout */}
-      <button onClick={() => { logout(); }} style={{
-        width: '100%', padding: 14, borderRadius: 12, fontSize: 13, fontWeight: 500,
-        background: s('#EF4444', 0.1), color: '#EF4444',
-        border: `1px solid ${s('#EF4444', 0.3)}`, cursor: 'pointer',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
-      }}>
-        <LogOut size={14} /> Terminar Sessao
-      </button>
-    </motion.div>
-  );
-}
+    const user = get().user;
+    return modeLabels[user?.financialMode] || 'Sobrevivência';
+  },
+
+  login: (user, token) => {
+    localStorage.setItem('poupt_token', token);
+    localStorage.setItem('poupt_user', JSON.stringify(user));
+
+    set({
+      user,
+      token,
+      isAuthenticated: true,
+      currentScreen: user.onboardingComplete ? 'dashboard' : 'onboarding',
+    });
+  },
+
+  logout: () => {
+    localStorage.removeItem('poupt_token');
+    localStorage.removeItem('poupt_user');
+
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      currentScreen: 'landing',
+      onboardingComplete: false,
+      onboardingStep: 0,
+    });
+  },
+
+  updateUser: (data) => {
+    const updated = { ...get().user, ...data };
+    localStorage.setItem('poupt_user', JSON.stringify(updated));
+    set({ user: updated });
+  },
+
+  setScreen: (screen) => set({ currentScreen: screen, menuOpen: false }),
+
+  setTheme: (theme) => {
+    localStorage.setItem('poupt_theme', theme);
+    set({ currentTheme: theme });
+  },
+
+  setMenuOpen: (value) => set({ menuOpen: value }),
+
+  setOnboardingComplete: (value) => {
+    const user = get().user;
+
+    if (user) {
+      const updatedUser = { ...user, onboardingComplete: value };
+      localStorage.setItem('poupt_user', JSON.stringify(updatedUser));
+
+      set({
+        onboardingComplete: value,
+        user: updatedUser,
+      });
+
+      return;
+    }
+
+    set({ onboardingComplete: value });
+  },
+
+  setOnboardingStep: (value) => set({ onboardingStep: value }),
+
+  setOnboardingData: (data) =>
+    set((state) => ({
+      onboardingData: {
+        ...state.onboardingData,
+        ...data,
+      },
+    })),
+
+  setTransactions: (transactions) => set({ transactions }),
+
+  addTransaction: (transaction) =>
+    set((state) => ({
+      transactions: [transaction, ...state.transactions],
+    })),
+
+  setDebts: (debts) => set({ debts }),
+
+  addDebt: (debt) =>
+    set((state) => ({
+      debts: [...state.debts, debt],
+    })),
+
+  setGoals: (goals) => set({ goals }),
+
+  addGoal: (goal) =>
+    set((state) => ({
+      goals: [...state.goals, goal],
+    })),
+
+  setInvestments: (investments) => set({ investments }),
+
+  setNotifications: (notifications) => set({ notifications }),
+
+  setChatMessages: (messages) => set({ chatMessages: messages }),
+
+  addChatMessage: (message) =>
+    set((state) => ({
+      chatMessages: [...state.chatMessages, message],
+    })),
+
+  setLoading: (isLoading) => set({ isLoading }),
+
+  addPoupMoedas: (amount) =>
+    set((state) => ({
+      mockUser: {
+        ...state.mockUser,
+        poupMoedas: state.mockUser.poupMoedas + amount,
+      },
+    })),
+
+  spendPoupMoedas: (amount) => {
+    const state = get();
+
+    if (state.mockUser.poupMoedas >= amount) {
+      set((current) => ({
+        mockUser: {
+          ...current.mockUser,
+          poupMoedas: current.mockUser.poupMoedas - amount,
+        },
+      }));
+
+      return true;
+    }
+
+    return false;
+  },
+
+  addCoachMessage: (message) =>
+    set((state) => ({
+      coachMessages: [...state.coachMessages, message],
+    })),
+
+  markNotificationRead: (id) =>
+    set((state) => ({
+      notifications: state.notifications.map((notification) =>
+        notification.id === id
+          ? { ...notification, read: true }
+          : notification
+      ),
+    })),
+
+  restoreSession: () => {
+    const savedTheme = localStorage.getItem('poupt_theme');
+
+    if (savedTheme) {
+      set({ currentTheme: savedTheme });
+    }
+
+    const token = localStorage.getItem('poupt_token');
+    const userStr = localStorage.getItem('poupt_user');
+
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+          currentScreen: user.onboardingComplete ? 'dashboard' : 'onboarding',
+        });
+      } catch {
+        localStorage.removeItem('poupt_token');
+        localStorage.removeItem('poupt_user');
+      }
+    }
+  },
+}));
+
+export default useStore;

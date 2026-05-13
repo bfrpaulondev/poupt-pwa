@@ -2,20 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { Mail, Lock, ArrowLeft, ArrowRight } from 'lucide-react';
-
-const colors = {
-  background: '#07070C',
-  gold: '#E4B94F',
-  goldLight: '#F4D77B',
-  text: '#FFFFFF',
-  muted: '#AAA6D8',
-  surface: '#18172E',
-  border: '#2F2D55',
-  danger: '#EF4444',
-};
+import useThemeColors, { alpha } from '../utils/useThemeColors';
 
 export default function Login() {
   const { setScreen, login } = useStore();
+  const { colors } = useThemeColors();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,9 +30,7 @@ export default function Login() {
         financialMode: 'sobrevivencia',
       };
 
-      const mockToken = 'mock-token-123';
-
-      login(mockUser, mockToken);
+      login(mockUser, 'mock-token-123');
     } catch {
       setError('Erro ao entrar. Tenta novamente.');
     } finally {
@@ -54,8 +43,7 @@ export default function Login() {
       style={{
         minHeight: '100dvh',
         width: '100%',
-        background:
-          'radial-gradient(circle at 50% 0%, rgba(228,185,79,0.06) 0%, rgba(7,7,12,0) 38%), #07070C',
+        background: `radial-gradient(circle at 50% 0%, ${alpha(colors.gold, 0.06)} 0%, transparent 38%), ${colors.background}`,
         display: 'flex',
         justifyContent: 'center',
         overflowY: 'auto',
@@ -153,24 +141,26 @@ export default function Login() {
             icon={<Mail size={18} />}
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
             placeholder="Email"
             autoComplete="email"
+            colors={colors}
           />
 
           <Field
             icon={<Lock size={18} />}
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
             placeholder="Palavra-passe"
             autoComplete="current-password"
+            colors={colors}
           />
 
           {error && (
             <p
               style={{
-                margin: '0',
+                margin: 0,
                 color: colors.danger,
                 fontSize: 12,
                 lineHeight: '16px',
@@ -193,7 +183,7 @@ export default function Login() {
               border: 'none',
               borderRadius: 29,
               background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
-              color: '#000000',
+              color: colors.inverse,
               fontSize: 16,
               fontWeight: 900,
               display: 'flex',
@@ -202,7 +192,7 @@ export default function Login() {
               gap: 8,
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.65 : 1,
-              boxShadow: '0 12px 32px rgba(228,185,79,0.22)',
+              boxShadow: `0 12px 32px ${alpha(colors.gold, 0.22)}`,
             }}
           >
             {loading ? 'A entrar...' : 'Entrar'}
@@ -254,34 +244,15 @@ export default function Login() {
             gap: 19,
           }}
         >
-          <span
-            style={{
-              color: colors.muted,
-              fontSize: 11,
-              lineHeight: '14px',
-              fontWeight: 400,
-            }}
-          >
-            ✓ Gratuito
-          </span>
-
-          <span
-            style={{
-              color: colors.muted,
-              fontSize: 11,
-              lineHeight: '14px',
-              fontWeight: 400,
-            }}
-          >
-            ✓ Sem cartão
-          </span>
+          <span style={badgeStyle(colors)}>✓ Gratuito</span>
+          <span style={badgeStyle(colors)}>✓ Sem cartão</span>
         </div>
       </main>
     </div>
   );
 }
 
-function Field({ icon, ...props }) {
+function Field({ icon, colors, ...props }) {
   return (
     <div
       style={{
@@ -321,4 +292,13 @@ function Field({ icon, ...props }) {
       />
     </div>
   );
+}
+
+function badgeStyle(colors) {
+  return {
+    color: colors.muted,
+    fontSize: 11,
+    lineHeight: '14px',
+    fontWeight: 400,
+  };
 }

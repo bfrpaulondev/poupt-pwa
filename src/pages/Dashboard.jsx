@@ -1,116 +1,249 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { themes } from '../themes';
-import { Plus, Camera, BarChart3, Target, ChevronRight, AlertTriangle } from 'lucide-react';
+import useThemeColors, { alpha } from '../utils/useThemeColors';
+import {
+  Plus,
+  Camera,
+  BarChart3,
+  Target,
+  ChevronRight,
+  AlertTriangle,
+} from 'lucide-react';
 
 export default function Dashboard() {
   const { mockUser, jars, transactions, setScreen } = useStore();
-  const theme = themes.darkGold;
+  const { colors } = useThemeColors();
 
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+  const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
 
-  const totalSpent = jars.reduce((s, j) => s + j.spent, 0);
-  const totalAllocated = jars.reduce((s, j) => s + j.allocated, 0);
+  const totalSpent = jars.reduce((sum, jar) => sum + jar.spent, 0);
+  const totalAllocated = jars.reduce((sum, jar) => sum + jar.allocated, 0);
   const available = totalAllocated - totalSpent;
   const spentPercent = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
 
   const barColor =
-    spentPercent > 80 ? '#EF4444' : spentPercent > 50 ? '#F59E0B' : '#10B981';
+    spentPercent > 80
+      ? colors.danger
+      : spentPercent > 50
+        ? colors.warning
+        : colors.success;
 
   const recentTx = transactions.slice(0, 5);
   const hasOverdueDebts = true;
 
   return (
-    <div className="px-4 py-3 poupt-scroll" style={{ background: theme.background }}>
-      {/* Greeting row */}
-      <div className="mb-4">
-        <h2 className="text-lg font-bold" style={{ color: theme.text }}>
-          {greeting}, Ana 🌅
+    <div
+      style={{
+        padding: '14px 15px 20px',
+        background: colors.background,
+      }}
+    >
+      <div style={{ marginBottom: 16 }}>
+        <h2
+          style={{
+            margin: 0,
+            color: colors.text,
+            fontSize: 19,
+            lineHeight: '24px',
+            fontWeight: 900,
+          }}
+        >
+          {greeting}, {mockUser?.name?.split(' ')[0] || 'Ana'}
         </h2>
-        <div className="flex items-center gap-3 mt-1.5">
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            marginTop: 7,
+          }}
+        >
           <span
-            className="text-xs font-bold px-2.5 py-1 rounded-full coin-sparkle"
-            style={{ background: 'rgba(255,215,0,0.1)', color: theme.primary }}
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              padding: '5px 10px',
+              borderRadius: 999,
+              background: alpha(colors.gold, 0.12),
+              color: colors.gold,
+            }}
           >
             🪙 {mockUser.poupMoedas} PoupMoedas
           </span>
-          <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
+
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: colors.muted,
+            }}
+          >
             🔥 {mockUser.streak} dias
           </span>
         </div>
       </div>
 
-      {/* Survival mode banner */}
       {hasOverdueDebts && (
         <motion.button
+          type="button"
           onClick={() => setScreen('survival')}
-          className="w-full mb-4 p-3.5 rounded-xl flex items-center gap-2.5 survival-pulse"
-          style={{ background: 'rgba(239,68,68,0.06)', border: '1.5px solid rgba(239,68,68,0.3)' }}
           whileTap={{ scale: 0.98 }}
+          style={{
+            width: '100%',
+            marginBottom: 16,
+            padding: '14px 13px',
+            borderRadius: 14,
+            background: alpha(colors.danger, 0.07),
+            border: `1.5px solid ${alpha(colors.danger, 0.3)}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            cursor: 'pointer',
+          }}
         >
-          <AlertTriangle size={16} color="#EF4444" />
-          <span className="text-xs font-bold flex-1" style={{ color: '#EF4444' }}>
-            ⚠️ MODO SOBREVIVENCIA ATIVO
+          <AlertTriangle size={16} color={colors.danger} />
+
+          <span
+            style={{
+              flex: 1,
+              color: colors.danger,
+              fontSize: 12,
+              fontWeight: 900,
+              textAlign: 'left',
+            }}
+          >
+            MODO SOBREVIVÊNCIA ATIVO
           </span>
-          <ChevronRight size={14} color="#EF4444" />
+
+          <ChevronRight size={14} color={colors.danger} />
         </motion.button>
       )}
 
-      {/* Balance card */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass rounded-2xl p-5 mb-4"
+        style={{
+          padding: 20,
+          marginBottom: 16,
+          borderRadius: 18,
+          background: 'rgba(255,255,255,0.055)',
+          border: '1px solid rgba(255,255,255,0.11)',
+        }}
       >
-        <p className="text-xs font-medium mb-1" style={{ color: theme.textMuted }}>
-          Disponivel este mes
-        </p>
-        <h2
-          className="text-3xl font-extrabold mb-3 gradient-text"
+        <p
           style={{
-            backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+            margin: '0 0 4px',
+            color: colors.muted,
+            fontSize: 12,
+            fontWeight: 700,
+          }}
+        >
+          Disponível este mês
+        </p>
+
+        <h2
+          style={{
+            margin: '0 0 14px',
+            color: colors.gold,
+            fontSize: 32,
+            lineHeight: '38px',
+            fontWeight: 900,
+            letterSpacing: '-1px',
           }}
         >
           €{available.toFixed(2)}
         </h2>
 
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs" style={{ color: theme.textMuted }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 8,
+          }}
+        >
+          <span
+            style={{
+              color: colors.muted,
+              fontSize: 12,
+            }}
+          >
             Gasto: €{totalSpent.toFixed(2)} / €{totalAllocated.toFixed(2)}
           </span>
-          <span className="text-xs font-bold" style={{ color: barColor }}>
+
+          <span
+            style={{
+              color: barColor,
+              fontSize: 12,
+              fontWeight: 900,
+            }}
+          >
             {spentPercent.toFixed(0)}%
           </span>
         </div>
 
         <div
-          className="w-full h-2 rounded-full overflow-hidden"
-          style={{ background: theme.surface }}
+          style={{
+            width: '100%',
+            height: 8,
+            borderRadius: 999,
+            background: colors.surface,
+            overflow: 'hidden',
+          }}
         >
           <motion.div
-            className="h-full rounded-full"
-            style={{ background: barColor }}
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(spentPercent, 100)}%` }}
             transition={{ duration: 1 }}
+            style={{
+              height: '100%',
+              borderRadius: 999,
+              background: barColor,
+            }}
           />
         </div>
 
-        {/* Mini jar icons */}
-        <div className="flex items-center gap-2 mt-3">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginTop: 14,
+          }}
+        >
           {jars.map((jar) => {
-            const pct = jar.allocated > 0 ? (jar.spent / jar.allocated) * 100 : 0;
+            const percent = jar.allocated > 0 ? (jar.spent / jar.allocated) * 100 : 0;
+
             return (
-              <div key={jar.name} className="flex-1 flex flex-col items-center">
-                <span className="text-xs">{jar.icon}</span>
-                <div className="w-full h-1 rounded-full mt-1" style={{ background: theme.surface }}>
+              <div
+                key={jar.name}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
+                <span style={{ fontSize: 13 }}>{jar.icon}</span>
+
+                <div
+                  style={{
+                    width: '100%',
+                    height: 4,
+                    borderRadius: 999,
+                    marginTop: 5,
+                    background: colors.surface,
+                    overflow: 'hidden',
+                  }}
+                >
                   <div
-                    className="h-full rounded-full"
                     style={{
-                      width: `${Math.min(pct, 100)}%`,
+                      width: `${Math.min(percent, 100)}%`,
+                      height: '100%',
+                      borderRadius: 999,
                       background: jar.color,
                     }}
                   />
@@ -121,114 +254,263 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-4 gap-2.5 mb-4">
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 10,
+          marginBottom: 17,
+        }}
+      >
         {[
           { icon: Camera, label: 'Scanner', screen: 'poupMoedas' },
           { icon: Plus, label: 'Adicionar', screen: 'addTransaction' },
-          { icon: BarChart3, label: 'Relatorio', screen: 'reports' },
+          { icon: BarChart3, label: 'Relatório', screen: 'reports' },
           { icon: Target, label: 'Plano', screen: 'goals' },
-        ].map((action) => (
-          <motion.button
-            key={action.label}
-            whileTap={{ scale: 0.92 }}
-            onClick={() => setScreen(action.screen)}
-            className="flex flex-col items-center gap-1.5 p-3 rounded-xl"
-            style={{ background: theme.surface }}
-          >
-            <action.icon size={20} style={{ color: theme.primary }} />
-            <span className="text-[10px] font-medium" style={{ color: theme.textMuted }}>
-              {action.label}
-            </span>
-          </motion.button>
-        ))}
+        ].map((action) => {
+          const Icon = action.icon;
+
+          return (
+            <motion.button
+              key={action.label}
+              type="button"
+              whileTap={{ scale: 0.92 }}
+              onClick={() => setScreen(action.screen)}
+              style={{
+                minHeight: 70,
+                padding: 10,
+                border: 'none',
+                borderRadius: 14,
+                background: colors.surface,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 7,
+                cursor: 'pointer',
+              }}
+            >
+              <Icon size={20} color={colors.gold} />
+
+              <span
+                style={{
+                  color: colors.muted,
+                  fontSize: 10,
+                  fontWeight: 800,
+                }}
+              >
+                {action.label}
+              </span>
+            </motion.button>
+          );
+        })}
       </div>
 
-      {/* Recent transactions */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2.5">
-          <h3 className="text-sm font-bold" style={{ color: theme.text }}>
-            Transacoes Recentes
+      <section style={{ marginBottom: 16 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 10,
+          }}
+        >
+          <h3
+            style={{
+              margin: 0,
+              color: colors.text,
+              fontSize: 15,
+              fontWeight: 900,
+            }}
+          >
+            Transações recentes
           </h3>
+
           <button
+            type="button"
             onClick={() => setScreen('reports')}
-            className="text-xs font-bold"
-            style={{ color: theme.primary }}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              color: colors.gold,
+              fontSize: 12,
+              fontWeight: 900,
+              cursor: 'pointer',
+              padding: 0,
+            }}
           >
             Ver todas →
           </button>
         </div>
 
-        <div className="flex flex-col gap-2">
-          {recentTx.map((tx) => {
-            const jarObj = jars.find((j) => j.name === tx.jar);
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+          }}
+        >
+          {recentTx.map((transaction) => {
+            const jar = jars.find((item) => item.name === transaction.jar);
+            const isIncome = transaction.type === 'income';
+
             return (
               <div
-                key={tx.id}
-                className="flex items-center gap-3 p-3 rounded-xl"
-                style={{ background: theme.surface }}
+                key={transaction.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: 12,
+                  borderRadius: 14,
+                  background: colors.surface,
+                }}
               >
                 <div
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: jarObj?.color || theme.textMuted }}
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 999,
+                    background: jar?.color || colors.muted,
+                    flexShrink: 0,
+                  }}
                 />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: theme.text }}>
-                    {tx.description}
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      color: colors.text,
+                      fontSize: 14,
+                      lineHeight: '18px',
+                      fontWeight: 800,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {transaction.description}
                   </p>
-                  <p className="text-xs" style={{ color: theme.textMuted }}>
-                    {tx.category} · {tx.jar}
+
+                  <p
+                    style={{
+                      margin: '2px 0 0',
+                      color: colors.muted,
+                      fontSize: 11,
+                    }}
+                  >
+                    {transaction.category} · {transaction.jar}
                   </p>
                 </div>
+
                 <span
-                  className="text-sm font-bold shrink-0"
                   style={{
-                    color: tx.type === 'income' ? '#10B981' : '#EF4444',
+                    color: isIncome ? colors.success : colors.danger,
+                    fontSize: 14,
+                    fontWeight: 900,
+                    flexShrink: 0,
                   }}
                 >
-                  {tx.type === 'income' ? '+' : ''}€{Math.abs(tx.amount).toFixed(2)}
+                  {isIncome ? '+' : '-'}€{Math.abs(transaction.amount).toFixed(2)}
                 </span>
               </div>
             );
           })}
         </div>
-      </div>
+      </section>
 
-      {/* AI Coach mini card */}
       <motion.button
+        type="button"
         onClick={() => setScreen('coach')}
         whileTap={{ scale: 0.98 }}
-        className="w-full glass rounded-xl p-4 mb-4 flex items-center gap-3"
+        style={{
+          width: '100%',
+          marginBottom: 16,
+          padding: 15,
+          borderRadius: 15,
+          border: '1px solid rgba(255,255,255,0.11)',
+          background: 'rgba(255,255,255,0.055)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          cursor: 'pointer',
+        }}
       >
         <div
-          className="w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0"
-          style={{ background: 'rgba(255,215,0,0.1)' }}
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 14,
+            background: alpha(colors.gold, 0.12),
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 20,
+            flexShrink: 0,
+          }}
         >
           🤖
         </div>
-        <div className="flex-1 min-w-0 text-left">
-          <p className="text-xs font-medium" style={{ color: theme.textMuted }}>
-            {mockUser.coachMode === 'sargento' ? 'Sargento diz:' : 'Amigavel diz:'}
+
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            textAlign: 'left',
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              color: colors.muted,
+              fontSize: 11,
+              fontWeight: 700,
+            }}
+          >
+            {mockUser.coachMode === 'sargento' ? 'Sargento diz:' : 'Amigável diz:'}
           </p>
-          <p className="text-xs mt-0.5 truncate" style={{ color: theme.text }}>
-            A WiZink vence em 3 dias. Tens os €85, soldado?
+
+          <p
+            style={{
+              margin: '2px 0 0',
+              color: colors.text,
+              fontSize: 12,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            A WiZink vence em 3 dias. Tens os €85?
           </p>
         </div>
-        <ChevronRight size={16} style={{ color: theme.textMuted }} />
+
+        <ChevronRight size={16} color={colors.muted} />
       </motion.button>
 
-      {/* Alert card */}
-      <motion.div
-        className="rounded-xl p-3.5 mb-4"
-        style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.15)' }}
+      <div
+        style={{
+          padding: 14,
+          borderRadius: 14,
+          background: alpha(colors.danger, 0.05),
+          border: `1px solid ${alpha(colors.danger, 0.16)}`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+        }}
       >
-        <div className="flex items-center gap-2">
-          <AlertTriangle size={14} color="#EF4444" />
-          <p className="text-xs font-bold" style={{ color: '#EF4444' }}>
-            WiZink vence em 3 dias
-          </p>
-        </div>
-      </motion.div>
+        <AlertTriangle size={15} color={colors.danger} />
+
+        <p
+          style={{
+            margin: 0,
+            color: colors.danger,
+            fontSize: 12,
+            fontWeight: 900,
+          }}
+        >
+          WiZink vence em 3 dias
+        </p>
+      </div>
     </div>
   );
 }

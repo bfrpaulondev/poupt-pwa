@@ -1,202 +1,544 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { themes } from '../themes';
 import {
-  ArrowUpRight, ArrowDownLeft, Save, X, ShoppingCart, Home, TrainFront,
-  Heart, GraduationCap, Gamepad2, Shirt, AlertTriangle, TrendingUp,
-  PiggyBank, Banknote, Laptop, Plus, CreditCard, Landmark, Calendar, Coins
+  ArrowUpRight,
+  ArrowDownLeft,
+  Save,
+  X,
+  ShoppingCart,
+  Home,
+  TrainFront,
+  Heart,
+  GraduationCap,
+  Gamepad2,
+  Shirt,
+  AlertTriangle,
+  TrendingUp,
+  PiggyBank,
+  Banknote,
+  Laptop,
+  Plus,
+  Calendar,
+  Coins,
 } from 'lucide-react';
+import useThemeColors, { alpha } from '../utils/useThemeColors';
 
 const categoryConfig = {
-  alimentacao: { label: 'Alimentacao', icon: ShoppingCart },
-  habitacao: { label: 'Habitacao', icon: Home },
+  alimentacao: { label: 'Alimentação', icon: ShoppingCart },
+  habitacao: { label: 'Habitação', icon: Home },
   transportes: { label: 'Transportes', icon: TrainFront },
-  saude: { label: 'Saude', icon: Heart },
-  educacao: { label: 'Educacao', icon: GraduationCap },
+  saude: { label: 'Saúde', icon: Heart },
+  educacao: { label: 'Educação', icon: GraduationCap },
   lazer: { label: 'Lazer', icon: Gamepad2 },
   roupa: { label: 'Roupa', icon: Shirt },
-  divida: { label: 'Divida', icon: AlertTriangle },
+  divida: { label: 'Dívida', icon: AlertTriangle },
   investimento: { label: 'Investimento', icon: TrendingUp },
-  poupanca: { label: 'Poupanca', icon: PiggyBank },
-  salario: { label: 'Salario', icon: Banknote },
+  poupanca: { label: 'Poupança', icon: PiggyBank },
+  salario: { label: 'Salário', icon: Banknote },
   freelance: { label: 'Freelance', icon: Laptop },
   outro: { label: 'Outro', icon: Plus },
 };
 
+const jarFallbackColors = [
+  '#FF6B6B',
+  '#4ECDC4',
+  '#45B7D1',
+  '#96CEB4',
+  '#FFEAA7',
+  '#DDA0DD',
+];
+
 export default function AddTransaction() {
-  const theme = themes.darkGold;
   const { addTransaction, setScreen, jars } = useStore();
+  const { colors } = useThemeColors();
+
   const [type, setType] = useState('despesa');
   const [form, setForm] = useState({
-    amount: '', category: 'alimentacao', description: '', jar: '',
-    date: new Date().toISOString().split('T')[0]
+    amount: '',
+    category: 'alimentacao',
+    description: '',
+    jar: '',
+    date: new Date().toISOString().split('T')[0],
   });
   const [saving, setSaving] = useState(false);
   const [moedasEarned, setMoedasEarned] = useState(null);
 
-  const s = (color, alpha) => `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
-
   const incomeCategories = ['salario', 'freelance', 'outro'];
-  const expenseCategories = ['alimentacao', 'habitacao', 'transportes', 'saude', 'educacao', 'lazer', 'roupa', 'divida', 'investimento', 'poupanca'];
+  const expenseCategories = [
+    'alimentacao',
+    'habitacao',
+    'transportes',
+    'saude',
+    'educacao',
+    'lazer',
+    'roupa',
+    'divida',
+    'investimento',
+    'poupanca',
+  ];
+
   const categories = type === 'receita' ? incomeCategories : expenseCategories;
+  const typeColor = type === 'receita' ? colors.success : colors.danger;
 
   const handleTypeChange = (newType) => {
     setType(newType);
-    setForm(f => ({ ...f, category: newType === 'receita' ? 'salario' : 'alimentacao', jar: '' }));
+    setForm((current) => ({
+      ...current,
+      category: newType === 'receita' ? 'salario' : 'alimentacao',
+      jar: '',
+    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     if (!form.amount || Number(form.amount) <= 0) return;
-    setSaving(true);
-    try {
-      addTransaction({ ...form, type, amount: Number(form.amount), id: Date.now() });
-      setMoedasEarned(5);
-      setTimeout(() => { setMoedasEarned(null); setScreen('dashboard'); }, 1500);
-    } catch { } finally { setSaving(false); }
-  };
 
-  const typeColor = type === 'receita' ? '#10B981' : '#EF4444';
+    setSaving(true);
+
+    try {
+      addTransaction({
+        ...form,
+        id: Date.now().toString(),
+        amount: type === 'receita' ? Number(form.amount) : -Number(form.amount),
+        type: type === 'receita' ? 'income' : 'expense',
+      });
+
+      setMoedasEarned(5);
+
+      setTimeout(() => {
+        setMoedasEarned(null);
+        setScreen('dashboard');
+      }, 1200);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16, overflowX: 'hidden' }}
+    <div
+      style={{
+        minHeight: '100%',
+        width: '100%',
+        background: colors.background,
+        display: 'flex',
+        justifyContent: 'center',
+        overflowY: 'auto',
+      }}
     >
-      {/* Moedas earned toast */}
-      {moedasEarned && (
-        <div style={{
-          padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 500, textAlign: 'center',
-          background: s(theme.primary, 0.15), color: theme.primary,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
-        }}>
-          <Coins size={14} /> +{moedasEarned} PoupMoedas ganhos!
+      <motion.main
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        style={{
+          width: '100%',
+          maxWidth: 361,
+          padding: '18px 15px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <header style={{ marginBottom: 18 }}>
+          <h1
+            style={{
+              margin: 0,
+              color: colors.text,
+              fontSize: 25,
+              lineHeight: '31px',
+              fontWeight: 900,
+              letterSpacing: '-0.5px',
+            }}
+          >
+            Nova transação
+          </h1>
+
+          <p
+            style={{
+              margin: '5px 0 0',
+              color: colors.muted,
+              fontSize: 13,
+              lineHeight: '17px',
+              fontWeight: 500,
+            }}
+          >
+            Regista uma receita ou despesa
+          </p>
+        </header>
+
+        {moedasEarned && (
+          <div
+            style={{
+              minHeight: 43,
+              marginBottom: 14,
+              padding: '0 14px',
+              borderRadius: 13,
+              background: alpha(colors.gold, 0.14),
+              color: colors.gold,
+              border: `1px solid ${alpha(colors.gold, 0.28)}`,
+              fontSize: 13,
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+          >
+            <Coins size={15} />
+            +{moedasEarned} PoupMoedas ganhos
+          </div>
+        )}
+
+        <div
+          style={{
+            display: 'flex',
+            gap: 10,
+            marginBottom: 16,
+          }}
+        >
+          <TypeButton
+            active={type === 'despesa'}
+            label="Despesa"
+            icon={<ArrowDownLeft size={15} />}
+            color={colors.danger}
+            colors={colors}
+            onClick={() => handleTypeChange('despesa')}
+          />
+
+          <TypeButton
+            active={type === 'receita'}
+            label="Receita"
+            icon={<ArrowUpRight size={15} />}
+            color={colors.success}
+            colors={colors}
+            onClick={() => handleTypeChange('receita')}
+          />
         </div>
-      )}
 
-      {/* Type Toggle */}
-      <div style={{ display: 'flex', gap: 8 }}>
-        {[
-          { id: 'despesa', label: 'Despesa', icon: ArrowDownLeft, color: '#EF4444' },
-          { id: 'receita', label: 'Receita', icon: ArrowUpRight, color: '#10B981' },
-        ].map(({ id, label, icon: Icon, color }) => (
-          <button key={id} onClick={() => handleTypeChange(id)} style={{
-            flex: 1, padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s',
-            background: type === id ? s(color, 0.15) : theme.surface,
-            color: type === id ? color : theme.textMuted,
-            border: type === id ? `1px solid ${color}` : `1px solid ${theme.border}`
-          }}>
-            <Icon size={14} /> {label}
-          </button>
-        ))}
-      </div>
-
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Amount */}
-        <div className="glass-card" style={{ padding: 24, textAlign: 'center' }}>
-          <span style={{ fontSize: 11, color: theme.textMuted }}>{type === 'receita' ? 'Receita' : 'Despesa'}</span>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 8 }}>
-            <span style={{ fontSize: 16, fontWeight: 600, color: typeColor }}>EUR</span>
-            <input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })}
-              placeholder="0.00" required min="0.01" step="0.01"
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+          }}
+        >
+          <section
+            style={{
+              padding: '22px 16px',
+              borderRadius: 16,
+              background: 'rgba(255,255,255,0.055)',
+              border: '1px solid rgba(255,255,255,0.11)',
+              textAlign: 'center',
+            }}
+          >
+            <span
               style={{
-                fontSize: 28, fontWeight: 700, width: 140, textAlign: 'center',
-                background: 'transparent', border: 'none', outline: 'none', color: typeColor
-              }} />
-          </div>
-        </div>
+                color: colors.muted,
+                fontSize: 12,
+                lineHeight: '15px',
+                fontWeight: 700,
+              }}
+            >
+              {type === 'receita' ? 'Receita' : 'Despesa'}
+            </span>
 
-        {/* Description */}
-        <div>
-          <label style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, marginBottom: 6, display: 'block' }}>Descricao</label>
-          <input type="text" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
-            placeholder={type === 'receita' ? 'Ex: Salario mensal' : 'Ex: Compras no supermercado'} required
+            <div
+              style={{
+                marginTop: 9,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 7,
+              }}
+            >
+              <span
+                style={{
+                  color: typeColor,
+                  fontSize: 15,
+                  fontWeight: 900,
+                }}
+              >
+                EUR
+              </span>
+
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(event) =>
+                  setForm({ ...form, amount: event.target.value })
+                }
+                placeholder="0.00"
+                required
+                min="0.01"
+                step="0.01"
+                style={{
+                  width: 148,
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  color: typeColor,
+                  fontSize: 34,
+                  lineHeight: '40px',
+                  fontWeight: 900,
+                  textAlign: 'center',
+                }}
+              />
+            </div>
+          </section>
+
+          <FieldLabel colors={colors}>Descrição</FieldLabel>
+
+          <input
+            type="text"
+            value={form.description}
+            onChange={(event) =>
+              setForm({ ...form, description: event.target.value })
+            }
+            placeholder={
+              type === 'receita'
+                ? 'Ex: Salário mensal'
+                : 'Ex: Compras no supermercado'
+            }
+            required
+            style={inputStyle(colors)}
+          />
+
+          <SectionTitle colors={colors}>Categoria</SectionTitle>
+
+          <div
             style={{
-              width: '100%', padding: '12px 14px', borderRadius: 12, fontSize: 13,
-              background: theme.surface, border: `1px solid ${theme.border}`, color: theme.text, outline: 'none'
-            }} />
-        </div>
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 8,
+            }}
+          >
+            {categories.map((category) => {
+              const config = categoryConfig[category] || categoryConfig.outro;
+              const Icon = config.icon;
+              const isActive = form.category === category;
 
-        {/* Category */}
-        <div>
-          <label style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, marginBottom: 8, display: 'block' }}>Categoria</label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-            {categories.map(cat => {
-              const conf = categoryConfig[cat] || { label: cat, icon: Plus };
-              const Icon = conf.icon;
-              const isActive = form.category === cat;
               return (
-                <button key={cat} type="button" onClick={() => setForm({ ...form, category: cat })} style={{
-                  padding: '10px 4px', borderRadius: 12, fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, transition: 'all 0.2s',
-                  background: isActive ? s(theme.primary, 0.2) : theme.surface,
-                  color: isActive ? theme.primary : theme.textMuted,
-                  border: isActive ? `1px solid ${theme.primary}` : `1px solid ${theme.border}`
-                }}>
-                  <Icon size={14} style={{ opacity: isActive ? 1 : 0.6 }} />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%', textAlign: 'center' }}>{conf.label}</span>
-                </button>
+                <SmallCardButton
+                  key={category}
+                  active={isActive}
+                  color={colors.gold}
+                  colors={colors}
+                  onClick={() => setForm({ ...form, category })}
+                >
+                  <Icon size={16} />
+                  <span>{config.label}</span>
+                </SmallCardButton>
               );
             })}
           </div>
-        </div>
 
-        {/* Jar Selector */}
-        <div>
-          <label style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, marginBottom: 8, display: 'block' }}>Frasco (opcional)</label>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-            {(jars || []).map((jar, idx) => {
+          <SectionTitle colors={colors}>Frasco opcional</SectionTitle>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 8,
+            }}
+          >
+            {(jars || []).map((jar, index) => {
               const isActive = form.jar === jar.name;
-              const jarColor = theme.jarColors[idx % theme.jarColors.length];
+              const jarColor =
+                jar.color || jarFallbackColors[index % jarFallbackColors.length];
+
               return (
-                <button key={jar.name} type="button" onClick={() => setForm({ ...form, jar: form.jar === jar.name ? '' : jar.name })} style={{
-                  padding: '10px 4px', borderRadius: 12, fontSize: 11, fontWeight: 500, cursor: 'pointer',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                  background: isActive ? s(jarColor, 0.2) : theme.surface,
-                  color: isActive ? jarColor : theme.textMuted,
-                  border: isActive ? `1px solid ${jarColor}` : `1px solid ${theme.border}`
-                }}>
-                  <span style={{ fontSize: 16 }}>{jar.icon || '🏺'}</span>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%', textAlign: 'center' }}>{jar.name}</span>
-                </button>
+                <SmallCardButton
+                  key={jar.name}
+                  active={isActive}
+                  color={jarColor}
+                  colors={colors}
+                  onClick={() =>
+                    setForm({
+                      ...form,
+                      jar: form.jar === jar.name ? '' : jar.name,
+                    })
+                  }
+                >
+                  <span style={{ fontSize: 18 }}>{jar.icon || '🏺'}</span>
+                  <span>{jar.name}</span>
+                </SmallCardButton>
               );
             })}
           </div>
-        </div>
 
-        {/* Date */}
-        <div>
-          <label style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, marginBottom: 6, display: 'block' }}>
-            <Calendar size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Data
-          </label>
-          <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })}
+          <FieldLabel colors={colors}>
+            <Calendar size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />
+            Data
+          </FieldLabel>
+
+          <input
+            type="date"
+            value={form.date}
+            onChange={(event) => setForm({ ...form, date: event.target.value })}
+            style={inputStyle(colors)}
+          />
+
+          <div
             style={{
-              width: '100%', padding: '12px 14px', borderRadius: 12, fontSize: 13,
-              background: theme.surface, border: `1px solid ${theme.border}`, color: theme.text, outline: 'none'
-            }} />
-        </div>
+              display: 'flex',
+              gap: 12,
+              marginTop: 4,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setScreen('dashboard')}
+              style={{
+                width: 112,
+                height: 54,
+                borderRadius: 15,
+                border: `1.5px solid ${colors.border}`,
+                background: 'transparent',
+                color: colors.muted,
+                fontSize: 13,
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                cursor: 'pointer',
+              }}
+            >
+              <X size={15} />
+              Cancelar
+            </button>
 
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button type="button" onClick={() => setScreen('dashboard')} style={{
-            padding: '14px 20px', borderRadius: 12, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-            color: theme.textMuted, border: `1px solid ${theme.border}`, background: 'transparent'
-          }}>
-            <X size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Cancelar
-          </button>
-          <button type="submit" disabled={saving} className="btn-gold" style={{
-            flex: 1, padding: 14, borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            opacity: saving ? 0.5 : 1
-          }}>
-            <Save size={14} /> {saving ? 'A guardar...' : 'Guardar'}
-          </button>
-        </div>
-      </form>
-    </motion.div>
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                flex: 1,
+                height: 54,
+                borderRadius: 15,
+                border: 'none',
+                background: `linear-gradient(135deg, ${colors.gold} 0%, ${colors.goldLight} 100%)`,
+                color: colors.inverse,
+                fontSize: 15,
+                fontWeight: 900,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                cursor: saving ? 'not-allowed' : 'pointer',
+                opacity: saving ? 0.65 : 1,
+                boxShadow: `0 12px 30px ${alpha(colors.gold, 0.2)}`,
+              }}
+            >
+              <Save size={15} />
+              {saving ? 'A guardar...' : 'Guardar'}
+            </button>
+          </div>
+        </form>
+      </motion.main>
+    </div>
   );
+}
+
+function TypeButton({ active, label, icon, color, colors, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        flex: 1,
+        height: 48,
+        borderRadius: 14,
+        border: active ? `1.5px solid ${color}` : `1.5px solid ${colors.border}`,
+        background: active ? alpha(color, 0.13) : colors.surface,
+        color: active ? color : colors.muted,
+        fontSize: 14,
+        fontWeight: 900,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        cursor: 'pointer',
+      }}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function SmallCardButton({ active, color, colors, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        minHeight: 68,
+        padding: '9px 5px',
+        borderRadius: 13,
+        border: active ? `1.5px solid ${color}` : `1.5px solid ${colors.border}`,
+        background: active ? alpha(color, 0.14) : colors.surface,
+        color: active ? color : colors.muted,
+        fontSize: 11,
+        lineHeight: '14px',
+        fontWeight: 800,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 5,
+        cursor: 'pointer',
+        overflow: 'hidden',
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function FieldLabel({ children, colors }) {
+  return (
+    <label
+      style={{
+        marginBottom: -8,
+        color: colors.muted,
+        fontSize: 12,
+        lineHeight: '15px',
+        fontWeight: 800,
+      }}
+    >
+      {children}
+    </label>
+  );
+}
+
+function SectionTitle({ children, colors }) {
+  return (
+    <h3
+      style={{
+        margin: '0 0 -8px',
+        color: colors.muted,
+        fontSize: 12,
+        lineHeight: '15px',
+        fontWeight: 800,
+      }}
+    >
+      {children}
+    </h3>
+  );
+}
+
+function inputStyle(colors) {
+  return {
+    width: '100%',
+    height: 51,
+    padding: '0 15px',
+    borderRadius: 13,
+    border: `1.5px solid ${colors.border}`,
+    background: colors.surface,
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: 700,
+    outline: 'none',
+  };
 }
