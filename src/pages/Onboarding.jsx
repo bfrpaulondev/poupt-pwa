@@ -31,21 +31,25 @@ export default function Onboarding() {
       // Complete onboarding via API
       setSaving(true);
       try {
+        const coachName = onboardingData.coachMode === 'sargento' ? 'Sargento' : 'Amigo';
+        const coachPersonality = onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel';
+        const defaultJars = useStore.getState().defaultJarPercentages;
         await api.completeOnboarding({
           name: onboardingData.name,
           income: onboardingData.income,
           hasDebts: onboardingData.hasDebts,
-          coachPersonality: onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel',
+          coachName,
+          coachPersonality,
           avatar: onboardingData.avatar,
-          jarPercentages: {
-            necessities: 50, freedom: 10, savings: 10, education: 10, play: 10, give: 5
-          }
+          jarPercentages: defaultJars
         });
         updateUser({
           onboardingComplete: true,
           name: onboardingData.name,
           income: onboardingData.income,
-          coachPersonality: onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel',
+          coachName,
+          coachPersonality,
+          jarPercentages: defaultJars,
         });
       } catch (err) {
         console.error('Onboarding save error:', err);

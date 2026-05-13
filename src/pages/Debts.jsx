@@ -25,6 +25,7 @@ export default function Debts() {
   const [showSnowball, setShowSnowball] = useState(false);
   const [debtProgress, setDebtProgress] = useState(null);
 
+  const today = new Date().toISOString().split('T')[0];
   const [form, setForm] = useState({
     creditorName: '', amount: '', minimumPayment: '', interestRate: '',
     dueDate: '', relationshipType: 'banco', notes: ''
@@ -70,11 +71,16 @@ export default function Debts() {
   const handleCreateDebt = async (e) => {
     e.preventDefault();
     try {
-      await api.createDebt({
-        ...form, type: 'formal', amount: Number(form.amount),
+      const debtData = {
+        ...form,
+        type: 'formal',
+        amount: Number(form.amount),
         minimumPayment: Number(form.minimumPayment),
         interestRate: Number(form.interestRate)
-      });
+      };
+      // Only include dueDate if provided
+      if (!debtData.dueDate) delete debtData.dueDate;
+      await api.createDebt(debtData);
       setShowForm(false);
       setForm({ creditorName: '', amount: '', minimumPayment: '', interestRate: '', dueDate: '', relationshipType: 'banco', notes: '' });
       loadDebts();
@@ -86,7 +92,9 @@ export default function Debts() {
   const handleCreateInformal = async (e) => {
     e.preventDefault();
     try {
-      await api.createInformalDebt({ ...informalForm, amount: Number(informalForm.amount) });
+      const debtData = { ...informalForm, amount: Number(informalForm.amount) };
+      if (!debtData.dueDate) delete debtData.dueDate;
+      await api.createInformalDebt(debtData);
       setShowInformalForm(false);
       setInformalForm({ creditorName: '', amount: '', dueDate: '', relationshipType: 'amigo', notes: '' });
       loadDebts();
@@ -258,8 +266,8 @@ export default function Debts() {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-muted)' }}>Data limite</label>
-              <input type="date" value={form.dueDate} onChange={e => setForm({...form, dueDate: e.target.value})}
-                className="w-full input-field" />
+              <input type="date" value={form.dueDate || ''} min={today} onChange={e => setForm({...form, dueDate: e.target.value})}
+                className="w-full input-field" placeholder="Opcional" />
             </div>
             <div>
               <label className="text-[10px] mb-1 block" style={{ color: 'var(--text-muted)' }}>Tipo</label>

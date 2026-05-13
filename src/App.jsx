@@ -321,6 +321,15 @@ function App() {
         }
       }
       setSessionChecked(true);
+
+      // Handle hash-based navigation (e.g., #settings, #coach)
+      const hash = window.location.hash.slice(1); // remove #
+      if (hash && screenComponents[hash]) {
+        const savedToken = localStorage.getItem('poupt_token');
+        if (savedToken) {
+          setScreen(hash);
+        }
+      }
     };
     init();
   }, []);
@@ -353,6 +362,7 @@ function App() {
 
   const handleTab = (id) => {
     setScreen(id);
+    window.location.hash = id;
   };
 
   return (

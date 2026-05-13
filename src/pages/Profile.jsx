@@ -384,7 +384,7 @@ export default function Profile() {
             <p className="text-2xl font-bold" style={{ color: 'var(--gold)' }}>{user?.poupMoedas || 0}</p>
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Saldo actual</p>
           </div>
-          <button onClick={() => setScreen('moedas')}
+          <button onClick={() => setScreen('poupMoedas')}
             className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
             style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
             <Sparkles size={14} /> Loja

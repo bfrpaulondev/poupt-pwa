@@ -50,9 +50,10 @@ export default function AddTransaction() {
     setSaving(true);
     setError(null);
     try {
+      const apiType = type === 'receita' ? 'income' : 'expense';
       const res = await api.createTransaction({
         ...form,
-        type,
+        type: apiType,
         amount: Number(form.amount),
         jar: form.jar || null
       });

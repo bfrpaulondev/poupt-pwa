@@ -24,6 +24,11 @@ const useStore = create((set, get) => ({
     avatar: '👩',
   },
 
+  // Default jar percentages (must total 100%)
+  defaultJarPercentages: {
+    necessities: 50, freedom: 10, savings: 10, education: 10, play: 10, give: 10
+  },
+
   // Data (fetched from API)
   jars: [],
   debts: [],
@@ -75,7 +80,10 @@ const useStore = create((set, get) => ({
   },
 
   // Navigation
-  setScreen: (screen) => set({ currentScreen: screen, menuOpen: false }),
+  setScreen: (screen) => {
+    window.location.hash = screen;
+    set({ currentScreen: screen, menuOpen: false });
+  },
 
   // Theme (persisted)
   setTheme: (theme) => {

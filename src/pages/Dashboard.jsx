@@ -4,7 +4,7 @@ import useStore from '../store/useStore';
 import { themes } from '../themes';
 import { api } from '../services/api';
 import { modeColors, modeLabels, formatCurrency } from '../utils/helpers';
-import { Plus, Camera, BarChart3, Target, ChevronRight, AlertTriangle, Bot, Coins } from 'lucide-react';
+import { Plus, Camera, BarChart3, Target, ChevronRight, AlertTriangle, Bot, Coins, RefreshCw } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, setScreen, currentTheme } = useStore();
@@ -18,43 +18,44 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [user]);
 
   const loadDashboardData = async () => {
+    setLoading(true);
     try {
-      const [summaryRes, txRes, jarsRes] = await Promise.allSettled([
+      // Fetch summary, recent transactions, and jar data in parallel
+      const [summaryRes, txRes] = await Promise.allSettled([
         api.getReportSummary(),
         api.getTransactions('?limit=5'),
-        api.getTransactions('/summary'),
       ]);
 
       if (summaryRes.status === 'fulfilled' && summaryRes.value?.data) {
         setSummary(summaryRes.value.data);
       }
 
-      if (txRes.status === 'fulfilled' && txRes.value?.data?.transactions) {
-        setRecentTransactions(txRes.value.data.transactions.slice(0, 5));
+      if (txRes.status === 'fulfilled' && txRes.value?.data) {
+        const txs = txRes.value.data.transactions || txRes.value.data || [];
+        setRecentTransactions(Array.isArray(txs) ? txs.slice(0, 5) : []);
       }
 
-      // Try to get jars from user jarPercentages
-      if (user?.jarPercentages) {
-        const jarDefs = [
-          { key: 'necessities', label: 'Necessidades', icon: '🏠', color: '#3B82F6' },
-          { key: 'freedom', label: 'Liberdade', icon: '🏦', color: '#10B981' },
-          { key: 'savings', label: 'Poupanca', icon: '🏛️', color: '#F59E0B' },
-          { key: 'education', label: 'Educacao', icon: '📚', color: '#8B5CF6' },
-          { key: 'play', label: 'Lazer', icon: '🎮', color: '#EF4444' },
-          { key: 'give', label: 'Doar', icon: '💝', color: '#EC4899' },
-        ];
-        const income = user?.income || 0;
-        const jarsData = jarDefs.map(j => ({
-          ...j,
-          percentage: user.jarPercentages[j.key] || 0,
-          allocated: income * (user.jarPercentages[j.key] || 0) / 100,
-          spent: 0,
-        }));
-        setJars(jarsData);
-      }
+      // Build jars from user jarPercentages and income
+      const jarDefs = [
+        { key: 'necessities', label: 'Necessidades', icon: '🏠', color: '#3B82F6' },
+        { key: 'freedom', label: 'Liberdade', icon: '🏦', color: '#10B981' },
+        { key: 'savings', label: 'Poupanca', icon: '🏛️', color: '#F59E0B' },
+        { key: 'education', label: 'Educacao', icon: '📚', color: '#8B5CF6' },
+        { key: 'play', label: 'Lazer', icon: '🎮', color: '#EF4444' },
+        { key: 'give', label: 'Doar', icon: '💝', color: '#EC4899' },
+      ];
+      const jarPcts = user?.jarPercentages || useStore.getState().defaultJarPercentages;
+      const income = user?.income || 0;
+      const jarsData = jarDefs.map(j => ({
+        ...j,
+        percentage: jarPcts[j.key] || 0,
+        allocated: income * (jarPcts[j.key] || 0) / 100,
+        spent: 0,
+      }));
+      setJars(jarsData);
 
       // Check overdue debts
       try {

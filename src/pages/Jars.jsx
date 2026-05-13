@@ -7,9 +7,8 @@ import { Save, RotateCcw, Info } from 'lucide-react';
 
 export default function Jars() {
   const { user, updateUser } = useStore();
-  const [percentages, setPercentages] = useState(user?.jarPercentages || {
-    necessities: 50, freedom: 10, savings: 10, education: 10, play: 10, give: 5
-  });
+  const defaultJars = useStore.getState().defaultJarPercentages;
+  const [percentages, setPercentages] = useState(user?.jarPercentages || defaultJars);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -38,7 +37,7 @@ export default function Jars() {
   };
 
   const handleReset = () => {
-    setPercentages({ necessities: 50, freedom: 10, savings: 10, education: 10, play: 10, give: 5 });
+    setPercentages(useStore.getState().defaultJarPercentages);
     setSaved(false);
   };
 
