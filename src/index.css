@@ -326,16 +326,12 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* ============================
-   Desktop: Centered max-width container
-   (NOT a phone frame - just a max-width
-   for readability, like a real responsive app)
+   Desktop: Full width, content max-width
+   for readability inside each page
    ============================ */
 @media (min-width: 768px) {
   .app-shell {
-    max-width: 480px;
-    margin: 0 auto;
-    min-height: 100dvh;
-    border-left: 1px solid rgba(255,255,255,0.06);
-    border-right: 1px solid rgba(255,255,255,0.06);
+    max-width: 100%;
+    margin: 0;
   }
 }
