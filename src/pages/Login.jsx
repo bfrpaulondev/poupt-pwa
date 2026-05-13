@@ -5,8 +5,8 @@ import { themes } from '../themes';
 import { Mail, Lock, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
-  const { setScreen, login } = useStore();
-  const theme = themes.darkGold;
+  const { setScreen, login, currentTheme } = useStore();
+  const theme = themes[currentTheme] || themes.darkGold;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

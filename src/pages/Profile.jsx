@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 export default function Profile() {
-  const { user, setScreen, getModeColor, getModeLabel, updateUser, transactions, goals, debts, logout } = useStore();
+  const { user, setScreen, updateUser, transactions, goals, debts, logout } = useStore();
   const levelInfo = calculateLevel(user?.xp || 0);
   const [editingCoach, setEditingCoach] = useState(false);
   const [coachName, setCoachName] = useState(user?.coachName || '');
@@ -75,8 +75,8 @@ export default function Profile() {
     }
   };
 
-  const modeColor = getModeColor();
-  const modeLabel = getModeLabel();
+  const modeColor = modeColors[user?.financialMode] || modeColors.sobrevivencia;
+  const modeLabel = modeLabels[user?.financialMode] || 'Sobrevivencia';
   const currentMode = user?.financialMode || 'sobrevivencia';
 
   const modeOrder = ['sobrevivencia', 'recuperacao', 'estabilidade', 'crescimento', 'prosperidade'];

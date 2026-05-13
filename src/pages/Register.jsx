@@ -5,8 +5,8 @@ import { themes } from '../themes';
 import { Mail, Lock, User, ArrowLeft } from 'lucide-react';
 
 export default function Register() {
-  const { setScreen, login } = useStore();
-  const theme = themes.darkGold;
+  const { setScreen, login, currentTheme } = useStore();
+  const theme = themes[currentTheme] || themes.darkGold;
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

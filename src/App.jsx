@@ -238,9 +238,9 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
   );
 }
 
-function ThemeBar({ theme, themeId, onThemeChange }) {
+function ThemeBar({ theme, themeId, onThemeChange, className = '' }) {
   return (
-    <div className="flex items-center justify-center gap-3 mt-4 flex-wrap px-4">
+    <div className={`flex items-center justify-center gap-3 mt-4 flex-wrap px-4 ${className}`}>
       {Object.entries(themes).map(([id, t]) => (
         <button
           key={id}
@@ -277,6 +277,24 @@ function App() {
 
   const theme = themes[currentTheme] || themes.darkGold;
 
+  // Inject theme as CSS custom properties into :root
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--gold', theme.primary);
+    root.style.setProperty('--gold-light', theme.primaryLight);
+    root.style.setProperty('--gold-dark', theme.primaryDark);
+    root.style.setProperty('--text-primary', theme.text);
+    root.style.setProperty('--text-secondary', theme.textMuted);
+    root.style.setProperty('--text-muted', theme.textMuted);
+    root.style.setProperty('--bg-primary', theme.background);
+    root.style.setProperty('--bg-secondary', theme.surface);
+    root.style.setProperty('--bg-surface-hover', theme.surfaceHover);
+    root.style.setProperty('--border', theme.border);
+    root.style.setProperty('--danger', '#EF4444');
+    root.style.setProperty('--success', '#10B981');
+    root.style.setProperty('--warning', '#F59E0B');
+  }, [theme]);
+
   useEffect(() => {
     restoreSession();
     setReady(true);
@@ -310,7 +328,7 @@ function App() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-3 text-center"
+        className="mb-3 text-center mobile-hide"
       >
         <h1
           className="text-lg font-bold gradient-text"
@@ -324,10 +342,8 @@ function App() {
 
       {/* Phone Frame */}
       <div
-        className="relative phone-frame-shadow rounded-[40px] overflow-hidden"
+        className="relative phone-frame-shadow rounded-[40px] overflow-hidden flex flex-col w-full max-w-[375px] h-full max-h-[812px] sm:w-[375px] sm:h-[812px]"
         style={{
-          width: 375,
-          height: 812,
           background: theme.background,
           transition: 'background-color 0.5s ease',
         }}
@@ -377,13 +393,7 @@ function App() {
 
         {/* Screen Content */}
         <div
-          className="overflow-y-auto poupt-scroll"
-          style={{
-            height: isFullScreen
-              ? 812 - 44 - 28
-              : 812 - 44 - 28 - 48 - 64,
-            transition: 'height 0.3s ease',
-          }}
+          className="overflow-y-auto poupt-scroll flex-1"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -424,7 +434,7 @@ function App() {
       </div>
 
       {/* Theme selector below phone */}
-      <ThemeBar theme={theme} themeId={currentTheme} onThemeChange={setTheme} />
+      <ThemeBar theme={theme} themeId={currentTheme} onThemeChange={setTheme} className="mobile-hide" />
     </>
   );
 }

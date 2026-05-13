@@ -1,8 +1,9 @@
 import useStore from '../store/useStore';
 import { Bell, Settings, ChevronLeft } from 'lucide-react';
+import { modeColors, modeLabels } from '../utils/helpers';
 
 export default function TopBar() {
-  const { user, currentScreen, setScreen, getModeLabel, getModeColor, notifications } = useStore();
+  const { user, currentScreen, setScreen, notifications } = useStore();
 
   const showBack = ['add-transaction', 'survival', 'settings', 'moedas', 'investments', 'notifications'].includes(currentScreen);
 
@@ -50,8 +51,8 @@ export default function TopBar() {
           </h1>
           {user && currentScreen === 'dashboard' && (
             <span className="text-xs mode-badge"
-              style={{ background: `${getModeColor()}18`, color: getModeColor() }}>
-              {getModeLabel()}
+              style={{ background: `${modeColors[user?.financialMode] || modeColors.sobrevivencia}18`, color: modeColors[user?.financialMode] || modeColors.sobrevivencia }}>
+              {modeLabels[user?.financialMode] || 'Sobrevivencia'}
             </span>
           )}
         </div>

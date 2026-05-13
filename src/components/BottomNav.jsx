@@ -1,5 +1,6 @@
 import useStore from '../store/useStore';
 import { LayoutDashboard, PiggyBank, MessageCircle, BarChart3, User } from 'lucide-react';
+import { modeColors } from '../utils/helpers';
 
 const navItems = [
   { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -10,8 +11,8 @@ const navItems = [
 ];
 
 export default function BottomNav() {
-  const { currentScreen, setScreen, getModeColor } = useStore();
-  const activeColor = getModeColor();
+  const { currentScreen, setScreen, user } = useStore();
+  const activeColor = modeColors[user?.financialMode] || modeColors.sobrevivencia;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-1.5 px-1"

@@ -142,10 +142,6 @@ const useStore = create((set, get) => ({
   addGoal: (goal) => set((s) => ({ goals: [...s.goals, goal] })),
   setInvestments: (investments) => set({ investments }),
   setNotifications: (notifications) => set({ notifications }),
-  setChatMessages: (messages) => set({ chatMessages: messages }),
-  addChatMessage: (message) => set((s) => ({
-    chatMessages: [...s.chatMessages, message]
-  })),
   setLoading: (isLoading) => set({ isLoading }),
 
   // PoupMoedas
@@ -160,6 +156,7 @@ const useStore = create((set, get) => ({
     return false;
   },
 
+  setCoachMessages: (messages) => set({ coachMessages: messages }),
   addCoachMessage: (msg) =>
     set((s) => ({ coachMessages: [...s.coachMessages, msg] })),
 

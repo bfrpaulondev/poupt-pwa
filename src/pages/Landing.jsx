@@ -14,8 +14,8 @@ function FlaskIcon({ color }) {
 }
 
 export default function Landing() {
-  const { setScreen, setOnboardingStep, onboardingComplete } = useStore();
-  const theme = themes.darkGold;
+  const { setScreen, setOnboardingStep, onboardingComplete, currentTheme } = useStore();
+  const theme = themes[currentTheme] || themes.darkGold;
 
   const handleStart = () => {
     setOnboardingStep(0);

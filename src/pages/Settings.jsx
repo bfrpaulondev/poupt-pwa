@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useStore from '../store/useStore';
+import { themes as themeMap } from '../themes';
 import { api } from '../services/api';
 import { modeLabels, modeColors, modeDescriptions } from '../utils/helpers';
 import {
@@ -10,15 +11,15 @@ import {
   Check
 } from 'lucide-react';
 
-const themes = [
-  { id: 'ouro-escuro', label: 'Ouro Escuro', color: 'var(--gold)', bg: '#121212' },
-  { id: 'ouro-claro', label: 'Ouro Claro', color: '#F5D76E', bg: '#1A1A2E' },
-  { id: 'azul-escuro', label: 'Azul Escuro', color: '#2563EB', bg: '#0C1222' },
-  { id: 'verde-escuro', label: 'Verde Escuro', color: '#059669', bg: '#0A1A14' },
-  { id: 'rosa-escuro', label: 'Rosa Escuro', color: '#DB2777', bg: '#1A0C16' },
-  { id: 'roxo-escuro', label: 'Roxo Escuro', color: '#7C3AED', bg: '#120C22' },
-  { id: 'vermelho-escuro', label: 'Vermelho Escuro', color: '#DC2626', bg: '#1A0C0C' },
-  { id: 'branco', label: 'Branco', color: '#1E293B', bg: '#F8FAFC' },
+const themeList = [
+  { id: 'darkGold', label: 'Ouro Escuro', color: themeMap.darkGold.primary, bg: themeMap.darkGold.background },
+  { id: 'oceanBlue', label: 'Oceano Azul', color: themeMap.oceanBlue.primary, bg: themeMap.oceanBlue.background },
+  { id: 'forestGreen', label: 'Floresta Verde', color: themeMap.forestGreen.primary, bg: themeMap.forestGreen.background },
+  { id: 'rosePink', label: 'Rosa Elegante', color: themeMap.rosePink.primary, bg: themeMap.rosePink.background },
+  { id: 'royalPurple', label: 'Purpura Real', color: themeMap.royalPurple.primary, bg: themeMap.royalPurple.background },
+  { id: 'sunsetOrange', label: 'Por do Sol', color: themeMap.sunsetOrange.primary, bg: themeMap.sunsetOrange.background },
+  { id: 'arcticWhite', label: 'Artico Claro', color: themeMap.arcticWhite.primary, bg: themeMap.arcticWhite.background },
+  { id: 'midnightNeon', label: 'Neon Midnight', color: themeMap.midnightNeon.primary, bg: themeMap.midnightNeon.background },
 ];
 
 const personalityLabels = {
@@ -36,12 +37,12 @@ const personalityDescriptions = {
 };
 
 export default function Settings() {
-  const { user, updateUser, logout, setScreen } = useStore();
+  const { user, updateUser, logout, setScreen, setTheme, currentTheme } = useStore();
   const [saving, setSaving] = useState(false);
   const [coachName, setCoachName] = useState(user?.coachName || '');
   const [coachPersonality, setCoachPersonality] = useState(user?.coachPersonality || 'disciplinado');
   const [selectedMode, setSelectedMode] = useState(user?.financialMode || 'sobrevivencia');
-  const [selectedTheme, setSelectedTheme] = useState(user?.theme || 'ouro-escuro');
+  const [selectedTheme, setSelectedTheme] = useState(currentTheme || 'darkGold');
   const [currency, setCurrency] = useState(user?.currency || 'EUR');
   const [language, setLanguage] = useState(user?.language || 'pt');
   const [notifications, setNotifications] = useState({
@@ -89,6 +90,7 @@ export default function Settings() {
 
   const handleThemeChange = async (themeId) => {
     setSelectedTheme(themeId);
+    setTheme(themeId);
     try {
       await api.updateMe({ theme: themeId });
       updateUser({ theme: themeId });
@@ -230,7 +232,7 @@ export default function Settings() {
           </h3>
         </div>
         <div className="grid grid-cols-4 gap-2">
-          {themes.map(theme => (
+          {themeList.map(theme => (
             <button key={theme.id} onClick={() => handleThemeChange(theme.id)}
               className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all"
               style={{
@@ -240,7 +242,7 @@ export default function Settings() {
               <div className="w-8 h-8 rounded-full relative border"
                 style={{ background: `linear-gradient(135deg, ${theme.color}, ${theme.bg})`,
                   boxShadow: selectedTheme === theme.id ? `0 0 12px ${theme.color}50` : 'none',
-                  borderColor: theme.id === 'branco' ? '#CBD5E1' : 'transparent'
+                  borderColor: theme.id === 'arcticWhite' ? '#CBD5E1' : 'transparent'
                 }}>
                 {selectedTheme === theme.id && (
                   <div className="absolute inset-0 flex items-center justify-center">

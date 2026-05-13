@@ -5,8 +5,8 @@ import { themes } from '../themes';
 import { Plus, Camera, BarChart3, Target, ChevronRight, AlertTriangle } from 'lucide-react';
 
 export default function Dashboard() {
-  const { mockUser, jars, transactions, setScreen } = useStore();
-  const theme = themes.darkGold;
+  const { mockUser, jars, transactions, setScreen, currentTheme } = useStore();
+  const theme = themes[currentTheme] || themes.darkGold;
 
   const hour = new Date().getHours();
   const greeting =

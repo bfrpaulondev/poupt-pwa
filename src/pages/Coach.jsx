@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
+import { modeColors } from '../utils/helpers';
 import { Send, Trash2, Sparkles, Bot, User as UserIcon } from 'lucide-react';
 
 export default function Coach() {
-  const { user, chatMessages, setChatMessages, addChatMessage, getModeColor } = useStore();
+  const { user, coachMessages, setCoachMessages, addCoachMessage } = useStore();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState(false);
@@ -16,7 +17,7 @@ export default function Coach() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [chatMessages, typing]);
+  }, [coachMessages, typing]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -26,7 +27,7 @@ export default function Coach() {
     try {
       const res = await api.getCoachHistory();
       if (res.data.messages?.length) {
-        setChatMessages(res.data.messages);
+        setCoachMessages(res.data.messages);
       }
     } catch (err) {
       console.error(err);
@@ -37,7 +38,7 @@ export default function Coach() {
     if (!input.trim() || sending) return;
 
     const userMessage = { role: 'user', content: input.trim(), timestamp: new Date() };
-    addChatMessage(userMessage);
+    addCoachMessage(userMessage);
     setInput('');
     setSending(true);
     setTyping(true);
@@ -49,9 +50,9 @@ export default function Coach() {
         content: res.data.reply,
         timestamp: new Date()
       };
-      addChatMessage(assistantMessage);
+      addCoachMessage(assistantMessage);
     } catch (err) {
-      addChatMessage({
+      addCoachMessage({
         role: 'assistant',
         content: err.message || 'Erro ao comunicar com o Coach.',
         timestamp: new Date()
@@ -65,7 +66,7 @@ export default function Coach() {
   const handleClear = async () => {
     try {
       await api.clearCoachHistory();
-      setChatMessages([]);
+      setCoachMessages([]);
     } catch (err) {
       console.error(err);
     }
@@ -78,7 +79,7 @@ export default function Coach() {
     }
   };
 
-  const modeColor = getModeColor();
+  const modeColor = modeColors[user?.financialMode] || modeColors.sobrevivencia;
 
   return (
     <div className="flex flex-col h-[calc(100vh-120px)]">
@@ -106,7 +107,7 @@ export default function Coach() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {chatMessages.length === 0 && (
+        {coachMessages.length === 0 && (
           <div className="text-center py-8 animate-fade-in">
             <div className="w-16 h-16 mx-auto mb-4 rounded-3xl flex items-center justify-center"
               style={{ background: `${modeColor}20` }}>
@@ -122,7 +123,7 @@ export default function Coach() {
           </div>
         )}
 
-        {chatMessages.map((msg, i) => (
+        {coachMessages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] px-4 py-3 rounded-2xl ${
               msg.role === 'user'

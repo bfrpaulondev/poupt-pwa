@@ -13,9 +13,10 @@ export default function Onboarding() {
     setOnboardingData,
     setOnboardingComplete,
     setScreen,
+    currentTheme,
   } = useStore();
 
-  const theme = themes.darkGold;
+  const theme = themes[currentTheme] || themes.darkGold;
 
   const steps = 4;
   const progress = ((onboardingStep + 1) / steps) * 100;
