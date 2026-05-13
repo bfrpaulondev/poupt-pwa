@@ -13,13 +13,10 @@ import {
   Target,
   BarChart3,
   Bell,
-  Map,
   Building2,
   Shield,
   Coins,
-  FileText,
   Settings,
-  Trophy,
   ChevronRight,
 } from 'lucide-react';
 
@@ -59,26 +56,6 @@ const screenComponents = {
   survival: SurvivalMode,
   alerts: Notifications,
   reports: Reports,
-};
-
-const screenNames = {
-  landing: 'PoupPT',
-  login: 'Entrar',
-  register: 'Criar Conta',
-  onboarding: 'Configuracao',
-  dashboard: 'Inicio',
-  jars: '6 Frascos',
-  coach: 'AI Coach',
-  debts: 'Dividas',
-  goals: 'Objetivos',
-  profile: 'Perfil',
-  settings: 'Configuracoes',
-  reports: 'Relatorios',
-  survival: 'Sobrevivencia',
-  poupMoedas: 'PoupMoedas',
-  addTransaction: 'Nova Transacao',
-  investments: 'Investimentos',
-  alerts: 'Alertas',
 };
 
 const tabs = [
@@ -139,7 +116,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.6 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-40"
+            className="fixed inset-0 z-40"
             style={{ background: '#000' }}
             onClick={onClose}
           />
@@ -148,7 +125,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
             animate={{ x: 0 }}
             exit={{ x: -280 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="absolute top-0 left-0 bottom-0 z-50 w-[260px] flex flex-col"
+            className="fixed top-0 left-0 bottom-0 z-50 w-[280px] flex flex-col"
             style={{ background: theme.surface }}
           >
             <div
@@ -177,7 +154,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => onNavigate(item.id)}
+                    onClick={onNavigate ? () => onNavigate(item.id) : undefined}
                     className="flex items-center gap-3 w-full px-4 py-3 text-left transition-colors duration-150 hover:opacity-80"
                     style={{ color: theme.text }}
                   >
@@ -205,39 +182,6 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
   );
 }
 
-function ThemeBar({ theme, themeId, onThemeChange }) {
-  return (
-    <div className="hidden md:flex items-center justify-center gap-3 mt-4 flex-wrap px-4">
-      {Object.entries(themes).map(([id, t]) => (
-        <button
-          key={id}
-          onClick={() => onThemeChange(id)}
-          className="relative transition-transform duration-200 hover:scale-110"
-          title={t.name}
-        >
-          <div
-            className="w-8 h-8 rounded-full border-2 transition-all duration-300"
-            style={{
-              background: `linear-gradient(135deg, ${t.gradient[0]}, ${t.gradient[1]})`,
-              borderColor: id === themeId ? '#fff' : 'rgba(255,255,255,0.2)',
-              boxShadow: id === themeId ? `0 0 12px ${t.primary}60` : 'none',
-              transform: id === themeId ? 'scale(1.15)' : 'scale(1)',
-            }}
-          />
-          {id === themeId && (
-            <div
-              className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold whitespace-nowrap"
-              style={{ color: t.primary }}
-            >
-              {t.name}
-            </div>
-          )}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function App() {
   const { currentScreen, setScreen, currentTheme, setTheme, menuOpen, setMenuOpen, restoreSession } = useStore();
   const [ready, setReady] = useState(false);
@@ -249,7 +193,7 @@ function App() {
     setReady(true);
   }, []);
 
-  // Set CSS custom properties from theme for internal pages
+  // Set CSS custom properties from theme
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty('--gold', theme.primary);
@@ -287,112 +231,90 @@ function App() {
   };
 
   return (
-    <>
-      {/* Desktop: Title above phone */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="hidden md:block mb-3 text-center"
-      >
-        <h1
-          className="text-lg font-bold gradient-text"
-          style={{
-            backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-          }}
-        >
-          {screenNames[currentScreen] || 'PoupPT'}
-        </h1>
-      </motion.div>
-
-      {/* App Shell - full viewport on mobile, phone frame on desktop */}
-      <div
-        className="app-shell relative flex flex-col"
-        style={{ background: theme.background }}
-      >
-        {/* App Header with hamburger (non-fullscreen screens) */}
-        {!isFullScreen && (
-          <div
-            className="flex items-center justify-between px-4 py-2 shrink-0"
-            style={{ background: theme.background }}
-          >
-            <button
-              onClick={() => setMenuOpen(true)}
-              className="p-2 rounded-xl transition-colors duration-150"
-              style={{ color: theme.text }}
-            >
-              <Menu size={20} />
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold" style={{ color: theme.primary }}>
-                🐷 PoupPT
-              </span>
-            </div>
-            <button
-              onClick={() => setScreen('alerts')}
-              className="p-2 rounded-xl relative"
-              style={{ color: theme.text }}
-            >
-              <Bell size={18} />
-              <div
-                className="absolute top-1 right-1 w-2 h-2 rounded-full"
-                style={{ background: '#FF4444' }}
-              />
-            </button>
-          </div>
-        )}
-
-        {/* Screen Content - fills remaining space */}
+    <div
+      className="app-shell"
+      style={{ background: theme.background }}
+    >
+      {/* App Header with hamburger (non-fullscreen screens) */}
+      {!isFullScreen && (
         <div
-          className="flex-1 overflow-y-auto poupt-scroll"
-          style={{
-            background: theme.background,
-            transition: 'background-color 0.5s ease',
-          }}
+          className="flex items-center justify-between px-4 py-2 shrink-0"
+          style={{ background: theme.background }}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentScreen}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="min-h-full"
-            >
-              <Suspense
-                fallback={
-                  <div
-                    className="flex items-center justify-center h-64"
-                    style={{ color: theme.textMuted }}
-                  >
-                    A carregar...
-                  </div>
-                }
-              >
-                <ScreenComponent />
-              </Suspense>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Bottom Navigation (non-fullscreen screens) */}
-        {!isFullScreen && (
-          <div className="shrink-0">
-            <BottomNav theme={theme} currentScreen={currentScreen} onTab={handleTab} />
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="p-2 rounded-xl transition-colors duration-150"
+            style={{ color: theme.text }}
+          >
+            <Menu size={20} />
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold" style={{ color: theme.primary }}>
+              🐷 PoupPT
+            </span>
           </div>
-        )}
+          <button
+            onClick={() => setScreen('alerts')}
+            className="p-2 rounded-xl relative"
+            style={{ color: theme.text }}
+          >
+            <Bell size={18} />
+            <div
+              className="absolute top-1 right-1 w-2 h-2 rounded-full"
+              style={{ background: '#FF4444' }}
+            />
+          </button>
+        </div>
+      )}
 
-        {/* Hamburger Menu */}
-        <HamburgerMenu
-          theme={theme}
-          isOpen={menuOpen}
-          onClose={() => setMenuOpen(false)}
-          onNavigate={(id) => setScreen(id)}
-        />
+      {/* Screen Content - fills remaining space */}
+      <div
+        className="flex-1 overflow-y-auto poupt-scroll"
+        style={{
+          background: theme.background,
+          transition: 'background-color 0.5s ease',
+        }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentScreen}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+            className="min-h-full"
+          >
+            <Suspense
+              fallback={
+                <div
+                  className="flex items-center justify-center h-64"
+                  style={{ color: theme.textMuted }}
+                >
+                  A carregar...
+                </div>
+              }
+            >
+              <ScreenComponent />
+            </Suspense>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Theme selector (desktop only) */}
-      <ThemeBar theme={theme} themeId={currentTheme} onThemeChange={setTheme} />
-    </>
+      {/* Bottom Navigation (non-fullscreen screens) */}
+      {!isFullScreen && (
+        <div className="shrink-0">
+          <BottomNav theme={theme} currentScreen={currentScreen} onTab={handleTab} />
+        </div>
+      )}
+
+      {/* Hamburger Menu */}
+      <HamburgerMenu
+        theme={theme}
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onNavigate={(id) => { setMenuOpen(false); setScreen(id); }}
+      />
+    </div>
   );
 }
 

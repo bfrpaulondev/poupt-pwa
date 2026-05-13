@@ -14,7 +14,7 @@ function FlaskIcon({ color }) {
 }
 
 export default function Landing() {
-  const { setScreen, setOnboardingStep, onboardingComplete } = useStore();
+  const { setScreen, setOnboardingStep } = useStore();
   const theme = themes.darkGold;
 
   const handleStart = () => {
@@ -28,12 +28,12 @@ export default function Landing() {
 
   return (
     <div
-      className="flex flex-col items-center justify-between min-h-full px-6 py-8 relative overflow-hidden"
+      className="flex flex-col min-h-full px-6 py-6 relative overflow-y-auto"
       style={{ background: theme.background }}
     >
       {/* Animated background gradient */}
       <div
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
           background: `radial-gradient(ellipse at 50% 0%, ${theme.gradient[0]}30 0%, transparent 60%)`,
         }}
@@ -44,7 +44,7 @@ export default function Landing() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 text-center mt-8"
+        className="relative z-10 text-center pt-6 pb-4"
       >
         <div className="text-6xl mb-3">🐷</div>
         <h1
@@ -65,7 +65,7 @@ export default function Landing() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="relative z-10 w-full glass rounded-2xl p-5 mb-6"
+        className="relative z-10 w-full glass rounded-2xl p-5 mt-4"
       >
         <h2
           className="text-xl font-bold mb-4 text-center"
@@ -77,7 +77,7 @@ export default function Landing() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: `${theme.primary}20` }}
             >
               <FlaskIcon color={theme.primary} />
@@ -94,7 +94,7 @@ export default function Landing() {
 
           <div className="flex items-center gap-3">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: `${theme.primary}20` }}
             >
               <Bot size={20} color={theme.primary} />
@@ -111,7 +111,7 @@ export default function Landing() {
 
           <div className="flex items-center gap-3">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: `${theme.primary}20` }}
             >
               <Snowflake size={20} color={theme.primary} />
@@ -133,7 +133,7 @@ export default function Landing() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6 }}
-        className="relative z-10 w-full flex flex-col gap-3"
+        className="relative z-10 w-full flex flex-col gap-3 mt-6"
       >
         <button
           onClick={handleStart}
@@ -173,8 +173,8 @@ export default function Landing() {
         <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; +1000 users</span>
       </motion.div>
 
-      {/* App store badges (mock) */}
-      <div className="relative z-10 flex items-center gap-3 mt-4 mb-2">
+      {/* App store badges */}
+      <div className="relative z-10 flex items-center justify-center gap-3 mt-4 mb-4">
         <div
           className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1"
           style={{ background: theme.surface, color: theme.textMuted, border: `1px solid ${theme.border}` }}
