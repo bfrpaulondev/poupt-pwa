@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
-import { Mail, Lock, User, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function Register() {
   const { setScreen, login } = useStore();
@@ -21,7 +21,6 @@ export default function Register() {
     setLoading(true);
     setError('');
     try {
-      // Mock register for prototype
       const mockUser = {
         name,
         email,
@@ -39,13 +38,13 @@ export default function Register() {
 
   return (
     <div
-      className="flex flex-col min-h-full px-6 py-4"
+      className="flex flex-col min-h-full px-5 py-4 poupt-scroll"
       style={{ background: theme.background }}
     >
       {/* Back button */}
       <button
         onClick={() => setScreen('landing')}
-        className="flex items-center gap-1 mb-6 text-sm font-medium"
+        className="flex items-center gap-1 mb-6 text-sm font-medium py-2"
         style={{ color: theme.textMuted }}
       >
         <ArrowLeft size={16} />
@@ -58,7 +57,7 @@ export default function Register() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <div className="text-5xl mb-3">🐷</div>
+        <div className="text-6xl mb-4 select-none">🐷</div>
         <h1
           className="text-3xl font-extrabold gradient-text mb-2"
           style={{
@@ -67,7 +66,7 @@ export default function Register() {
         >
           Criar Conta
         </h1>
-        <p className="text-sm" style={{ color: theme.textMuted }}>
+        <p className="text-sm font-medium" style={{ color: theme.textMuted }}>
           Comeca a tua jornada financeira
         </p>
       </motion.div>
@@ -79,73 +78,75 @@ export default function Register() {
         transition={{ delay: 0.2 }}
         className="flex flex-col gap-4"
       >
-        <div>
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
-            <User size={18} style={{ color: theme.textMuted }} />
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Nome"
-              className="flex-1 bg-transparent outline-none text-sm font-medium"
-              style={{ color: theme.text }}
-            />
-          </div>
+        <div
+          className="flex items-center gap-3 px-4 py-3.5 rounded-xl"
+          style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}
+        >
+          <User size={18} style={{ color: theme.textMuted }} />
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nome"
+            className="flex-1 bg-transparent outline-none text-sm font-medium"
+            style={{ color: theme.text }}
+            autoComplete="name"
+          />
         </div>
 
-        <div>
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
-            <Mail size={18} style={{ color: theme.textMuted }} />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="flex-1 bg-transparent outline-none text-sm font-medium"
-              style={{ color: theme.text }}
-            />
-          </div>
+        <div
+          className="flex items-center gap-3 px-4 py-3.5 rounded-xl"
+          style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}
+        >
+          <Mail size={18} style={{ color: theme.textMuted }} />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="flex-1 bg-transparent outline-none text-sm font-medium"
+            style={{ color: theme.text }}
+            autoComplete="email"
+          />
         </div>
 
-        <div>
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
-            <Lock size={18} style={{ color: theme.textMuted }} />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Palavra-passe"
-              className="flex-1 bg-transparent outline-none text-sm font-medium"
-              style={{ color: theme.text }}
-            />
-          </div>
+        <div
+          className="flex items-center gap-3 px-4 py-3.5 rounded-xl"
+          style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}
+        >
+          <Lock size={18} style={{ color: theme.textMuted }} />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Palavra-passe"
+            className="flex-1 bg-transparent outline-none text-sm font-medium"
+            style={{ color: theme.text }}
+            autoComplete="new-password"
+          />
         </div>
 
         {error && (
-          <p className="text-xs text-center" style={{ color: '#FF6B6B' }}>{error}</p>
+          <p className="text-xs text-center font-medium" style={{ color: '#EF4444' }}>{error}</p>
         )}
 
         <button
           onClick={handleRegister}
           disabled={loading}
-          className="w-full py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-          style={{
-            background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-            color: theme.textInverse,
-            boxShadow: `0 8px 24px ${theme.primary}40`,
-          }}
+          className="btn-gold w-full flex items-center justify-center gap-2"
         >
           {loading ? 'A criar conta...' : 'Comecar Gratis'}
+          {!loading && <ArrowRight size={16} />}
         </button>
       </motion.div>
 
       {/* Login link */}
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <p className="text-xs" style={{ color: theme.textMuted }}>
           Ja tens conta?{' '}
           <button
             onClick={() => setScreen('login')}
-            className="font-semibold"
+            className="font-bold"
             style={{ color: theme.primary }}
           >
             Entrar
@@ -154,9 +155,9 @@ export default function Register() {
       </div>
 
       {/* Trust badges */}
-      <div className="mt-auto pt-6 flex items-center justify-center gap-4">
-        <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Gratuito</span>
-        <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Sem cartao</span>
+      <div className="mt-auto pt-6 flex items-center justify-center gap-5">
+        <span className="text-[11px]" style={{ color: theme.textMuted }}>&#10003; Gratuito</span>
+        <span className="text-[11px]" style={{ color: theme.textMuted }}>&#10003; Sem cartao</span>
       </div>
     </div>
   );

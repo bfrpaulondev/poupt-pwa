@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
 
-const avatars = ['\u{1F469}', '\u{1F468}', '\u{1F9D1}', '\u{1F469}\u{200D}\u{1F9B0}', '\u{1F468}\u{200D}\u{1F9B1}', '\u{1F469}\u{200D}\u{1F9B3}', '\u{1F9D4}', '\u{1F471}\u{200D}\u{2640}\u{FE0F}'];
+const avatars = ['👩', '👨', '🧑', '👩‍🦰', '👨‍🦱', '👩‍🦳', '🧔', '👱‍♀️'];
 
 export default function Onboarding() {
   const {
@@ -37,7 +37,7 @@ export default function Onboarding() {
 
   return (
     <div
-      className="flex flex-col min-h-full px-6 py-4"
+      className="flex flex-col min-h-full px-5 py-4 poupt-scroll"
       style={{ background: theme.background }}
     >
       {/* Progress bar */}
@@ -49,7 +49,7 @@ export default function Onboarding() {
           {onboardingStep > 0 && (
             <button
               onClick={handlePrev}
-              className="text-xs font-medium"
+              className="text-xs font-bold"
               style={{ color: theme.primary }}
             >
               ← Anterior
@@ -57,7 +57,7 @@ export default function Onboarding() {
           )}
         </div>
         <div
-          className="w-full h-2 rounded-full overflow-hidden"
+          className="w-full h-1.5 rounded-full overflow-hidden"
           style={{ background: theme.surface }}
         >
           <motion.div
@@ -90,15 +90,10 @@ export default function Onboarding() {
       </AnimatePresence>
 
       {/* Next button */}
-      <div className="mt-6">
+      <div className="mt-6 pb-2">
         <button
           onClick={handleNext}
-          className="w-full py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
-          style={{
-            background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-            color: theme.textInverse,
-            boxShadow: `0 8px 24px ${theme.primary}40`,
-          }}
+          className="btn-gold w-full"
         >
           {onboardingStep === steps - 1 ? '🎉 Comecar!' : 'Proximo →'}
         </button>
@@ -111,8 +106,8 @@ function Step1Name({ theme }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   return (
-    <div className="flex flex-col items-center pt-8">
-      <div className="text-5xl mb-4">👋</div>
+    <div className="flex flex-col items-center pt-6">
+      <div className="text-5xl mb-4 select-none">👋</div>
       <h2 className="text-2xl font-bold mb-2 text-center" style={{ color: theme.text }}>
         Como te chamas?
       </h2>
@@ -121,15 +116,15 @@ function Step1Name({ theme }) {
       </p>
 
       {/* Avatar picker */}
-      <div className="flex flex-wrap gap-3 mb-6 justify-center">
+      <div className="flex flex-wrap gap-2.5 mb-6 justify-center">
         {avatars.map((a) => (
           <button
             key={a}
             onClick={() => setOnboardingData({ avatar: a })}
             className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-all duration-200"
             style={{
-              background: onboardingData.avatar === a ? `${theme.primary}30` : theme.surface,
-              border: onboardingData.avatar === a ? `2px solid ${theme.primary}` : `2px solid ${theme.border}`,
+              background: onboardingData.avatar === a ? 'rgba(255,215,0,0.15)' : theme.surface,
+              border: onboardingData.avatar === a ? '2px solid #FFD700' : `2px solid ${theme.border}`,
               transform: onboardingData.avatar === a ? 'scale(1.1)' : 'scale(1)',
             }}
           >
@@ -144,7 +139,7 @@ function Step1Name({ theme }) {
         value={onboardingData.name}
         onChange={(e) => setOnboardingData({ name: e.target.value })}
         placeholder="O teu nome..."
-        className="w-full px-4 py-3 rounded-xl text-base font-medium outline-none transition-all duration-200"
+        className="w-full px-4 py-3.5 rounded-xl text-base font-medium outline-none transition-all duration-200"
         style={{
           background: theme.surface,
           color: theme.text,
@@ -159,8 +154,8 @@ function Step2Income({ theme }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   return (
-    <div className="flex flex-col items-center pt-8">
-      <div className="text-5xl mb-4">💰</div>
+    <div className="flex flex-col items-center pt-6">
+      <div className="text-5xl mb-4 select-none">💰</div>
       <h2 className="text-2xl font-bold mb-2 text-center" style={{ color: theme.text }}>
         Qual o teu rendimento?
       </h2>
@@ -183,7 +178,6 @@ function Step2Income({ theme }) {
         value={onboardingData.income}
         onChange={(e) => setOnboardingData({ income: parseInt(e.target.value) })}
         className="w-full mb-4"
-        style={{ accentColor: theme.primary }}
       />
 
       <div className="flex justify-between w-full text-xs" style={{ color: theme.textMuted }}>
@@ -195,7 +189,7 @@ function Step2Income({ theme }) {
         type="number"
         value={onboardingData.income}
         onChange={(e) => setOnboardingData({ income: parseInt(e.target.value) || 500 })}
-        className="w-full px-4 py-3 rounded-xl text-base font-medium outline-none mt-4"
+        className="w-full px-4 py-3.5 rounded-xl text-base font-medium outline-none mt-4"
         style={{
           background: theme.surface,
           color: theme.text,
@@ -210,8 +204,8 @@ function Step2Debts({ theme }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   return (
-    <div className="flex flex-col items-center pt-8">
-      <div className="text-5xl mb-4">💳</div>
+    <div className="flex flex-col items-center pt-6">
+      <div className="text-5xl mb-4 select-none">💳</div>
       <h2 className="text-2xl font-bold mb-2 text-center" style={{ color: theme.text }}>
         Tens dividas?
       </h2>
@@ -219,12 +213,12 @@ function Step2Debts({ theme }) {
         Sem julgamentos. Vamos resolver isso.
       </p>
 
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-4 mb-6 w-full">
         <button
           onClick={() => setOnboardingData({ hasDebts: true })}
-          className="px-8 py-3 rounded-xl font-bold text-sm transition-all duration-200"
+          className="flex-1 py-3.5 rounded-xl font-bold text-sm transition-all duration-200"
           style={{
-            background: onboardingData.hasDebts ? `${theme.primary}30` : theme.surface,
+            background: onboardingData.hasDebts ? 'rgba(255,215,0,0.15)' : theme.surface,
             color: onboardingData.hasDebts ? theme.primary : theme.textMuted,
             border: `1.5px solid ${onboardingData.hasDebts ? theme.primary : theme.border}`,
           }}
@@ -233,9 +227,9 @@ function Step2Debts({ theme }) {
         </button>
         <button
           onClick={() => setOnboardingData({ hasDebts: false })}
-          className="px-8 py-3 rounded-xl font-bold text-sm transition-all duration-200"
+          className="flex-1 py-3.5 rounded-xl font-bold text-sm transition-all duration-200"
           style={{
-            background: !onboardingData.hasDebts ? `${theme.primary}30` : theme.surface,
+            background: !onboardingData.hasDebts ? 'rgba(255,215,0,0.15)' : theme.surface,
             color: !onboardingData.hasDebts ? theme.primary : theme.textMuted,
             border: `1.5px solid ${!onboardingData.hasDebts ? theme.primary : theme.border}`,
           }}
@@ -251,11 +245,11 @@ function Step2Debts({ theme }) {
           className="w-full glass rounded-xl p-4"
         >
           <p className="text-xs font-medium mb-3" style={{ color: theme.textMuted }}>
-            Nao te preocupes - o PoupPT vai ajudar-te a eliminar cada uma delas com o metodo Snowball.
+            Nao te preocupes — o PoupPT vai ajudar-te a eliminar cada uma delas com o metodo Snowball.
           </p>
-          <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: `${theme.primary}15` }}>
+          <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: 'rgba(255,215,0,0.06)' }}>
             <span>❄️</span>
-            <span className="text-xs font-medium" style={{ color: theme.primary }}>
+            <span className="text-xs font-bold" style={{ color: theme.primary }}>
               Metodo Snowball: pagar a menor divida primeiro
             </span>
           </div>
@@ -269,8 +263,8 @@ function Step4Coach({ theme }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   return (
-    <div className="flex flex-col items-center pt-8">
-      <div className="text-5xl mb-4">🤖</div>
+    <div className="flex flex-col items-center pt-6">
+      <div className="text-5xl mb-4 select-none">🤖</div>
       <h2 className="text-2xl font-bold mb-2 text-center" style={{ color: theme.text }}>
         Escolhe o teu treinador
       </h2>
@@ -283,18 +277,18 @@ function Step4Coach({ theme }) {
           onClick={() => setOnboardingData({ coachMode: 'sargento' })}
           className="flex-1 p-4 rounded-2xl transition-all duration-200"
           style={{
-            background: onboardingData.coachMode === 'sargento' ? '#FF444420' : theme.surface,
-            border: `2px solid ${onboardingData.coachMode === 'sargento' ? '#FF4444' : theme.border}`,
+            background: onboardingData.coachMode === 'sargento' ? 'rgba(239,68,68,0.08)' : theme.surface,
+            border: `2px solid ${onboardingData.coachMode === 'sargento' ? '#EF4444' : theme.border}`,
           }}
         >
           <div className="text-4xl mb-2">💪</div>
-          <h3 className="font-bold text-base mb-1" style={{ color: '#FF6B6B' }}>
+          <h3 className="font-bold text-base mb-1" style={{ color: '#EF4444' }}>
             Sargento
           </h3>
           <p className="text-xs" style={{ color: theme.textMuted }}>
             Disciplina e resultados!
           </p>
-          <div className="mt-2 text-xs px-2 py-1 rounded-full inline-block" style={{ background: '#FF444420', color: '#FF6B6B' }}>
+          <div className="mt-2 text-xs px-2 py-1 rounded-full inline-block" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444' }}>
             Militar
           </div>
         </button>
@@ -303,18 +297,18 @@ function Step4Coach({ theme }) {
           onClick={() => setOnboardingData({ coachMode: 'amigavel' })}
           className="flex-1 p-4 rounded-2xl transition-all duration-200"
           style={{
-            background: onboardingData.coachMode === 'amigavel' ? '#4CAF5020' : theme.surface,
-            border: `2px solid ${onboardingData.coachMode === 'amigavel' ? '#4CAF50' : theme.border}`,
+            background: onboardingData.coachMode === 'amigavel' ? 'rgba(16,185,129,0.08)' : theme.surface,
+            border: `2px solid ${onboardingData.coachMode === 'amigavel' ? '#10B981' : theme.border}`,
           }}
         >
           <div className="text-4xl mb-2">🤗</div>
-          <h3 className="font-bold text-base mb-1" style={{ color: '#4CAF50' }}>
+          <h3 className="font-bold text-base mb-1" style={{ color: '#10B981' }}>
             Amigavel
           </h3>
           <p className="text-xs" style={{ color: theme.textMuted }}>
             Apoio e compreensao!
           </p>
-          <div className="mt-2 text-xs px-2 py-1 rounded-full inline-block" style={{ background: '#4CAF5020', color: '#4CAF50' }}>
+          <div className="mt-2 text-xs px-2 py-1 rounded-full inline-block" style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981' }}>
             Amigo
           </div>
         </button>
@@ -327,7 +321,7 @@ function Step4Coach({ theme }) {
         transition={{ delay: 0.3 }}
         className="w-full mt-6 glass rounded-xl p-4"
       >
-        <p className="text-xs" style={{ color: theme.textMuted }}>
+        <p className="text-xs leading-relaxed" style={{ color: theme.textMuted }}>
           {onboardingData.coachMode === 'sargento'
             ? '💬 "Bem-vindo(a), recruta! A partir de hoje, as tuas financas sao a tua missao. Sem desculpas!"'
             : '💬 "Ola! Estou aqui para te ajudar. Vamos juntos construir um futuro financeiro melhor!"'}

@@ -1,458 +1,231 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { api } from '../services/api';
-import { formatCurrency, categoryLabels, jarLabels, jarColors } from '../utils/helpers';
+import { themes } from '../themes';
 import {
-  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
-import {
-  Calendar, PieChart as PieChartIcon, CreditCard, TrendingUp,
-  TrendingDown, ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight
+  Calendar, CreditCard, TrendingUp, ArrowDownLeft, ArrowUpRight,
+  ChevronLeft, ChevronRight, BarChart3, PieChart
 } from 'lucide-react';
 
-const CHART_COLORS = ['var(--gold)', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444', '#EC4899', '#F97316', '#64748B'];
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="p-2 rounded-xl text-xs" style={{
-      background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-    }}>
-      <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }}>
-          {p.name}: {formatCurrency(p.value)}
-        </p>
-      ))}
-    </div>
-  );
-};
-
-const PieTooltip = ({ active, payload }) => {
-  if (!active || !payload?.length) return null;
-  const d = payload[0];
-  return (
-    <div className="p-2 rounded-xl text-xs" style={{
-      background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-    }}>
-      <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{d.name}</p>
-      <p style={{ color: d.payload.fill || 'var(--gold)' }}>{formatCurrency(d.value)}</p>
-    </div>
-  );
-};
+const monthNames = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 export default function Reports() {
-  const { user } = useStore();
-  const [activeTab, setActiveTab] = useState('mensal');
-  const [monthlyData, setMonthlyData] = useState(null);
-  const [debtProgress, setDebtProgress] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState(() => {
-    const now = new Date();
-    return { month: now.getMonth() + 1, year: now.getFullYear() };
-  });
+  const theme = themes.darkGold;
+  const { transactions, jars, user } = useStore();
+  const [activeTab, setActiveTab] = useState('resumo');
 
-  useEffect(() => { loadData(); }, [selectedMonth]);
+  const s = (color, alpha) => `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [monthlyRes, debtRes] = await Promise.all([
-        api.getReportMonthly(selectedMonth.month, selectedMonth.year).catch(() => null),
-        api.getDebtProgress().catch(() => null)
-      ]);
-      if (monthlyRes?.data) setMonthlyData(monthlyRes.data);
-      if (debtRes?.data) setDebtProgress(debtRes.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const now = new Date();
+  const [month, setMonth] = useState(now.getMonth());
+  const [year, setYear] = useState(now.getFullYear());
 
   const navigateMonth = (dir) => {
-    setSelectedMonth(prev => {
-      let { month, year } = prev;
-      month += dir;
-      if (month > 12) { month = 1; year++; }
-      if (month < 1) { month = 12; year--; }
-      return { month, year };
-    });
+    let m = month + dir;
+    let y = year;
+    if (m > 11) { m = 0; y++; }
+    if (m < 0) { m = 11; y--; }
+    setMonth(m); setYear(y);
   };
 
-  const monthName = new Date(selectedMonth.year, selectedMonth.month - 1, 1)
-    .toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
+  const monthTransactions = useMemo(() => {
+    return (transactions || []).filter(t => {
+      const d = new Date(t.date);
+      return d.getMonth() === month && d.getFullYear() === year;
+    });
+  }, [transactions, month, year]);
 
-  // Prepare chart data
-  const incomeVsExpenses = monthlyData?.monthlyBreakdown || [];
-  const categoryBreakdown = monthlyData?.categoryBreakdown || [];
-  const jarsAllocation = monthlyData?.jarsAllocation || Object.entries(jarLabels).map(([key, label]) => ({
-    jar: key, name: label, value: 0, percentage: 0
-  }));
-  const savingsRateTrend = monthlyData?.savingsRateTrend || [];
-  const totalIncome = monthlyData?.totalIncome || 0;
-  const totalExpenses = monthlyData?.totalExpenses || 0;
+  const totalIncome = monthTransactions.filter(t => t.type === 'receita').reduce((s, t) => s + (t.amount || 0), 0);
+  const totalExpenses = monthTransactions.filter(t => t.type === 'despesa').reduce((s, t) => s + (t.amount || 0), 0);
   const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
 
+  // Spending by jar
+  const spendingByJar = useMemo(() => {
+    const map = {};
+    monthTransactions.filter(t => t.type === 'despesa' && t.jar).forEach(t => {
+      map[t.jar] = (map[t.jar] || 0) + (t.amount || 0);
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [monthTransactions]);
+
+  // Spending by category
+  const spendingByCategory = useMemo(() => {
+    const map = {};
+    monthTransactions.filter(t => t.type === 'despesa').forEach(t => {
+      const cat = t.category || 'outro';
+      map[cat] = (map[cat] || 0) + (t.amount || 0);
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  }, [monthTransactions]);
+
+  const maxSpend = spendingByJar.length > 0 ? spendingByJar[0][1] : 1;
+  const maxCatSpend = spendingByCategory.length > 0 ? spendingByCategory[0][1] : 1;
+
   const tabs = [
-    { id: 'mensal', label: 'Mensal', icon: Calendar },
-    { id: 'categorias', label: 'Categorias', icon: PieChartIcon },
-    { id: 'dividas', label: 'Dividas', icon: CreditCard },
+    { id: 'resumo', label: 'Resumo', icon: BarChart3 },
+    { id: 'frascos', label: 'Frascos', icon: PieChart },
+    { id: 'categorias', label: 'Categorias', icon: CreditCard },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient gold-shimmer" />
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>A carregar relatorios...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Relatorios</h2>
-        <div className="flex items-center gap-2">
-          <button onClick={() => navigateMonth(-1)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
-            <ChevronLeft size={14} style={{ color: 'var(--text-secondary)' }} />
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16, overflowX: 'hidden' }}
+    >
+      {/* Month Navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: theme.text, margin: 0 }}>Relatorios</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button onClick={() => navigateMonth(-1)} style={{
+            width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: theme.surface, border: `1px solid ${theme.border}`, cursor: 'pointer'
+          }}>
+            <ChevronLeft size={14} style={{ color: theme.textMuted }} />
           </button>
-          <span className="text-xs font-medium capitalize min-w-[100px] text-center"
-            style={{ color: 'var(--text-primary)' }}>
-            {monthName}
+          <span style={{ fontSize: 12, fontWeight: 500, color: theme.text, minWidth: 100, textAlign: 'center' }}>
+            {monthNames[month]} {year}
           </span>
-          <button onClick={() => navigateMonth(1)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
-            <ChevronRight size={14} style={{ color: 'var(--text-secondary)' }} />
+          <button onClick={() => navigateMonth(1)} style={{
+            width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: theme.surface, border: `1px solid ${theme.border}`, cursor: 'pointer'
+          }}>
+            <ChevronRight size={14} style={{ color: theme.textMuted }} />
           </button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="glass-card p-3 text-center">
-          <ArrowDownLeft size={14} className="mx-auto mb-1" style={{ color: '#10B981' }} />
-          <p className="text-sm font-bold" style={{ color: '#10B981' }}>{formatCurrency(totalIncome)}</p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Receitas</p>
-        </div>
-        <div className="glass-card p-3 text-center">
-          <ArrowUpRight size={14} className="mx-auto mb-1" style={{ color: '#EF4444' }} />
-          <p className="text-sm font-bold" style={{ color: '#EF4444' }}>{formatCurrency(totalExpenses)}</p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Despesas</p>
-        </div>
-        <div className="glass-card p-3 text-center">
-          <TrendingUp size={14} className="mx-auto mb-1" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }} />
-          <p className="text-sm font-bold" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }}>
-            {savingsRate.toFixed(1)}%
-          </p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Poupanca</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        {[
+          { icon: ArrowDownLeft, value: totalIncome, label: 'Receitas', color: '#10B981' },
+          { icon: ArrowUpRight, value: totalExpenses, label: 'Despesas', color: '#EF4444' },
+          { icon: TrendingUp, value: savingsRate, label: 'Poupanca', color: theme.primary, isPercent: true },
+        ].map(({ icon: Icon, value, label, color, isPercent }) => (
+          <div key={label} className="glass-card" style={{ padding: 12, textAlign: 'center' }}>
+            <Icon size={14} style={{ color, margin: '0 auto 4px' }} />
+            <p style={{ fontSize: 14, fontWeight: 700, color, margin: 0 }}>
+              {isPercent ? `${value.toFixed(1)}%` : `€${value.toFixed(2)}`}
+            </p>
+            <p style={{ fontSize: 9, color: theme.textMuted, margin: 0 }}>{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Income vs Expenses Bar */}
+      <div className="glass-card" style={{ padding: 16 }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: '0 0 12px' }}>Receitas vs Despesas</h3>
+        <div style={{ display: 'flex', gap: 8, height: 160 }}>
+          {[ 
+            { label: 'Receitas', value: totalIncome, color: '#10B981' },
+            { label: 'Despesas', value: totalExpenses, color: '#EF4444' },
+          ].map(({ label, value, color }) => {
+            const max = Math.max(totalIncome, totalExpenses, 1);
+            const height = (value / max) * 140;
+            return (
+              <div key={label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color, marginBottom: 4 }}>€{value.toFixed(0)}</span>
+                <div style={{ width: '100%', borderRadius: '8px 8px 0 0', background: color, height: Math.max(4, height), transition: 'height 0.3s' }} />
+                <span style={{ fontSize: 10, color: theme.textMuted, marginTop: 6 }}>{label}</span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2">
+      <div style={{ display: 'flex', gap: 8 }}>
         {tabs.map(({ id, label, icon: Icon }) => (
-          <button key={id} onClick={() => setActiveTab(id)}
-            className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
-            style={{
-              background: activeTab === id ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
-              color: activeTab === id ? 'var(--gold)' : 'var(--text-secondary)',
-              border: activeTab === id ? '1px solid rgba(255,215,0,0.4)' : '1px solid var(--border)'
-            }}>
+          <button key={id} onClick={() => setActiveTab(id)} style={{
+            flex: 1, padding: 10, borderRadius: 12, fontSize: 11, fontWeight: 500, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            background: activeTab === id ? s(theme.primary, 0.15) : theme.surface,
+            color: activeTab === id ? theme.primary : theme.textMuted,
+            border: activeTab === id ? `1px solid ${s(theme.primary, 0.4)}` : `1px solid ${theme.border}`
+          }}>
             <Icon size={12} /> {label}
           </button>
         ))}
       </div>
 
-      {/* Mensal Tab */}
-      {activeTab === 'mensal' && (
-        <div className="space-y-4">
-          {/* Income vs Expenses Bar Chart */}
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
-              Receitas vs Despesas
-            </h3>
-            {incomeVsExpenses.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={incomeVsExpenses} barGap={4}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }} />
-                  <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: 10, color: 'var(--text-secondary)' }} />
-                  <Bar dataKey="income" name="Receitas" fill="#10B981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expenses" name="Despesas" fill="#EF4444" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[220px] flex items-center justify-center">
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sem dados disponiveis</p>
-              </div>
-            )}
-          </div>
-
-          {/* 6 Jars Allocation Donut */}
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
-              Alocacao dos 6 Frascos
-            </h3>
-            <div className="flex flex-col items-center">
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={jarsAllocation.map(j => ({ name: j.name || jarLabels[j.jar] || j.jar, value: j.value || j.percentage || 0 }))}
-                    cx="50%" cy="50%" innerRadius={55} outerRadius={85}
-                    paddingAngle={3} dataKey="value"
-                  >
-                    {jarsAllocation.map((entry, idx) => (
-                      <Cell key={idx} fill={jarColors[entry.jar] || CHART_COLORS[idx % CHART_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<PieTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 mt-2 w-full">
-                {jarsAllocation.map((j, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full shrink-0"
-                      style={{ background: jarColors[j.jar] || CHART_COLORS[idx % CHART_COLORS.length] }} />
-                    <span className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>
-                      {j.name || jarLabels[j.jar] || j.jar}
-                    </span>
-                    <span className="text-[10px] font-medium ml-auto" style={{ color: 'var(--text-primary)' }}>
-                      {j.percentage?.toFixed(0) || 0}%
-                    </span>
-                  </div>
-                ))}
-              </div>
+      {/* Resumo Tab */}
+      {activeTab === 'resumo' && (
+        <div className="glass-card" style={{ padding: 16 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: '0 0 12px' }}>Resumo Mensal</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${theme.border}` }}>
+              <span style={{ fontSize: 13, color: theme.textMuted }}>Total receitas</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#10B981' }}>€{totalIncome.toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${theme.border}` }}>
+              <span style={{ fontSize: 13, color: theme.textMuted }}>Total despesas</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#EF4444' }}>€{totalExpenses.toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${theme.border}` }}>
+              <span style={{ fontSize: 13, color: theme.textMuted }}>Balanço</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: totalIncome - totalExpenses >= 0 ? '#10B981' : '#EF4444' }}>
+                €{(totalIncome - totalExpenses).toFixed(2)}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+              <span style={{ fontSize: 13, color: theme.textMuted }}>Taxa de poupanca</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: theme.primary }}>{savingsRate.toFixed(1)}%</span>
             </div>
           </div>
+          {monthTransactions.length === 0 && (
+            <p style={{ fontSize: 12, color: theme.textMuted, textAlign: 'center', padding: 24 }}>Sem transacoes este mes</p>
+          )}
+        </div>
+      )}
 
-          {/* Savings Rate Trend */}
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
-              Taxa de Poupanca
-            </h3>
-            {savingsRateTrend.length > 0 ? (
-              <ResponsiveContainer width="100%" height={180}>
-                <LineChart data={savingsRateTrend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }} />
-                  <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }}
-                    unit="%" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="rate" name="Taxa de Poupanca" stroke="var(--gold)"
-                    strokeWidth={2} dot={{ fill: 'var(--gold)', r: 3 }} activeDot={{ r: 5 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[180px] flex items-center justify-center">
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sem historico disponivel</p>
+      {/* Frascos Tab */}
+      {activeTab === 'frascos' && (
+        <div className="glass-card" style={{ padding: 16 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: '0 0 12px' }}>Despesas por Frasco</h3>
+          {spendingByJar.length > 0 ? spendingByJar.map(([jar, amount], idx) => {
+            const jarColor = theme.jarColors[idx % theme.jarColors.length];
+            const pct = maxSpend > 0 ? (amount / maxSpend) * 100 : 0;
+            return (
+              <div key={jar} style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                  <span style={{ color: jarColor, fontWeight: 500 }}>{jar}</span>
+                  <span style={{ color: theme.text, fontWeight: 600 }}>€{amount.toFixed(2)}</span>
+                </div>
+                <div style={{ width: '100%', borderRadius: 20, height: 8, background: theme.border }}>
+                  <div style={{ height: 8, borderRadius: 20, width: `${pct}%`, background: jarColor, transition: 'width 0.3s' }} />
+                </div>
               </div>
-            )}
-          </div>
+            );
+          }) : (
+            <p style={{ fontSize: 12, color: theme.textMuted, textAlign: 'center', padding: 24 }}>Sem despesas por frasco este mes</p>
+          )}
         </div>
       )}
 
       {/* Categorias Tab */}
       {activeTab === 'categorias' && (
-        <div className="space-y-4">
-          {/* Category Breakdown Pie */}
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
-              Distribuicao por Categoria
-            </h3>
-            {categoryBreakdown.length > 0 ? (
-              <div className="flex flex-col items-center">
-                <ResponsiveContainer width="100%" height={220}>
-                  <PieChart>
-                    <Pie
-                      data={categoryBreakdown.map(c => ({
-                        name: categoryLabels[c.category] || c.category,
-                        value: c.total || c.amount || 0
-                      }))}
-                      cx="50%" cy="50%" innerRadius={45} outerRadius={90}
-                      paddingAngle={2} dataKey="value"
-                    >
-                      {categoryBreakdown.map((_, idx) => (
-                        <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<PieTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-3 w-full">
-                  {categoryBreakdown.map((c, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <div className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ background: CHART_COLORS[idx % CHART_COLORS.length] }} />
-                      <span className="text-[10px] truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
-                        {categoryLabels[c.category] || c.category}
-                      </span>
-                      <span className="text-[10px] font-medium" style={{ color: 'var(--text-primary)' }}>
-                        {formatCurrency(c.total || c.amount || 0)}
-                      </span>
-                    </div>
-                  ))}
+        <div className="glass-card" style={{ padding: 16 }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: '0 0 12px' }}>Maiores Despesas</h3>
+          {spendingByCategory.length > 0 ? spendingByCategory.map(([cat, amount], idx) => {
+            const pct = maxCatSpend > 0 ? (amount / maxCatSpend) * 100 : 0;
+            const catColor = theme.jarColors[idx % theme.jarColors.length];
+            return (
+              <div key={cat} style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                  <span style={{ color: theme.textMuted, textTransform: 'capitalize' }}>{cat}</span>
+                  <span style={{ color: theme.text, fontWeight: 600 }}>€{amount.toFixed(2)}</span>
+                </div>
+                <div style={{ width: '100%', borderRadius: 20, height: 6, background: theme.border }}>
+                  <div style={{ height: 6, borderRadius: 20, width: `${pct}%`, background: catColor, transition: 'width 0.3s' }} />
                 </div>
               </div>
-            ) : (
-              <div className="h-[220px] flex items-center justify-center">
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sem dados de categorias este mes</p>
-              </div>
-            )}
-          </div>
-
-          {/* Top Categories List */}
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
-              Maiores Despesas
-            </h3>
-            {categoryBreakdown.length > 0 ? (
-              <div className="space-y-3">
-                {categoryBreakdown
-                  .filter(c => (c.total || c.amount || 0) > 0)
-                  .sort((a, b) => (b.total || b.amount || 0) - (a.total || a.amount || 0))
-                  .slice(0, 5)
-                  .map((c, idx) => {
-                    const value = c.total || c.amount || 0;
-                    const maxVal = categoryBreakdown.reduce((max, cat) =>
-                      Math.max(max, cat.total || cat.amount || 0), 0);
-                    const pct = maxVal > 0 ? (value / maxVal) * 100 : 0;
-                    return (
-                      <div key={idx}>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span style={{ color: 'var(--text-secondary)' }}>
-                            {categoryLabels[c.category] || c.category}
-                          </span>
-                          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                            {formatCurrency(value)}
-                          </span>
-                        </div>
-                        <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border)' }}>
-                          <div className="h-1.5 rounded-full transition-all"
-                            style={{ width: `${pct}%`, background: CHART_COLORS[idx % CHART_COLORS.length] }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            ) : (
-              <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>
-                Sem despesas registadas este mes
-              </p>
-            )}
-          </div>
+            );
+          }) : (
+            <p style={{ fontSize: 12, color: theme.textMuted, textAlign: 'center', padding: 24 }}>Sem despesas registadas este mes</p>
+          )}
         </div>
       )}
-
-      {/* Dividas Tab */}
-      {activeTab === 'dividas' && (
-        <div className="space-y-4">
-          {/* Debt Payoff Progress */}
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
-              Progresso de Pagamento
-            </h3>
-            {debtProgress ? (
-              <div className="space-y-4">
-                {/* Summary */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <span className="text-[10px] block" style={{ color: 'var(--text-muted)' }}>Total em divida</span>
-                    <p className="text-sm font-bold" style={{ color: '#EF4444' }}>
-                      {formatCurrency(debtProgress.totalRemaining || debtProgress.totalDebt || 0)}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <span className="text-[10px] block" style={{ color: 'var(--text-muted)' }}>Ja pago</span>
-                    <p className="text-sm font-bold" style={{ color: '#10B981' }}>
-                      {formatCurrency(debtProgress.totalPaid || 0)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Overall Progress */}
-                {debtProgress.totalDebt > 0 && (
-                  <div>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span style={{ color: 'var(--text-secondary)' }}>Progresso geral</span>
-                      <span className="font-semibold" style={{ color: '#10B981' }}>
-                        {((debtProgress.totalPaid / debtProgress.totalDebt) * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="w-full rounded-full h-3" style={{ background: 'var(--border)' }}>
-                      <div className="h-3 rounded-full transition-all gold-gradient"
-                        style={{ width: `${Math.min(100, (debtProgress.totalPaid / debtProgress.totalDebt) * 100)}%` }} />
-                    </div>
-                  </div>
-                )}
-
-                {/* Individual debts */}
-                {debtProgress.debts?.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
-                      Dividas individuais
-                    </h4>
-                    {debtProgress.debts.map((d, idx) => {
-                      const paid = d.paid || d.amountPaid || 0;
-                      const total = d.total || d.originalAmount || d.amount || 1;
-                      const pct = Math.min(100, (paid / total) * 100);
-                      return (
-                        <div key={idx} className="p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                          <div className="flex justify-between text-xs mb-1.5">
-                            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                              {d.creditorName || d.name || `Divida ${idx + 1}`}
-                            </span>
-                            <span style={{ color: '#10B981' }}>{pct.toFixed(0)}%</span>
-                          </div>
-                          <div className="w-full rounded-full h-2" style={{ background: 'var(--border)' }}>
-                            <div className="h-2 rounded-full transition-all"
-                              style={{ width: `${pct}%`, background: pct >= 100 ? '#10B981' : 'var(--gold)' }} />
-                          </div>
-                          <div className="flex justify-between text-[10px] mt-1">
-                            <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(paid)} pago</span>
-                            <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(total)} total</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <CreditCard size={36} className="mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sem dividas registadas</p>
-              </div>
-            )}
-          </div>
-
-          {/* Snowball Strategy */}
-          <div className="glass-card p-4">
-            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--gold)' }}>
-              <TrendingDown size={16} /> Estrategia Snowball
-            </h3>
-            <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-              Paga primeiro as dividas menores para criar momento
-            </p>
-            <div className="p-3 rounded-xl text-center" style={{ background: 'rgba(255,215,0,0.1)' }}>
-              <p className="text-xs" style={{ color: 'var(--gold)' }}>
-                Acede a estrategia detalhada na pagina de Dividas
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </motion.div>
   );
 }

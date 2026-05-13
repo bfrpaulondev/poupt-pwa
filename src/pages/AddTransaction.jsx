@@ -1,237 +1,202 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { api } from '../services/api';
-import { categoryLabels, categoryIcons, jarLabels, jarColors, jarIcons } from '../utils/helpers';
+import { themes } from '../themes';
 import {
   ArrowUpRight, ArrowDownLeft, Save, X, ShoppingCart, Home, TrainFront,
   Heart, GraduationCap, Gamepad2, Shirt, AlertTriangle, TrendingUp,
-  PiggyBank, Banknote, Laptop, Plus, Minus, CreditCard, Landmark,
-  Calendar, FileText, Coins
+  PiggyBank, Banknote, Laptop, Plus, CreditCard, Landmark, Calendar, Coins
 } from 'lucide-react';
 
-const iconMap = {
-  ShoppingCart, Home, TrainFront, Heart, GraduationCap, Gamepad2, Shirt,
-  AlertTriangle, TrendingUp, PiggyBank, Banknote, Laptop, Plus, Minus,
-  ArrowUpRight, ArrowDownLeft, CreditCard, Landmark
+const categoryConfig = {
+  alimentacao: { label: 'Alimentacao', icon: ShoppingCart },
+  habitacao: { label: 'Habitacao', icon: Home },
+  transportes: { label: 'Transportes', icon: TrainFront },
+  saude: { label: 'Saude', icon: Heart },
+  educacao: { label: 'Educacao', icon: GraduationCap },
+  lazer: { label: 'Lazer', icon: Gamepad2 },
+  roupa: { label: 'Roupa', icon: Shirt },
+  divida: { label: 'Divida', icon: AlertTriangle },
+  investimento: { label: 'Investimento', icon: TrendingUp },
+  poupanca: { label: 'Poupanca', icon: PiggyBank },
+  salario: { label: 'Salario', icon: Banknote },
+  freelance: { label: 'Freelance', icon: Laptop },
+  outro: { label: 'Outro', icon: Plus },
 };
 
 export default function AddTransaction() {
-  const { user, addTransaction, setScreen, updateUser } = useStore();
+  const theme = themes.darkGold;
+  const { addTransaction, setScreen, jars } = useStore();
   const [type, setType] = useState('despesa');
   const [form, setForm] = useState({
     amount: '', category: 'alimentacao', description: '', jar: '',
-    date: new Date().toISOString().split('T')[0], notes: ''
+    date: new Date().toISOString().split('T')[0]
   });
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
   const [moedasEarned, setMoedasEarned] = useState(null);
 
-  const incomeCategories = ['salario', 'freelance', 'outro_rendimento', 'emprestimo_recebido'];
-  const expenseCategories = [
-    'alimentacao', 'habitacao', 'transportes', 'saude', 'educacao',
-    'lazer', 'roupa', 'divida', 'investimento', 'poupanca',
-    'pagamento_divida', 'emprestimo_dado', 'outro_gasto'
-  ];
+  const s = (color, alpha) => `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
 
+  const incomeCategories = ['salario', 'freelance', 'outro'];
+  const expenseCategories = ['alimentacao', 'habitacao', 'transportes', 'saude', 'educacao', 'lazer', 'roupa', 'divida', 'investimento', 'poupanca'];
   const categories = type === 'receita' ? incomeCategories : expenseCategories;
 
   const handleTypeChange = (newType) => {
     setType(newType);
-    setForm({
-      ...form,
-      category: newType === 'receita' ? 'salario' : 'alimentacao',
-      jar: ''
-    });
+    setForm(f => ({ ...f, category: newType === 'receita' ? 'salario' : 'alimentacao', jar: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.amount || Number(form.amount) <= 0) return;
     setSaving(true);
-    setError(null);
     try {
-      const res = await api.createTransaction({
-        ...form,
-        type,
-        amount: Number(form.amount),
-        jar: form.jar || null
-      });
-      addTransaction(res.data.transaction);
-
-      try {
-        const moedasRes = await api.earnMoedas('add_transaction', 5);
-        updateUser({ poupMoedas: moedasRes.data.balance });
-        setMoedasEarned(moedasRes.data.earned || 5);
-        setTimeout(() => setMoedasEarned(null), 3000);
-      } catch {}
-
-      setScreen('dashboard');
-    } catch (err) {
-      setError(err.message || 'Erro ao guardar transacao');
-    } finally {
-      setSaving(false);
-    }
+      addTransaction({ ...form, type, amount: Number(form.amount), id: Date.now() });
+      setMoedasEarned(5);
+      setTimeout(() => { setMoedasEarned(null); setScreen('dashboard'); }, 1500);
+    } catch { } finally { setSaving(false); }
   };
 
-  const getCategoryIcon = (cat) => {
-    const iconName = categoryIcons[cat];
-    const Icon = iconMap[iconName];
-    return Icon ? <Icon size={14} /> : <Plus size={14} />;
-  };
-
-  const getJarIcon = (key) => {
-    const iconName = jarIcons[key];
-    const Icon = iconMap[iconName];
-    return Icon ? <Icon size={12} /> : null;
-  };
-
-
+  const typeColor = type === 'receita' ? '#10B981' : '#EF4444';
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16, overflowX: 'hidden' }}
+    >
+      {/* Moedas earned toast */}
       {moedasEarned && (
-        <div className="p-3 rounded-xl text-sm font-medium text-center animate-fade-in flex items-center justify-center gap-2"
-          style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)' }}>
+        <div style={{
+          padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 500, textAlign: 'center',
+          background: s(theme.primary, 0.15), color: theme.primary,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+        }}>
           <Coins size={14} /> +{moedasEarned} PoupMoedas ganhos!
         </div>
       )}
 
-      {error && (
-        <div className="p-3 rounded-xl text-sm text-center animate-fade-in"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--danger)' }}>
-          {error}
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        <button onClick={() => handleTypeChange('despesa')}
-          className="flex-1 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
-          style={{
-            background: type === 'despesa' ? 'rgba(239,68,68,0.15)' : 'var(--bg-secondary)',
-            color: type === 'despesa' ? '#EF4444' : 'var(--text-secondary)',
-            border: type === 'despesa' ? '1px solid #EF4444' : '1px solid var(--border)'
+      {/* Type Toggle */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        {[
+          { id: 'despesa', label: 'Despesa', icon: ArrowDownLeft, color: '#EF4444' },
+          { id: 'receita', label: 'Receita', icon: ArrowUpRight, color: '#10B981' },
+        ].map(({ id, label, icon: Icon, color }) => (
+          <button key={id} onClick={() => handleTypeChange(id)} style={{
+            flex: 1, padding: 12, borderRadius: 12, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s',
+            background: type === id ? s(color, 0.15) : theme.surface,
+            color: type === id ? color : theme.textMuted,
+            border: type === id ? `1px solid ${color}` : `1px solid ${theme.border}`
           }}>
-          <ArrowDownLeft size={14} /> Despesa
-        </button>
-        <button onClick={() => handleTypeChange('receita')}
-          className="flex-1 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
-          style={{
-            background: type === 'receita' ? 'rgba(16,185,129,0.15)' : 'var(--bg-secondary)',
-            color: type === 'receita' ? '#10B981' : 'var(--text-secondary)',
-            border: type === 'receita' ? '1px solid #10B981' : '1px solid var(--border)'
-          }}>
-          <ArrowUpRight size={14} /> Receita
-        </button>
+            <Icon size={14} /> {label}
+          </button>
+        ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="glass-card p-6 text-center">
-          <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            {type === 'receita' ? 'Receita' : 'Despesa'}
-          </span>
-          <div className="flex items-center justify-center gap-1 mt-2">
-            <span className="text-lg font-semibold" style={{ color: type === 'receita' ? '#10B981' : '#EF4444' }}>
-              EUR
-            </span>
-            <input type="number" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})}
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Amount */}
+        <div className="glass-card" style={{ padding: 24, textAlign: 'center' }}>
+          <span style={{ fontSize: 11, color: theme.textMuted }}>{type === 'receita' ? 'Receita' : 'Despesa'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 8 }}>
+            <span style={{ fontSize: 16, fontWeight: 600, color: typeColor }}>EUR</span>
+            <input type="number" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })}
               placeholder="0.00" required min="0.01" step="0.01"
-              className="text-3xl font-bold w-40 text-center bg-transparent outline-none"
-              style={{ color: type === 'receita' ? '#10B981' : '#EF4444' }} />
+              style={{
+                fontSize: 28, fontWeight: 700, width: 140, textAlign: 'center',
+                background: 'transparent', border: 'none', outline: 'none', color: typeColor
+              }} />
           </div>
-          {form.amount && Number(form.amount) > 0 && (
-            <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
-              {formatDisplayAmount(Number(form.amount))}
-            </p>
-          )}
         </div>
 
+        {/* Description */}
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
-            Descricao
-          </label>
-          <input type="text" value={form.description} onChange={e => setForm({...form, description: e.target.value})}
+          <label style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, marginBottom: 6, display: 'block' }}>Descricao</label>
+          <input type="text" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
             placeholder={type === 'receita' ? 'Ex: Salario mensal' : 'Ex: Compras no supermercado'} required
-            className="w-full input-field" />
+            style={{
+              width: '100%', padding: '12px 14px', borderRadius: 12, fontSize: 13,
+              background: theme.surface, border: `1px solid ${theme.border}`, color: theme.text, outline: 'none'
+            }} />
         </div>
 
+        {/* Category */}
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
-            Categoria
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            {categories.map(cat => (
-              <button key={cat} type="button" onClick={() => setForm({...form, category: cat})}
-                className="py-2.5 px-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
-                style={{
-                  background: form.category === cat ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
-                  color: form.category === cat ? 'var(--gold)' : 'var(--text-secondary)',
-                  border: form.category === cat ? '1px solid var(--gold)' : '1px solid var(--border)'
+          <label style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, marginBottom: 8, display: 'block' }}>Categoria</label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+            {categories.map(cat => {
+              const conf = categoryConfig[cat] || { label: cat, icon: Plus };
+              const Icon = conf.icon;
+              const isActive = form.category === cat;
+              return (
+                <button key={cat} type="button" onClick={() => setForm({ ...form, category: cat })} style={{
+                  padding: '10px 4px', borderRadius: 12, fontSize: 11, fontWeight: 500, cursor: 'pointer',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, transition: 'all 0.2s',
+                  background: isActive ? s(theme.primary, 0.2) : theme.surface,
+                  color: isActive ? theme.primary : theme.textMuted,
+                  border: isActive ? `1px solid ${theme.primary}` : `1px solid ${theme.border}`
                 }}>
-                <span style={{ opacity: form.category === cat ? 1 : 0.6 }}>{getCategoryIcon(cat)}</span>
-                <span className="truncate w-full text-center">{categoryLabels[cat] || cat}</span>
-              </button>
-            ))}
+                  <Icon size={14} style={{ opacity: isActive ? 1 : 0.6 }} />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%', textAlign: 'center' }}>{conf.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
+        {/* Jar Selector */}
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
-            Frasco (opcional)
-          </label>
-          <div className="grid grid-cols-3 gap-2">
-            {Object.entries(jarLabels).map(([key, label]) => (
-              <button key={key} type="button"
-                onClick={() => setForm({...form, jar: form.jar === key ? '' : key})}
-                className="py-2.5 px-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
-                style={{
-                  background: form.jar === key ? `${jarColors[key]}20` : 'var(--bg-secondary)',
-                  color: form.jar === key ? jarColors[key] : 'var(--text-secondary)',
-                  border: form.jar === key ? `1px solid ${jarColors[key]}` : '1px solid var(--border)'
+          <label style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, marginBottom: 8, display: 'block' }}>Frasco (opcional)</label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+            {(jars || []).map((jar, idx) => {
+              const isActive = form.jar === jar.name;
+              const jarColor = theme.jarColors[idx % theme.jarColors.length];
+              return (
+                <button key={jar.name} type="button" onClick={() => setForm({ ...form, jar: form.jar === jar.name ? '' : jar.name })} style={{
+                  padding: '10px 4px', borderRadius: 12, fontSize: 11, fontWeight: 500, cursor: 'pointer',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                  background: isActive ? s(jarColor, 0.2) : theme.surface,
+                  color: isActive ? jarColor : theme.textMuted,
+                  border: isActive ? `1px solid ${jarColor}` : `1px solid ${theme.border}`
                 }}>
-                <span style={{ opacity: form.jar === key ? 1 : 0.6 }}>{getJarIcon(key)}</span>
-                <span className="truncate w-full text-center">{label.split(' ')[0]}</span>
-              </button>
-            ))}
+                  <span style={{ fontSize: 16 }}>{jar.icon || '🏺'}</span>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%', textAlign: 'center' }}>{jar.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
+        {/* Date */}
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
-            <Calendar size={12} className="inline mr-1" /> Data
+          <label style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, marginBottom: 6, display: 'block' }}>
+            <Calendar size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Data
           </label>
-          <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})}
-            className="w-full input-field" />
+          <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })}
+            style={{
+              width: '100%', padding: '12px 14px', borderRadius: 12, fontSize: 13,
+              background: theme.surface, border: `1px solid ${theme.border}`, color: theme.text, outline: 'none'
+            }} />
         </div>
 
-        <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
-            <FileText size={12} className="inline mr-1" /> Notas (opcional)
-          </label>
-          <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
-            placeholder="Adiciona notas ou detalhes..."
-            rows={2}
-            className="w-full input-field resize-none" />
-        </div>
-
-        <div className="flex gap-3">
-          <button type="button" onClick={() => setScreen('dashboard')}
-            className="px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2"
-            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-            <X size={14} /> Cancelar
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button type="button" onClick={() => setScreen('dashboard')} style={{
+            padding: '14px 20px', borderRadius: 12, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+            color: theme.textMuted, border: `1px solid ${theme.border}`, background: 'transparent'
+          }}>
+            <X size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Cancelar
           </button>
-          <button type="submit" disabled={saving}
-            className="btn-gold flex-1 py-3.5 disabled:opacity-50 flex items-center justify-center gap-2">
+          <button type="submit" disabled={saving} className="btn-gold" style={{
+            flex: 1, padding: 14, borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            opacity: saving ? 0.5 : 1
+          }}>
             <Save size={14} /> {saving ? 'A guardar...' : 'Guardar'}
           </button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
-}
-
-function formatDisplayAmount(value) {
-  return new Intl.NumberFormat('pt-PT', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value) + ' EUR';
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import useStore from './store/useStore';
 import { themes } from './themes';
 import {
@@ -78,8 +78,8 @@ const menuItems = [
 
 function BottomNav({ theme, currentScreen, onTab }) {
   return (
-    <div
-      className="flex items-center justify-around px-2 py-2 border-t bottom-nav-safe"
+    <nav
+      className="flex items-center justify-around px-1 py-1.5 border-t bottom-nav-safe shrink-0"
       style={{
         background: theme.surface,
         borderColor: theme.border,
@@ -92,18 +92,18 @@ function BottomNav({ theme, currentScreen, onTab }) {
           <button
             key={tab.id}
             onClick={() => onTab(tab.id)}
-            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all duration-200"
+            className="flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-xl transition-all duration-200 min-w-0"
             style={{
               color: isActive ? theme.primary : theme.textMuted,
-              background: isActive ? `${theme.primary}15` : 'transparent',
+              background: isActive ? `${theme.primary}12` : 'transparent',
             }}
           >
             <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
-            <span className="text-[10px] font-medium">{tab.label}</span>
+            <span className="text-[9px] font-medium leading-tight">{tab.label}</span>
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 }
 
@@ -114,7 +114,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
         <>
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
+            animate={{ opacity: 0.7 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-40"
             style={{ background: '#000' }}
@@ -126,14 +126,14 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
             exit={{ x: -280 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed top-0 left-0 bottom-0 z-50 w-[280px] flex flex-col"
-            style={{ background: theme.surface }}
+            style={{ background: theme.background }}
           >
             <div
               className="flex items-center justify-between p-4 border-b"
               style={{ borderColor: theme.border }}
             >
               <div className="flex items-center gap-2">
-                <span className="text-xl">🐷</span>
+                <span className="text-2xl">🐷</span>
                 <span
                   className="font-bold text-lg gradient-text"
                   style={{
@@ -155,7 +155,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
                   <button
                     key={item.id}
                     onClick={onNavigate ? () => onNavigate(item.id) : undefined}
-                    className="flex items-center gap-3 w-full px-4 py-3 text-left transition-colors duration-150 hover:opacity-80"
+                    className="flex items-center gap-3 w-full px-4 py-3.5 text-left transition-colors duration-150"
                     style={{ color: theme.text }}
                   >
                     <Icon size={18} style={{ color: theme.textMuted }} />
@@ -183,7 +183,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
 }
 
 function App() {
-  const { currentScreen, setScreen, currentTheme, setTheme, menuOpen, setMenuOpen, restoreSession } = useStore();
+  const { currentScreen, setScreen, currentTheme, menuOpen, setMenuOpen, restoreSession } = useStore();
   const [ready, setReady] = useState(false);
 
   const theme = themes[currentTheme] || themes.darkGold;
@@ -211,7 +211,7 @@ function App() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: theme.background }}>
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
             style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}>
@@ -235,11 +235,11 @@ function App() {
       className="app-shell"
       style={{ background: theme.background }}
     >
-      {/* App Header with hamburger (non-fullscreen screens) */}
+      {/* App Header with hamburger */}
       {!isFullScreen && (
-        <div
-          className="flex items-center justify-between px-4 py-2 shrink-0"
-          style={{ background: theme.background }}
+        <header
+          className="flex items-center justify-between px-4 py-2.5 shrink-0"
+          style={{ background: theme.background, borderBottom: `1px solid ${theme.border}` }}
         >
           <button
             onClick={() => setMenuOpen(true)}
@@ -249,8 +249,9 @@ function App() {
             <Menu size={20} />
           </button>
           <div className="flex items-center gap-2">
+            <span className="text-lg">🐷</span>
             <span className="text-sm font-bold" style={{ color: theme.primary }}>
-              🐷 PoupPT
+              PoupPT
             </span>
           </div>
           <button
@@ -260,28 +261,27 @@ function App() {
           >
             <Bell size={18} />
             <div
-              className="absolute top-1 right-1 w-2 h-2 rounded-full"
-              style={{ background: '#FF4444' }}
+              className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
+              style={{ background: '#EF4444' }}
             />
           </button>
-        </div>
+        </header>
       )}
 
-      {/* Screen Content - fills remaining space */}
-      <div
+      {/* Screen Content */}
+      <main
         className="flex-1 overflow-y-auto poupt-scroll"
         style={{
           background: theme.background,
-          transition: 'background-color 0.5s ease',
         }}
       >
         <AnimatePresence mode="wait">
           <motion.div
             key={currentScreen}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="min-h-full"
           >
             <Suspense
@@ -298,13 +298,11 @@ function App() {
             </Suspense>
           </motion.div>
         </AnimatePresence>
-      </div>
+      </main>
 
-      {/* Bottom Navigation (non-fullscreen screens) */}
+      {/* Bottom Navigation */}
       {!isFullScreen && (
-        <div className="shrink-0">
-          <BottomNav theme={theme} currentScreen={currentScreen} onTab={handleTab} />
-        </div>
+        <BottomNav theme={theme} currentScreen={currentScreen} onTab={handleTab} />
       )}
 
       {/* Hamburger Menu */}

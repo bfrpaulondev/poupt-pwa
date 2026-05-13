@@ -18,30 +18,28 @@ export default function Dashboard() {
   const spentPercent = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
 
   const barColor =
-    spentPercent > 80 ? '#FF4444' : spentPercent > 50 ? '#FFB020' : '#4CAF50';
+    spentPercent > 80 ? '#EF4444' : spentPercent > 50 ? '#F59E0B' : '#10B981';
 
   const recentTx = transactions.slice(0, 5);
   const hasOverdueDebts = true;
 
   return (
-    <div className="px-4 py-3" style={{ background: theme.background }}>
+    <div className="px-4 py-3 poupt-scroll" style={{ background: theme.background }}>
       {/* Greeting row */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-lg font-bold" style={{ color: theme.text }}>
-            {greeting}, Ana 🌅
-          </h2>
-          <div className="flex items-center gap-3 mt-1">
-            <span
-              className="text-xs font-semibold px-2 py-0.5 rounded-full coin-sparkle"
-              style={{ background: `${theme.primary}20`, color: theme.primary }}
-            >
-              🪙 {mockUser.poupMoedas} PoupMoedas
-            </span>
-            <span className="text-xs" style={{ color: theme.textMuted }}>
-              🔥 {mockUser.streak} dias
-            </span>
-          </div>
+      <div className="mb-4">
+        <h2 className="text-lg font-bold" style={{ color: theme.text }}>
+          {greeting}, Ana 🌅
+        </h2>
+        <div className="flex items-center gap-3 mt-1.5">
+          <span
+            className="text-xs font-bold px-2.5 py-1 rounded-full coin-sparkle"
+            style={{ background: 'rgba(255,215,0,0.1)', color: theme.primary }}
+          >
+            🪙 {mockUser.poupMoedas} PoupMoedas
+          </span>
+          <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
+            🔥 {mockUser.streak} dias
+          </span>
         </div>
       </div>
 
@@ -49,15 +47,15 @@ export default function Dashboard() {
       {hasOverdueDebts && (
         <motion.button
           onClick={() => setScreen('survival')}
-          className="w-full mb-4 p-3 rounded-xl flex items-center gap-2 survival-pulse"
-          style={{ background: '#FF444418', border: '1.5px solid #FF444460' }}
+          className="w-full mb-4 p-3.5 rounded-xl flex items-center gap-2.5 survival-pulse"
+          style={{ background: 'rgba(239,68,68,0.06)', border: '1.5px solid rgba(239,68,68,0.3)' }}
           whileTap={{ scale: 0.98 }}
         >
-          <AlertTriangle size={16} color="#FF4444" />
-          <span className="text-xs font-bold" style={{ color: '#FF6B6B' }}>
+          <AlertTriangle size={16} color="#EF4444" />
+          <span className="text-xs font-bold flex-1" style={{ color: '#EF4444' }}>
             ⚠️ MODO SOBREVIVENCIA ATIVO
           </span>
-          <ChevronRight size={14} color="#FF6B6B" className="ml-auto" />
+          <ChevronRight size={14} color="#EF4444" />
         </motion.button>
       )}
 
@@ -81,7 +79,7 @@ export default function Dashboard() {
 
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs" style={{ color: theme.textMuted }}>
-            Ja gastei: €{totalSpent.toFixed(2)} / €{totalAllocated.toFixed(2)}
+            Gasto: €{totalSpent.toFixed(2)} / €{totalAllocated.toFixed(2)}
           </span>
           <span className="text-xs font-bold" style={{ color: barColor }}>
             {spentPercent.toFixed(0)}%
@@ -89,7 +87,7 @@ export default function Dashboard() {
         </div>
 
         <div
-          className="w-full h-2.5 rounded-full overflow-hidden"
+          className="w-full h-2 rounded-full overflow-hidden"
           style={{ background: theme.surface }}
         >
           <motion.div
@@ -124,7 +122,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-4 gap-2.5 mb-4">
         {[
           { icon: Camera, label: 'Scanner', screen: 'poupMoedas' },
           { icon: Plus, label: 'Adicionar', screen: 'addTransaction' },
@@ -133,9 +131,9 @@ export default function Dashboard() {
         ].map((action) => (
           <motion.button
             key={action.label}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.92 }}
             onClick={() => setScreen(action.screen)}
-            className="flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors duration-150"
+            className="flex flex-col items-center gap-1.5 p-3 rounded-xl"
             style={{ background: theme.surface }}
           >
             <action.icon size={20} style={{ color: theme.primary }} />
@@ -148,13 +146,13 @@ export default function Dashboard() {
 
       {/* Recent transactions */}
       <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-2.5">
           <h3 className="text-sm font-bold" style={{ color: theme.text }}>
             Transacoes Recentes
           </h3>
           <button
             onClick={() => setScreen('reports')}
-            className="text-xs font-medium"
+            className="text-xs font-bold"
             style={{ color: theme.primary }}
           >
             Ver todas →
@@ -171,21 +169,21 @@ export default function Dashboard() {
                 style={{ background: theme.surface }}
               >
                 <div
-                  className="w-2 h-2 rounded-full"
+                  className="w-2 h-2 rounded-full shrink-0"
                   style={{ background: jarObj?.color || theme.textMuted }}
                 />
-                <div className="flex-1">
-                  <p className="text-sm font-medium" style={{ color: theme.text }}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate" style={{ color: theme.text }}>
                     {tx.description}
                   </p>
                   <p className="text-xs" style={{ color: theme.textMuted }}>
-                    {tx.category} • {tx.jar}
+                    {tx.category} · {tx.jar}
                   </p>
                 </div>
                 <span
-                  className="text-sm font-bold"
+                  className="text-sm font-bold shrink-0"
                   style={{
-                    color: tx.type === 'income' ? '#4CAF50' : '#FF6B6B',
+                    color: tx.type === 'income' ? '#10B981' : '#EF4444',
                   }}
                 >
                   {tx.type === 'income' ? '+' : ''}€{Math.abs(tx.amount).toFixed(2)}
@@ -203,16 +201,16 @@ export default function Dashboard() {
         className="w-full glass rounded-xl p-4 mb-4 flex items-center gap-3"
       >
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-          style={{ background: `${theme.primary}20` }}
+          className="w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0"
+          style={{ background: 'rgba(255,215,0,0.1)' }}
         >
           🤖
         </div>
-        <div className="flex-1 text-left">
+        <div className="flex-1 min-w-0 text-left">
           <p className="text-xs font-medium" style={{ color: theme.textMuted }}>
             {mockUser.coachMode === 'sargento' ? 'Sargento diz:' : 'Amigavel diz:'}
           </p>
-          <p className="text-xs mt-0.5" style={{ color: theme.text }}>
+          <p className="text-xs mt-0.5 truncate" style={{ color: theme.text }}>
             A WiZink vence em 3 dias. Tens os €85, soldado?
           </p>
         </div>
@@ -221,12 +219,12 @@ export default function Dashboard() {
 
       {/* Alert card */}
       <motion.div
-        className="rounded-xl p-4 mb-4"
-        style={{ background: '#FF444412', border: '1px solid #FF444430' }}
+        className="rounded-xl p-3.5 mb-4"
+        style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.15)' }}
       >
         <div className="flex items-center gap-2">
-          <AlertTriangle size={14} color="#FF6B6B" />
-          <p className="text-xs font-bold" style={{ color: '#FF6B6B' }}>
+          <AlertTriangle size={14} color="#EF4444" />
+          <p className="text-xs font-bold" style={{ color: '#EF4444' }}>
             WiZink vence em 3 dias
           </p>
         </div>

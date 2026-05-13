@@ -1,15 +1,27 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { api } from '../services/api';
-import { formatCurrency, jarLabels, jarColors, jarIcons } from '../utils/helpers';
-import JarDonut from '../components/JarDonut';
+import { themes } from '../themes';
 import { Save, RotateCcw, Info } from 'lucide-react';
 
+const jarConfig = [
+  { key: 'necessities', label: 'Necessidades', icon: '🏠', color: '#FF6B6B', defaultPct: 50 },
+  { key: 'freedom', label: 'Liberdade Financeira', icon: '🏛️', color: '#4ECDC4', defaultPct: 10 },
+  { key: 'savings', label: 'Poupanca Longo Prazo', icon: '🏗️', color: '#45B7D1', defaultPct: 10 },
+  { key: 'education', label: 'Educacao', icon: '📚', color: '#96CEB4', defaultPct: 10 },
+  { key: 'play', label: 'Lazer', icon: '🎮', color: '#FFEAA7', defaultPct: 10 },
+  { key: 'give', label: 'Ofertas', icon: '🎁', color: '#DDA0DD', defaultPct: 5 },
+];
+
 export default function Jars() {
-  const { user, updateUser } = useStore();
-  const [percentages, setPercentages] = useState(user?.jarPercentages || {
-    necessities: 50, freedom: 10, savings: 10, education: 10, play: 10, give: 5
-  });
+  const { jars, mockUser } = useStore();
+  const theme = themes.darkGold;
+  const income = mockUser?.income || 1100;
+
+  const defaultPercentages = {};
+  jarConfig.forEach(j => { defaultPercentages[j.key] = j.defaultPct; });
+
+  const [percentages, setPercentages] = useState(defaultPercentages);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -25,88 +37,113 @@ export default function Jars() {
   const handleSave = async () => {
     if (!isValid) return;
     setSaving(true);
-    try {
-      await api.updateMe({ jarPercentages: percentages });
-      updateUser({ jarPercentages: percentages });
+    setTimeout(() => {
+      setSaving(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
+    }, 800);
   };
 
   const handleReset = () => {
-    setPercentages({ necessities: 50, freedom: 10, savings: 10, education: 10, play: 10, give: 5 });
+    setPercentages(defaultPercentages);
     setSaved(false);
   };
 
-  const jarOrder = ['necessities', 'freedom', 'savings', 'education', 'play', 'give'];
-
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
-      {/* Donut Chart */}
-      <div className="flex justify-center py-4">
-        <JarDonut percentages={percentages} size={220} />
+    <div className="px-4 py-4 poupt-scroll" style={{ background: theme.background }}>
+      {/* Title */}
+      <div className="text-center mb-4">
+        <h2 className="text-lg font-bold" style={{ color: theme.text }}>
+          6 Frascos
+        </h2>
+        <p className="text-xs mt-1" style={{ color: theme.textMuted }}>
+          Distribui o teu rendimento de forma inteligente
+        </p>
+      </div>
+
+      {/* Donut-like visual summary */}
+      <div className="flex justify-center mb-4">
+        <div className="flex flex-wrap justify-center gap-2">
+          {jarConfig.map(j => (
+            <div key={j.key} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full" style={{ background: `${j.color}15` }}>
+              <span className="text-xs">{j.icon}</span>
+              <span className="text-[11px] font-bold" style={{ color: j.color }}>{percentages[j.key]}%</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Total indicator */}
-      <div className="text-center">
-        <span className="text-sm" style={{ color: isValid ? '#10B981' : '#EF4444' }}>
-          Total: {total}% {isValid ? '- Perfeito!' : '- Deve somar 100%'}
+      <div className="text-center mb-4">
+        <span className="text-sm font-bold" style={{ color: isValid ? '#10B981' : '#EF4444' }}>
+          Total: {total}% {isValid ? '✓ Perfeito!' : '— Deve somar 100%'}
         </span>
       </div>
 
       {/* Jar Sliders */}
-      <div className="space-y-4">
-        {jarOrder.map(key => {
-          const amount = (user?.income || 0) * percentages[key] / 100;
+      <div className="flex flex-col gap-3 mb-4">
+        {jarConfig.map(j => {
+          const amount = (income * percentages[j.key]) / 100;
           return (
-            <div key={key} className="feature-card p-4">
+            <motion.div
+              key={j.key}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="feature-card p-4"
+            >
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ background: jarColors[key] }} />
-                  <span className="text-sm font-semibold" style={{ color: jarColors[key] }}>
-                    {jarLabels[key]}
+                <div className="flex items-center gap-2.5">
+                  <span className="text-base">{j.icon}</span>
+                  <span className="text-sm font-bold" style={{ color: j.color }}>
+                    {j.label}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {percentages[key]}%
+                  <span className="text-base font-extrabold" style={{ color: theme.text }}>
+                    {percentages[j.key]}%
                   </span>
-                  <span className="text-xs ml-2" style={{ color: 'var(--text-secondary)' }}>
-                    {formatCurrency(amount)}
+                  <span className="text-xs ml-2 font-medium" style={{ color: theme.textMuted }}>
+                    €{amount.toFixed(0)}
                   </span>
                 </div>
               </div>
-              <input type="range" min="0" max="100" value={percentages[key]}
-                onChange={e => handleChange(key, e.target.value)}
-                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={percentages[j.key]}
+                onChange={e => handleChange(j.key, e.target.value)}
+                className="w-full"
                 style={{
-                  background: `linear-gradient(to right, ${jarColors[key]} ${percentages[key]}%, var(--border) ${percentages[key]}%)`
-                }} />
-            </div>
+                  accentColor: j.color,
+                }}
+              />
+            </motion.div>
           );
         })}
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
-        <button onClick={handleReset}
-          className="btn-gold-outline flex items-center gap-2 px-4 py-3">
+      <div className="flex gap-3 mb-4">
+        <button
+          onClick={handleReset}
+          className="btn-gold-outline flex items-center gap-2 px-4 py-3"
+        >
           <RotateCcw size={14} /> Reset
         </button>
-        <button onClick={handleSave} disabled={!isValid || saving}
-          className="btn-gold flex-1 py-3 disabled:opacity-50 flex items-center justify-center gap-2">
+        <button
+          onClick={handleSave}
+          disabled={!isValid || saving}
+          className="btn-gold flex-1 flex items-center justify-center gap-2 disabled:opacity-40"
+        >
           <Save size={14} /> {saving ? 'A guardar...' : saved ? 'Guardado!' : 'Guardar'}
         </button>
       </div>
 
       {/* Info */}
       <div className="glass-card p-4 flex gap-3">
-        <Info size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--gold)' }} />
-        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+        <Info size={16} className="mt-0.5 shrink-0" style={{ color: theme.primary }} />
+        <p className="text-xs leading-relaxed" style={{ color: theme.textMuted }}>
           Baseado no metodo de T. Harv Eker. Os 6 Frascos ajudam-te a alocar o rendimento de forma equilibrada.
           Ajusta as percentagens ao teu contexto e modo de vida atual.
         </p>

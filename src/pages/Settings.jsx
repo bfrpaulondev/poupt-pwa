@@ -1,533 +1,218 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { api } from '../services/api';
-import { modeLabels, modeColors, modeDescriptions } from '../utils/helpers';
+import { themes, themeKeys } from '../themes';
 import {
-  Save, Shield, Bell, Trash2, LogOut,
-  Palette, Download, Info, ChevronRight,
-  MessageSquare, Target, FileText, Calendar, Sparkles,
-  Euro, Languages, Lock, Eye, Heart, ExternalLink,
-  Check
+  Palette, Bell, LogOut, Info, ChevronRight,
+  MessageSquare, Sparkles, Crown, Check, Shield, Globe, Lock
 } from 'lucide-react';
 
-const themes = [
-  { id: 'ouro-escuro', label: 'Ouro Escuro', color: 'var(--gold)', bg: '#121212' },
-  { id: 'ouro-claro', label: 'Ouro Claro', color: '#F5D76E', bg: '#1A1A2E' },
-  { id: 'azul-escuro', label: 'Azul Escuro', color: '#2563EB', bg: '#0C1222' },
-  { id: 'verde-escuro', label: 'Verde Escuro', color: '#059669', bg: '#0A1A14' },
-  { id: 'rosa-escuro', label: 'Rosa Escuro', color: '#DB2777', bg: '#1A0C16' },
-  { id: 'roxo-escuro', label: 'Roxo Escuro', color: '#7C3AED', bg: '#120C22' },
-  { id: 'vermelho-escuro', label: 'Vermelho Escuro', color: '#DC2626', bg: '#1A0C0C' },
-  { id: 'branco', label: 'Branco', color: '#1E293B', bg: '#F8FAFC' },
+const coachModes = [
+  { id: 'sargento', label: 'Sargento', desc: 'Firme e direto' },
+  { id: 'amigavel', label: 'Amigavel', desc: 'Acolhedor e motivador' },
 ];
 
-const personalityLabels = {
-  disciplinado: 'Disciplinado',
-  amigavel: 'Amigavel',
-  estrategico: 'Estrategico',
-  espiritual: 'Espiritual',
-};
-
-const personalityDescriptions = {
-  disciplinado: 'Firme e direto, foca na disciplina financeira',
-  amigavel: 'Acolhedor e motivador, celebra pequenas vitorias',
-  estrategico: 'Analitico e pragmatico, planeia cada passo',
-  espiritual: 'Conectado com valores, foca na paz financeira',
-};
-
 export default function Settings() {
+  const theme = themes.darkGold;
   const { user, updateUser, logout, setScreen } = useStore();
-  const [saving, setSaving] = useState(false);
-  const [coachName, setCoachName] = useState(user?.coachName || '');
-  const [coachPersonality, setCoachPersonality] = useState(user?.coachPersonality || 'disciplinado');
-  const [selectedMode, setSelectedMode] = useState(user?.financialMode || 'sobrevivencia');
-  const [selectedTheme, setSelectedTheme] = useState(user?.theme || 'ouro-escuro');
-  const [currency, setCurrency] = useState(user?.currency || 'EUR');
-  const [language, setLanguage] = useState(user?.language || 'pt');
-  const [notifications, setNotifications] = useState({
-    debtReminders: user?.notificationSettings?.debtReminders ?? true,
-    coachTips: user?.notificationSettings?.coachTips ?? true,
-    goalAlerts: user?.notificationSettings?.goalAlerts ?? true,
-    weeklyReports: user?.notificationSettings?.weeklyReports ?? true,
-  });
-  const [privacySettings, setPrivacySettings] = useState({
-    analytics: user?.privacySettings?.analytics ?? true,
-    personalizedTips: user?.privacySettings?.personalizedTips ?? true,
-  });
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [exporting, setExporting] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState('darkGold');
+  const [coachMode, setCoachMode] = useState(user?.coachMode || 'sargento');
+  const [notifications, setNotifications] = useState(true);
   const [saveSuccess, setSaveSuccess] = useState(null);
+
+  const s = (color, alpha) => `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
 
   const showSuccess = (msg) => {
     setSaveSuccess(msg);
     setTimeout(() => setSaveSuccess(null), 2000);
   };
 
-  const handleSaveCoach = async () => {
-    setSaving(true);
-    try {
-      await api.updateCoach({ coachName, coachPersonality });
-      updateUser({ coachName, coachPersonality });
-      showSuccess('Coach actualizado!');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleModeChange = async (mode) => {
-    try {
-      await api.updateMode(mode);
-      updateUser({ financialMode: mode });
-      setSelectedMode(mode);
-      showSuccess('Modo actualizado!');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleThemeChange = async (themeId) => {
-    setSelectedTheme(themeId);
-    try {
-      await api.updateMe({ theme: themeId });
-      updateUser({ theme: themeId });
-      showSuccess('Tema alterado!');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleCurrencyChange = async (curr) => {
-    setCurrency(curr);
-    try {
-      await api.updateMe({ currency: curr });
-      updateUser({ currency: curr });
-      showSuccess('Moeda actualizada!');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleLanguageChange = async (lang) => {
-    setLanguage(lang);
-    try {
-      await api.updateMe({ language: lang });
-      updateUser({ language: lang });
-      showSuccess('Idioma actualizado!');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleNotificationToggle = async (key) => {
-    const updated = { ...notifications, [key]: !notifications[key] };
-    setNotifications(updated);
-    try {
-      await api.updateMe({ notificationSettings: updated });
-      updateUser({ notificationSettings: updated });
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handlePrivacyToggle = async (key) => {
-    const updated = { ...privacySettings, [key]: !privacySettings[key] };
-    setPrivacySettings(updated);
-    try {
-      await api.updateMe({ privacySettings: updated });
-      updateUser({ privacySettings: updated });
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleExportData = async () => {
-    setExporting(true);
-    try {
-      const res = await api.getReportSummary();
-      const dataStr = JSON.stringify(res.data, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `poupt-dados-${new Date().toISOString().slice(0, 10)}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showSuccess('Dados exportados!');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const handleLogout = () => {
-    api.logout().catch(() => {});
-    logout();
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!showDeleteConfirm) {
-      setShowDeleteConfirm(true);
-      return;
-    }
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'https://poupt-api.onrender.com/api'}/auth/me`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('poupt_token')}` }
-      });
-      logout();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const notificationItems = [
-    { key: 'debtReminders', label: 'Lembretes de dividas', desc: 'Avisos quando dividas estao prestes a vencer', icon: FileText },
-    { key: 'goalAlerts', label: 'Alertas de metas', desc: 'Notificacao ao atingir marcos de objetivos', icon: Target },
-    { key: 'coachTips', label: 'Dicas do Coach', desc: 'Sugestoes e motivacao do teu AI Coach', icon: MessageSquare },
-    { key: 'weeklyReports', label: 'Relatorios semanais', desc: 'Resumo semanal das tuas financas', icon: Calendar },
-  ];
-
-  const currencies = [
-    { code: 'EUR', label: 'Euro (EUR)', symbol: '€' },
-    { code: 'USD', label: 'Dolar (USD)', symbol: '$' },
-    { code: 'BRL', label: 'Real (BRL)', symbol: 'R$' },
-    { code: 'GBP', label: 'Libra (GBP)', symbol: '£' },
-  ];
-
-  const languages = [
-    { code: 'pt', label: 'Portugues' },
-    { code: 'en', label: 'English' },
-    { code: 'es', label: 'Espanol' },
-  ];
-
   const Toggle = ({ isOn, onToggle }) => (
-    <button onClick={onToggle} className="w-11 h-6 rounded-full relative transition-all shrink-0"
-      style={{ background: isOn ? 'var(--gold)' : 'var(--border)' }}>
-      <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all"
-        style={{ left: isOn ? '22px' : '2px' }} />
+    <button onClick={onToggle} style={{
+      width: 44, height: 24, borderRadius: 20, position: 'relative',
+      transition: 'background 0.2s', background: isOn ? theme.primary : theme.border,
+      border: 'none', cursor: 'pointer', flexShrink: 0
+    }}>
+      <div style={{
+        width: 20, height: 20, borderRadius: '50%', background: '#fff',
+        position: 'absolute', top: 2, transition: 'left 0.2s',
+        left: isOn ? 22 : 2
+      }} />
     </button>
   );
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16, overflowX: 'hidden' }}
+    >
       {/* Success Toast */}
       {saveSuccess && (
-        <div className="p-3 rounded-xl text-xs font-medium text-center animate-fade-in"
-          style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981' }}>
-          <Check size={12} className="inline mr-1" /> {saveSuccess}
+        <div style={{
+          padding: 12, borderRadius: 12, fontSize: 12, fontWeight: 500, textAlign: 'center',
+          background: s('#10B981', 0.15), color: '#10B981'
+        }}>
+          <Check size={12} style={{ marginRight: 4, verticalAlign: 'middle' }} /> {saveSuccess}
         </div>
       )}
 
-      {/* Tema */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Palette size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Tema
-          </h3>
+      {/* Theme Selector */}
+      <div className="glass-card" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Palette size={16} style={{ color: theme.primary }} />
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Tema</h3>
         </div>
-        <div className="grid grid-cols-4 gap-2">
-          {themes.map(theme => (
-            <button key={theme.id} onClick={() => handleThemeChange(theme.id)}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all"
-              style={{
-                background: selectedTheme === theme.id ? `${theme.color}15` : 'transparent',
-                border: selectedTheme === theme.id ? `1px solid ${theme.color}` : '1px solid transparent'
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          {themeKeys.map(key => {
+            const t = themes[key];
+            const isActive = selectedTheme === key;
+            return (
+              <button key={key} onClick={() => { setSelectedTheme(key); showSuccess('Tema alterado!'); }} style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: 8,
+                borderRadius: 12, transition: 'all 0.2s', cursor: 'pointer',
+                background: isActive ? s(t.primary, 0.1) : 'transparent',
+                border: isActive ? `1px solid ${t.primary}` : '1px solid transparent'
               }}>
-              <div className="w-8 h-8 rounded-full relative border"
-                style={{ background: `linear-gradient(135deg, ${theme.color}, ${theme.bg})`,
-                  boxShadow: selectedTheme === theme.id ? `0 0 12px ${theme.color}50` : 'none',
-                  borderColor: theme.id === 'branco' ? '#CBD5E1' : 'transparent'
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', position: 'relative',
+                  background: `linear-gradient(135deg, ${t.primary}, ${t.background})`,
+                  border: key === 'arcticWhite' ? '1px solid #CBD5E1' : 'none',
+                  boxShadow: isActive ? `0 0 12px ${s(t.primary, 0.5)}` : 'none'
                 }}>
-                {selectedTheme === theme.id && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Check size={12} className="text-white" />
-                  </div>
-                )}
-              </div>
-              <span className="text-[10px] font-medium text-center leading-tight"
-                style={{ color: selectedTheme === theme.id ? theme.color : 'var(--text-muted)' }}>
-                {theme.label}
-              </span>
+                  {isActive && (
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Check size={12} color="#fff" />
+                    </div>
+                  )}
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 500, color: isActive ? t.primary : theme.textMuted, textAlign: 'center', lineHeight: 1.2 }}>
+                  {t.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Coach Mode */}
+      <div className="glass-card" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Sparkles size={16} style={{ color: theme.primary }} />
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Modo do Coach</h3>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+          {coachModes.map(mode => (
+            <button key={mode.id} onClick={() => { setCoachMode(mode.id); updateUser({ coachMode: mode.id }); showSuccess('Coach actualizado!'); }} style={{
+              padding: 12, borderRadius: 12, textAlign: 'left', cursor: 'pointer',
+              background: coachMode === mode.id ? s(theme.primary, 0.15) : theme.surface,
+              border: coachMode === mode.id ? `1px solid ${theme.primary}` : `1px solid ${theme.border}`
+            }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: coachMode === mode.id ? theme.primary : theme.text, margin: 0 }}>
+                {mode.label}
+              </p>
+              <p style={{ fontSize: 10, color: theme.textMuted, margin: '4px 0 0' }}>{mode.desc}</p>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Notificacoes */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Bell size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Notificacoes
-          </h3>
+      {/* Notifications */}
+      <div className="glass-card" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Bell size={16} style={{ color: theme.primary }} />
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Notificacoes</h3>
         </div>
-        <div className="space-y-3">
-          {notificationItems.map(({ key, label, desc, icon: Icon }) => (
-            <div key={key} className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: notifications[key] ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
-                <Icon size={16} style={{ color: notifications[key] ? 'var(--gold)' : 'var(--text-muted)' }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{label}</p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</p>
-              </div>
-              <Toggle isOn={notifications[key]} onToggle={() => handleNotificationToggle(key)} />
+        {[
+          { label: 'Alertas de dividas', desc: 'Avisos de pagamentos proximos' },
+          { label: 'Dicas do Coach', desc: 'Sugestoes e motivacao' },
+          { label: 'Relatorios semanais', desc: 'Resumo semanal das financas' },
+        ].map(item => (
+          <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0' }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 12, display: 'flex',
+              alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              background: notifications ? s(theme.primary, 0.15) : theme.surface
+            }}>
+              <MessageSquare size={14} style={{ color: notifications ? theme.primary : theme.textMuted }} />
             </div>
-          ))}
-        </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 13, fontWeight: 500, color: theme.text, margin: 0 }}>{item.label}</p>
+              <p style={{ fontSize: 10, color: theme.textMuted, margin: 0 }}>{item.desc}</p>
+            </div>
+            <Toggle isOn={notifications} onToggle={() => { setNotifications(!notifications); showSuccess('Notificacoes actualizadas!'); }} />
+          </div>
+        ))}
       </div>
 
-      {/* Moeda */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Euro size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Moeda de Referencia
-          </h3>
+      {/* Language */}
+      <div className="glass-card" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Globe size={16} style={{ color: theme.primary }} />
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Idioma</h3>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          {currencies.map(curr => (
-            <button key={curr.code} onClick={() => handleCurrencyChange(curr.code)}
-              className="py-2.5 px-3 rounded-xl text-left transition-all flex items-center gap-2"
-              style={{
-                background: currency === curr.code ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
-                border: currency === curr.code ? '1px solid var(--gold)' : '1px solid var(--border)'
-              }}>
-              <span className="text-base font-bold" style={{
-                color: currency === curr.code ? 'var(--gold)' : 'var(--text-primary)'
-              }}>
-                {curr.symbol}
-              </span>
-              <span className="text-xs font-medium" style={{
-                color: currency === curr.code ? 'var(--gold)' : 'var(--text-secondary)'
-              }}>
-                {curr.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Idioma */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Languages size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Idioma
-          </h3>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {languages.map(lang => (
-            <button key={lang.code} onClick={() => handleLanguageChange(lang.code)}
-              className="py-2.5 rounded-xl text-sm font-medium transition-all text-center"
-              style={{
-                background: language === lang.code ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
-                color: language === lang.code ? 'var(--gold)' : 'var(--text-secondary)',
-                border: language === lang.code ? '1px solid var(--gold)' : '1px solid var(--border)'
-              }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          {[
+            { code: 'pt', label: 'Portugues' },
+            { code: 'en', label: 'English' },
+            { code: 'es', label: 'Espanol' },
+          ].map(lang => (
+            <button key={lang.code} style={{
+              padding: '10px 0', borderRadius: 12, fontSize: 12, fontWeight: 500, textAlign: 'center', cursor: 'pointer',
+              background: lang.code === 'pt' ? s(theme.primary, 0.15) : theme.surface,
+              color: lang.code === 'pt' ? theme.primary : theme.textMuted,
+              border: lang.code === 'pt' ? `1px solid ${theme.primary}` : `1px solid ${theme.border}`
+            }}>
               {lang.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Coach Settings */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            AI Coach
-          </h3>
-        </div>
-        <div className="space-y-3">
-          <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
-              Nome do Coach
-            </label>
-            <input type="text" value={coachName} onChange={e => setCoachName(e.target.value)}
-              className="w-full input-field" />
+      {/* Premium Upsell */}
+      <div style={{
+        padding: 16, borderRadius: 16,
+        background: `linear-gradient(135deg, ${s(theme.primary, 0.15)}, ${s(theme.primary, 0.05)})`,
+        border: `1px solid ${s(theme.primary, 0.3)}`
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Crown size={20} style={{ color: theme.primary }} />
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: theme.primary, margin: 0 }}>Premium</p>
+            <p style={{ fontSize: 11, color: theme.textMuted, margin: 0 }}>Temas exclusivos, coach avancado, relatorios completos</p>
           </div>
-          <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
-              Personalidade
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.entries(personalityLabels).map(([key, label]) => (
-                <button key={key} onClick={() => setCoachPersonality(key)}
-                  className="py-2.5 px-3 rounded-xl text-left transition-all"
-                  style={{
-                    background: coachPersonality === key ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
-                    border: coachPersonality === key ? '1px solid var(--gold)' : '1px solid var(--border)'
-                  }}>
-                  <p className="text-xs font-semibold"
-                    style={{ color: coachPersonality === key ? 'var(--gold)' : 'var(--text-primary)' }}>
-                    {label}
-                  </p>
-                  <p className="text-[10px] mt-0.5"
-                    style={{ color: coachPersonality === key ? 'var(--gold)' : 'var(--text-muted)' }}>
-                    {personalityDescriptions[key]}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </div>
-          <button onClick={handleSaveCoach} disabled={saving}
-            className="w-full py-2.5 rounded-xl text-sm font-bold text-white gold-gradient disabled:opacity-50 flex items-center justify-center gap-2">
-            <Save size={14} /> {saving ? 'A guardar...' : 'Guardar Coach'}
-          </button>
-        </div>
-      </div>
-
-      {/* Modo de Vida */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Shield size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Modo de Vida
-          </h3>
-        </div>
-        <div className="space-y-2">
-          {Object.entries(modeLabels).map(([key, label]) => (
-            <button key={key} onClick={() => handleModeChange(key)}
-              className="w-full p-3 rounded-xl text-left transition-all flex items-center gap-3"
-              style={{
-                background: selectedMode === key ? `${modeColors[key]}15` : 'transparent',
-                border: selectedMode === key ? `1px solid ${modeColors[key]}` : '1px solid transparent'
-              }}>
-              <div className="w-3 h-3 rounded-full" style={{ background: modeColors[key] }} />
-              <div className="flex-1">
-                <p className="text-sm font-semibold" style={{ color: modeColors[key] }}>{label}</p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{modeDescriptions[key]}</p>
-              </div>
-              {selectedMode === key && (
-                <ChevronRight size={14} style={{ color: modeColors[key] }} />
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Exportar Dados */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Download size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Exportar Dados
-          </h3>
-        </div>
-        <button onClick={handleExportData} disabled={exporting}
-          className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
-          style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
-          <Download size={14} style={{ color: 'var(--gold)' }} />
-          {exporting ? 'A exportar...' : 'Exportar os meus dados (JSON)'}
-        </button>
-      </div>
-
-      {/* Privacidade */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Lock size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Privacidade
-          </h3>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: privacySettings.analytics ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
-              <Eye size={16} style={{ color: privacySettings.analytics ? 'var(--gold)' : 'var(--text-muted)' }} />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Analise de uso</p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Ajuda-nos a melhorar a app</p>
-            </div>
-            <Toggle isOn={privacySettings.analytics} onToggle={() => handlePrivacyToggle('analytics')} />
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: privacySettings.personalizedTips ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
-              <Heart size={16} style={{ color: privacySettings.personalizedTips ? 'var(--gold)' : 'var(--text-muted)' }} />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Dicas personalizadas</p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Sugestoes baseadas nos teus habitos</p>
-            </div>
-            <Toggle isOn={privacySettings.personalizedTips} onToggle={() => handlePrivacyToggle('personalizedTips')} />
-          </div>
+          <ChevronRight size={16} style={{ color: theme.primary }} />
         </div>
       </div>
 
       {/* About */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Info size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Sobre o PoupPT
-          </h3>
+      <div className="glass-card" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <Info size={16} style={{ color: theme.primary }} />
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: theme.text, margin: 0 }}>Sobre o PoupPT</h3>
         </div>
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span style={{ color: 'var(--text-secondary)' }}>Versao</span>
-            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>1.3.0</span>
+        {[
+          { label: 'Versao', value: '1.3.0' },
+          { label: 'Ambiente', value: 'Producao' },
+          { label: 'Licenca', value: 'Pessoal' },
+        ].map(row => (
+          <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+            <span style={{ fontSize: 13, color: theme.textMuted }}>{row.label}</span>
+            <span style={{ fontSize: 13, fontWeight: 500, color: theme.text }}>{row.value}</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span style={{ color: 'var(--text-secondary)' }}>Ambiente</span>
-            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Producao</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span style={{ color: 'var(--text-secondary)' }}>Licenca</span>
-            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Pessoal</span>
-          </div>
-          <div className="pt-2" style={{ borderTop: '1px solid var(--border)' }}>
-            <a href="https://poupt.pt/termos" target="_blank" rel="noopener noreferrer"
-              className="text-xs flex items-center gap-1 mb-1.5" style={{ color: 'var(--gold)' }}>
-              Termos e Condicoes <ExternalLink size={10} />
-            </a>
-            <a href="https://poupt.pt/privacidade" target="_blank" rel="noopener noreferrer"
-              className="text-xs flex items-center gap-1" style={{ color: 'var(--gold)' }}>
-              Politica de Privacidade <ExternalLink size={10} />
-            </a>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Logout */}
-      <div className="glass-card p-4">
-        <button onClick={handleLogout}
-          className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
-          style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
-          <LogOut size={14} /> Terminar Sessao
-        </button>
-      </div>
-
-      {/* Delete Account */}
-      <div className="glass-card p-4">
-        <h3 className="text-xs font-semibold mb-2 uppercase" style={{ color: '#EF4444' }}>
-          Zona de Perigo
-        </h3>
-        <button onClick={handleDeleteAccount}
-          className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
-          style={{
-            background: showDeleteConfirm ? 'rgba(239,68,68,0.1)' : 'transparent',
-            color: showDeleteConfirm ? '#EF4444' : 'var(--text-muted)',
-            border: showDeleteConfirm ? '1px solid rgba(239,68,68,0.5)' : '1px solid var(--border)'
-          }}>
-          <Trash2 size={14} />
-          {showDeleteConfirm ? 'Tens a certeza? Clica novamente para eliminar' : 'Eliminar conta'}
-        </button>
-        {showDeleteConfirm && (
-          <button onClick={() => setShowDeleteConfirm(false)}
-            className="w-full py-2 mt-2 rounded-xl text-xs"
-            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-            Cancelar
-          </button>
-        )}
-      </div>
-    </div>
+      <button onClick={() => { logout(); }} style={{
+        width: '100%', padding: 14, borderRadius: 12, fontSize: 13, fontWeight: 500,
+        background: s('#EF4444', 0.1), color: '#EF4444',
+        border: `1px solid ${s('#EF4444', 0.3)}`, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+      }}>
+        <LogOut size={14} /> Terminar Sessao
+      </button>
+    </motion.div>
   );
 }
