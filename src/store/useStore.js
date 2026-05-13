@@ -86,6 +86,32 @@ const useStore = create((set, get) => ({
   transactions: mockTransactions,
   notifications: mockNotifications,
   coachMessages: mockCoachMessages,
+  chatMessages: [],
+  goals: [],
+
+  // Computed helpers
+  getModeColor: () => {
+    const modeColors = {
+      sobrevivencia: '#EF4444',
+      recuperacao: '#F97316',
+      estabilidade: '#F59E0B',
+      crescimento: '#10B981',
+      prosperidade: '#D4A843',
+    };
+    const user = get().user;
+    return modeColors[user?.financialMode] || modeColors.sobrevivencia;
+  },
+  getModeLabel: () => {
+    const modeLabels = {
+      sobrevivencia: 'Sobrevivencia',
+      recuperacao: 'Recuperacao',
+      estabilidade: 'Estabilidade',
+      crescimento: 'Crescimento',
+      prosperidade: 'Prosperidade',
+    };
+    const user = get().user;
+    return modeLabels[user?.financialMode] || 'Sobrevivencia';
+  },
 
   // Auth actions
   login: (user, token) => {

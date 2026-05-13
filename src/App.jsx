@@ -99,43 +99,10 @@ const menuItems = [
   { id: 'settings', label: 'Configuracoes', icon: Settings },
 ];
 
-function StatusBar({ theme }) {
-  const now = new Date();
-  const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-  return (
-    <div
-      className="flex items-center justify-between px-6 py-2 text-xs font-semibold"
-      style={{ color: theme.text }}
-    >
-      <span>{time}</span>
-      <div className="flex items-center gap-1">
-        <div className="flex gap-[2px]">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="w-[3px] h-[6px] rounded-[1px]"
-              style={{
-                background: i <= 3 ? theme.text : theme.textMuted,
-              }}
-            />
-          ))}
-        </div>
-        <span className="ml-1 text-[10px]">5G</span>
-        <svg width="22" height="10" viewBox="0 0 22 10" className="ml-1">
-          <rect x="0" y="0" width="18" height="10" rx="2" stroke={theme.textMuted} strokeWidth="1" fill="none" />
-          <rect x="19" y="3" width="2" height="4" rx="1" fill={theme.textMuted} />
-          <rect x="1.5" y="1.5" width="12" height="7" rx="1" fill={theme.primary} />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
 function BottomNav({ theme, currentScreen, onTab }) {
   return (
     <div
-      className="flex items-center justify-around px-2 py-2 border-t"
+      className="flex items-center justify-around px-2 py-2 border-t bottom-nav-safe"
       style={{
         background: theme.surface,
         borderColor: theme.border,
@@ -240,7 +207,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
 
 function ThemeBar({ theme, themeId, onThemeChange }) {
   return (
-    <div className="flex items-center justify-center gap-3 mt-4 flex-wrap px-4">
+    <div className="hidden md:flex items-center justify-center gap-3 mt-4 flex-wrap px-4">
       {Object.entries(themes).map(([id, t]) => (
         <button
           key={id}
@@ -282,9 +249,25 @@ function App() {
     setReady(true);
   }, []);
 
+  // Set CSS custom properties from theme for internal pages
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--gold', theme.primary);
+    root.style.setProperty('--gold-light', theme.primaryLight);
+    root.style.setProperty('--gold-dark', theme.primaryDark);
+    root.style.setProperty('--bg-primary', theme.background);
+    root.style.setProperty('--bg-secondary', theme.surface);
+    root.style.setProperty('--bg-tertiary', theme.surfaceHover);
+    root.style.setProperty('--text-primary', theme.text);
+    root.style.setProperty('--text-secondary', theme.textMuted);
+    root.style.setProperty('--text-muted', theme.textMuted);
+    root.style.setProperty('--border', theme.border);
+    root.style.setProperty('--shadow', theme.shadow);
+  }, [theme]);
+
   if (!ready) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#080810' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
             style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}>
@@ -297,7 +280,6 @@ function App() {
   }
 
   const isFullScreen = ['landing', 'login', 'register', 'onboarding'].includes(currentScreen);
-
   const ScreenComponent = screenComponents[currentScreen] || Dashboard;
 
   const handleTab = (id) => {
@@ -306,11 +288,11 @@ function App() {
 
   return (
     <>
-      {/* Title above phone */}
+      {/* Desktop: Title above phone */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-3 text-center"
+        className="hidden md:block mb-3 text-center"
       >
         <h1
           className="text-lg font-bold gradient-text"
@@ -322,31 +304,15 @@ function App() {
         </h1>
       </motion.div>
 
-      {/* Phone Frame */}
+      {/* App Shell - full viewport on mobile, phone frame on desktop */}
       <div
-        className="relative phone-frame-shadow rounded-[40px] overflow-hidden"
-        style={{
-          width: 375,
-          height: 812,
-          background: theme.background,
-          transition: 'background-color 0.5s ease',
-        }}
+        className="app-shell relative flex flex-col"
+        style={{ background: theme.background }}
       >
-        {/* Status Bar */}
-        <StatusBar theme={theme} />
-
-        {/* Dynamic Island / Notch */}
-        <div className="flex justify-center">
-          <div
-            className="w-[120px] h-[28px] rounded-b-2xl"
-            style={{ background: '#000' }}
-          />
-        </div>
-
-        {/* App Header with hamburger */}
+        {/* App Header with hamburger (non-fullscreen screens) */}
         {!isFullScreen && (
           <div
-            className="flex items-center justify-between px-4 py-2"
+            className="flex items-center justify-between px-4 py-2 shrink-0"
             style={{ background: theme.background }}
           >
             <button
@@ -375,14 +341,12 @@ function App() {
           </div>
         )}
 
-        {/* Screen Content */}
+        {/* Screen Content - fills remaining space */}
         <div
-          className="overflow-y-auto poupt-scroll"
+          className="flex-1 overflow-y-auto poupt-scroll"
           style={{
-            height: isFullScreen
-              ? 812 - 44 - 28
-              : 812 - 44 - 28 - 48 - 64,
-            transition: 'height 0.3s ease',
+            background: theme.background,
+            transition: 'background-color 0.5s ease',
           }}
         >
           <AnimatePresence mode="wait">
@@ -392,6 +356,7 @@ function App() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
+              className="min-h-full"
             >
               <Suspense
                 fallback={
@@ -409,9 +374,11 @@ function App() {
           </AnimatePresence>
         </div>
 
-        {/* Bottom Navigation */}
+        {/* Bottom Navigation (non-fullscreen screens) */}
         {!isFullScreen && (
-          <BottomNav theme={theme} currentScreen={currentScreen} onTab={handleTab} />
+          <div className="shrink-0">
+            <BottomNav theme={theme} currentScreen={currentScreen} onTab={handleTab} />
+          </div>
         )}
 
         {/* Hamburger Menu */}
@@ -423,7 +390,7 @@ function App() {
         />
       </div>
 
-      {/* Theme selector below phone */}
+      {/* Theme selector (desktop only) */}
       <ThemeBar theme={theme} themeId={currentTheme} onThemeChange={setTheme} />
     </>
   );

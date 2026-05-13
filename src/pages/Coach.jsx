@@ -1,36 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import useStore from '../store/useStore';
-import { api } from '../services/api';
-import { Send, Trash2, Sparkles, Bot, User as UserIcon } from 'lucide-react';
+import { Send, Trash2, Sparkles, Bot } from 'lucide-react';
 
 export default function Coach() {
-  const { user, chatMessages, setChatMessages, addChatMessage, getModeColor } = useStore();
+  const { user, chatMessages, addChatMessage, getModeColor } = useStore();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [typing, setTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [chatMessages, typing]);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const loadHistory = async () => {
-    try {
-      const res = await api.getCoachHistory();
-      if (res.data.messages?.length) {
-        setChatMessages(res.data.messages);
-      }
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   const handleSend = async () => {
@@ -42,33 +22,38 @@ export default function Coach() {
     setSending(true);
     setTyping(true);
 
-    try {
-      const res = await api.coachChat(userMessage.content);
-      const assistantMessage = {
-        role: 'assistant',
-        content: res.data.reply,
-        timestamp: new Date()
-      };
-      addChatMessage(assistantMessage);
-    } catch (err) {
+    // Simulate AI coach response (mock)
+    setTimeout(() => {
+      const modeColor = getModeColor();
+      const isSargento = user?.coachMode === 'sargento' || user?.coachName === 'Sargento';
+      const responses = isSargento
+        ? [
+            'Soldado! Cada euro conta na guerra contra as dividas. Corta o desnecessario e foca!',
+            'A disciplina financeira nao e opcional, e obrigacao! Mais esforco!',
+            'Verifica as tuas dividas - a WiZink precisa de atencao imediata!',
+            'Se poupares 5 EUR por dia, sao 150 EUR por mes. Isso paga uma divida!',
+          ]
+        : [
+            'Vais conseguir! Cada passo conta, mesmo os pequenos.',
+            'Ja fizeste progresso incrivel! Continua assim!',
+            'Lembra-te: poupar nao e privacao, e investimento no teu futuro.',
+            'Que tal definires uma meta pequena para esta semana? Vais sentir-te otimo ao cumpri-la!',
+          ];
+      const reply = responses[Math.floor(Math.random() * responses.length)];
       addChatMessage({
         role: 'assistant',
-        content: err.message || 'Erro ao comunicar com o Coach.',
+        content: reply,
         timestamp: new Date()
       });
-    } finally {
       setSending(false);
       setTyping(false);
-    }
+      setTimeout(scrollToBottom, 100);
+    }, 1500);
   };
 
-  const handleClear = async () => {
-    try {
-      await api.clearCoachHistory();
-      setChatMessages([]);
-    } catch (err) {
-      console.error(err);
-    }
+  const handleClear = () => {
+    // Clear chat messages locally
+    useStore.setState({ chatMessages: [] });
   };
 
   const handleKeyDown = (e) => {
@@ -79,11 +64,12 @@ export default function Coach() {
   };
 
   const modeColor = getModeColor();
+  const coachName = user?.coachName || 'Ricardo';
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]">
+    <div className="flex flex-col" style={{ minHeight: '100%' }}>
       {/* Coach Header */}
-      <div className="px-4 py-3 flex items-center justify-between"
+      <div className="px-4 py-3 flex items-center justify-between shrink-0"
         style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
@@ -92,7 +78,7 @@ export default function Coach() {
           </div>
           <div>
             <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-              {user?.coachName || 'Ricardo'}
+              {coachName}
             </p>
             <p className="text-xs" style={{ color: modeColor }}>
               O teu alter ego financeiro
@@ -105,7 +91,7 @@ export default function Coach() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto poupt-scroll px-4 py-4 space-y-4">
         {chatMessages.length === 0 && (
           <div className="text-center py-8 animate-fade-in">
             <div className="w-16 h-16 mx-auto mb-4 rounded-3xl flex items-center justify-center"
@@ -116,7 +102,7 @@ export default function Coach() {
               Ola, {user?.name || 'amigo'}!
             </h3>
             <p className="text-sm max-w-xs mx-auto" style={{ color: 'var(--text-secondary)' }}>
-              Eu sou o {user?.coachName || 'Ricardo'}, o teu alter ego financeiro.
+              Eu sou o {coachName}, o teu alter ego financeiro.
               Pergunta-me qualquer coisa sobre as tuas financas.
             </p>
           </div>
@@ -136,7 +122,7 @@ export default function Coach() {
               }}>
               {msg.role === 'assistant' && (
                 <p className="text-[10px] font-semibold mb-1" style={{ color: modeColor }}>
-                  {user?.coachName}
+                  {coachName}
                 </p>
               )}
               <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
@@ -161,11 +147,11 @@ export default function Coach() {
       </div>
 
       {/* Input */}
-      <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border)' }}>
+      <div className="px-4 py-3 shrink-0" style={{ borderTop: '1px solid var(--border)' }}>
         <div className="flex gap-2">
           <input type="text" value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Pergunta ao ${user?.coachName || 'Coach'}...`}
+            placeholder={`Pergunta ao ${coachName}...`}
             className="flex-1 input-field" />
           <button onClick={handleSend} disabled={!input.trim() || sending}
             className="w-12 h-12 rounded-xl flex items-center justify-center gold-gradient disabled:opacity-40">
@@ -173,7 +159,7 @@ export default function Coach() {
           </button>
         </div>
         <p className="text-[10px] mt-1.5 text-center" style={{ color: 'var(--text-muted)' }}>
-          {user?.plan === 'premium' ? 'Mensagens ilimitadas' : `3 mensagens/dia (gratuito)`}
+          {user?.plan === 'premium' ? 'Mensagens ilimitadas' : '3 mensagens/dia (gratuito)'}
         </p>
       </div>
     </div>
