@@ -2,6 +2,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from './store/useStore';
 import { themes } from './themes';
+import { api } from './services/api';
 import {
   Home,
   FlaskConical,
@@ -13,7 +14,6 @@ import {
   Target,
   BarChart3,
   Bell,
-  Map,
   Building2,
   Shield,
   Coins,
@@ -163,7 +163,7 @@ function BottomNav({ theme, currentScreen, onTab }) {
   );
 }
 
-function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
+function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -228,7 +228,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate }) {
                 style={{ color: theme.textMuted }}
               >
                 <span>🪙</span>
-                <span>PoupMoedas: 145</span>
+                <span>PoupMoedas: {user?.poupMoedas || 0}</span>
               </div>
             </div>
           </motion.div>
@@ -272,8 +272,9 @@ function ThemeBar({ theme, themeId, onThemeChange, className = '' }) {
 }
 
 function App() {
-  const { currentScreen, setScreen, currentTheme, setTheme, menuOpen, setMenuOpen, restoreSession } = useStore();
+  const { currentScreen, setScreen, currentTheme, setTheme, menuOpen, setMenuOpen, restoreSession, user, logout } = useStore();
   const [ready, setReady] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   const theme = themes[currentTheme] || themes.darkGold;
 
@@ -295,9 +296,41 @@ function App() {
     root.style.setProperty('--warning', '#F59E0B');
   }, [theme]);
 
+  // Restore session and validate token
   useEffect(() => {
-    restoreSession();
-    setReady(true);
+    const init = async () => {
+      restoreSession();
+      setReady(true);
+
+      // Validate token with API
+      const token = localStorage.getItem('poupt_token');
+      if (token && token !== 'mock-token-123') {
+        try {
+          const res = await api.getMe();
+          if (res.data?.user) {
+            const freshUser = res.data.user;
+            localStorage.setItem('poupt_user', JSON.stringify(freshUser));
+            // Update store with fresh user data
+            useStore.getState().updateUser(freshUser);
+          }
+        } catch (err) {
+          // Token expired or invalid
+          if (err.message?.includes('401') || err.message?.includes('Unauthorized') || err.message?.includes('invalid')) {
+            logout();
+          }
+        }
+      }
+      setSessionChecked(true);
+    };
+    init();
+  }, []);
+
+  // Load Inter font
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
   }, []);
 
   if (!ready) {
@@ -383,10 +416,6 @@ function App() {
               style={{ color: theme.text }}
             >
               <Bell size={18} />
-              <div
-                className="absolute top-1 right-1 w-2 h-2 rounded-full"
-                style={{ background: '#FF4444' }}
-              />
             </button>
           </div>
         )}
@@ -430,6 +459,7 @@ function App() {
           isOpen={menuOpen}
           onClose={() => setMenuOpen(false)}
           onNavigate={(id) => setScreen(id)}
+          user={user}
         />
       </div>
 

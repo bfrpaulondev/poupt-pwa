@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
-import { Mail, Lock, ArrowLeft } from 'lucide-react';
+import { api } from '../services/api';
+import { Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const { setScreen, login, currentTheme } = useStore();
@@ -11,6 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -20,20 +22,23 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      // Mock login for prototype
-      const mockUser = {
-        name: 'Ana Silva',
-        email,
-        onboardingComplete: true,
-        financialMode: 'sobrevivencia',
-      };
-      const mockToken = 'mock-token-123';
-      login(mockUser, mockToken);
+      const res = await api.login(email, password);
+      const { token, user } = res.data || res;
+      login(user, token);
     } catch (err) {
-      setError('Erro ao entrar. Tenta novamente.');
+      const msg = err.message || 'Erro ao entrar';
+      if (msg.includes('invalid') || msg.includes('incorrect') || msg.includes('credenciais')) {
+        setError('Email ou palavra-passe incorretos');
+      } else {
+        setError('Erro ao entrar. Tenta novamente.');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') handleLogin();
   };
 
   return (
@@ -85,7 +90,9 @@ export default function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Email"
+              autoComplete="email"
               className="flex-1 bg-transparent outline-none text-sm font-medium"
               style={{ color: theme.text }}
             />
@@ -96,18 +103,27 @@ export default function Login() {
           <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
             <Lock size={18} style={{ color: theme.textMuted }} />
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Palavra-passe"
+              autoComplete="current-password"
               className="flex-1 bg-transparent outline-none text-sm font-medium"
               style={{ color: theme.text }}
             />
+            <button onClick={() => setShowPassword(!showPassword)} className="p-1">
+              {showPassword ? (
+                <EyeOff size={16} style={{ color: theme.textMuted }} />
+              ) : (
+                <Eye size={16} style={{ color: theme.textMuted }} />
+              )}
+            </button>
           </div>
         </div>
 
         {error && (
-          <p className="text-xs text-center" style={{ color: '#FF6B6B' }}>{error}</p>
+          <p className="text-xs text-center animate-fade-in" style={{ color: '#FF6B6B' }}>{error}</p>
         )}
 
         <button
@@ -124,8 +140,19 @@ export default function Login() {
         </button>
       </motion.div>
 
+      {/* Forgot password */}
+      <div className="mt-4 text-center">
+        <button
+          className="text-xs font-medium"
+          style={{ color: theme.primary }}
+          onClick={() => setScreen('forgotPassword')}
+        >
+          Esqueceste a palavra-passe?
+        </button>
+      </div>
+
       {/* Register link */}
-      <div className="mt-6 text-center">
+      <div className="mt-4 text-center">
         <p className="text-xs" style={{ color: theme.textMuted }}>
           Nao tens conta?{' '}
           <button
@@ -136,6 +163,12 @@ export default function Login() {
             Criar conta gratis
           </button>
         </p>
+      </div>
+
+      {/* Trust badges */}
+      <div className="mt-auto pt-6 flex items-center justify-center gap-4">
+        <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Gratuito</span>
+        <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Sem cartao</span>
       </div>
     </div>
   );

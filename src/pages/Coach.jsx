@@ -82,7 +82,7 @@ export default function Coach() {
   const modeColor = modeColors[user?.financialMode] || modeColors.sobrevivencia;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)]">
+    <div className="flex flex-col h-full">
       {/* Coach Header */}
       <div className="px-4 py-3 flex items-center justify-between"
         style={{ borderBottom: '1px solid var(--border)' }}>

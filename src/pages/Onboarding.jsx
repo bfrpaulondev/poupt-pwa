@@ -2,8 +2,9 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import { api } from '../services/api';
 
-const avatars = ['\u{1F469}', '\u{1F468}', '\u{1F9D1}', '\u{1F469}\u{200D}\u{1F9B0}', '\u{1F468}\u{200D}\u{1F9B1}', '\u{1F469}\u{200D}\u{1F9B3}', '\u{1F9D4}', '\u{1F471}\u{200D}\u{2640}\u{FE0F}'];
+const avatars = ['👩', '👨', '🧑', '👩‍🦰', '👨‍🦱', '👩‍🦳', '🧔', '👱‍♀️'];
 
 export default function Onboarding() {
   const {
@@ -14,17 +15,45 @@ export default function Onboarding() {
     setOnboardingComplete,
     setScreen,
     currentTheme,
+    updateUser,
   } = useStore();
 
   const theme = themes[currentTheme] || themes.darkGold;
+  const [saving, setSaving] = React.useState(false);
 
   const steps = 4;
   const progress = ((onboardingStep + 1) / steps) * 100;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (onboardingStep < steps - 1) {
       setOnboardingStep(onboardingStep + 1);
     } else {
+      // Complete onboarding via API
+      setSaving(true);
+      try {
+        await api.completeOnboarding({
+          name: onboardingData.name,
+          income: onboardingData.income,
+          hasDebts: onboardingData.hasDebts,
+          coachPersonality: onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel',
+          avatar: onboardingData.avatar,
+          jarPercentages: {
+            necessities: 50, freedom: 10, savings: 10, education: 10, play: 10, give: 5
+          }
+        });
+        updateUser({
+          onboardingComplete: true,
+          name: onboardingData.name,
+          income: onboardingData.income,
+          coachPersonality: onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel',
+        });
+      } catch (err) {
+        console.error('Onboarding save error:', err);
+        // Still proceed - data saved locally
+        updateUser({ onboardingComplete: true, name: onboardingData.name });
+      } finally {
+        setSaving(false);
+      }
       setOnboardingComplete(true);
       setScreen('dashboard');
     }
@@ -94,14 +123,15 @@ export default function Onboarding() {
       <div className="mt-6">
         <button
           onClick={handleNext}
-          className="w-full py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          disabled={saving || (onboardingStep === 0 && !onboardingData.name.trim())}
+          className="w-full py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
           style={{
             background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
             color: theme.textInverse,
             boxShadow: `0 8px 24px ${theme.primary}40`,
           }}
         >
-          {onboardingStep === steps - 1 ? '🎉 Comecar!' : 'Proximo →'}
+          {saving ? 'A guardar...' : onboardingStep === steps - 1 ? '🎉 Comecar!' : 'Proximo →'}
         </button>
       </div>
     </div>
@@ -151,6 +181,7 @@ function Step1Name({ theme }) {
           color: theme.text,
           border: `1.5px solid ${theme.border}`,
         }}
+        autoFocus
       />
     </div>
   );
