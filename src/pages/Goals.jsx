@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import {
   Target, Plus, Check, X, Calendar, Clock,
   Shield, PiggyBank, TrendingUp, CreditCard, ShoppingBag, Banknote
@@ -19,7 +20,7 @@ const goalTypes = [
 const goalIcons = ['🎯', '🏠', '🚗', '✈️', '💍', '🎓', '💼', '🏥', '📱', '🎮', '💎', '🏆'];
 
 export default function Goals() {
-  const theme = themes.darkGold;
+  const { theme } = useThemeColors();
   const { goals, setScreen } = useStore();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({

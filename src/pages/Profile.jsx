@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import {
   User, Trophy, Flame, Target, Coins, Settings, ChevronRight, Award,
   Star, Shield, CreditCard, Sparkles, Crown, TrendingUp, MessageCircle,
@@ -25,7 +26,7 @@ function calculateLevel(xp) {
 }
 
 export default function Profile() {
-  const theme = themes.darkGold;
+  const { theme } = useThemeColors();
   const { user, setScreen, updateUser } = useStore();
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 

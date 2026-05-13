@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import {
   Bell, BellOff, CheckCheck, AlertTriangle, CreditCard, Target,
   TrendingUp, Flame, Trophy, Lightbulb, MessageCircle, Circle, Info
@@ -19,7 +20,7 @@ const typeConfig = {
 };
 
 export default function Notifications() {
-  const theme = themes.darkGold;
+  const { theme } = useThemeColors();
   const { notifications, setScreen } = useStore();
   const [filter, setFilter] = useState('all');
 

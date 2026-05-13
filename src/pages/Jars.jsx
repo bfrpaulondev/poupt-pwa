@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import { Save, RotateCcw, Info } from 'lucide-react';
 
 const jarConfig = [
@@ -15,7 +16,7 @@ const jarConfig = [
 
 export default function Jars() {
   const { jars, mockUser } = useStore();
-  const theme = themes.darkGold;
+  const { theme } = useThemeColors();
   const income = mockUser?.income || 1100;
 
   const defaultPercentages = {};

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import {
   Calendar, CreditCard, TrendingUp, ArrowDownLeft, ArrowUpRight,
   ChevronLeft, ChevronRight, BarChart3, PieChart
@@ -10,7 +11,7 @@ import {
 const monthNames = ['Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 export default function Reports() {
-  const theme = themes.darkGold;
+  const { theme } = useThemeColors();
   const { transactions, jars, user } = useStore();
   const [activeTab, setActiveTab] = useState('resumo');
 

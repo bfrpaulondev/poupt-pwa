@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import {
   Coins, Play, Gift, Star, MessageCircle, Palette,
   Check, Camera, FileBarChart, Users, Zap, CalendarDays, Flame,
@@ -26,7 +27,7 @@ const spendItems = [
 ];
 
 export default function MoedasStore() {
-  const theme = themes.darkGold;
+  const { theme } = useThemeColors();
   const { user, updateUser, setScreen } = useStore();
   const [activeTab, setActiveTab] = useState('earn');
   const [watchingAd, setWatchingAd] = useState(false);

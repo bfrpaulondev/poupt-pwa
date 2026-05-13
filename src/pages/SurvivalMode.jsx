@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import {
   Shield, AlertTriangle, Phone, FileText, Heart, ArrowRight,
   AlertCircle, CheckSquare, Square, Home, CreditCard, Banknote,
@@ -35,7 +36,7 @@ const resourceLinks = [
 ];
 
 export default function SurvivalMode() {
-  const theme = themes.darkGold;
+  const { theme } = useThemeColors();
   const { user, debts, setScreen } = useStore();
   const [checkedItems, setCheckedItems] = useState({});
   const [showAllResources, setShowAllResources] = useState(false);

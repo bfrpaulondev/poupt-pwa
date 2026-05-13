@@ -2,17 +2,18 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import {
   CreditCard, AlertTriangle, TrendingDown, ChevronDown,
   ChevronUp, Banknote, Snowflake, Flame, Shield,
   ArrowDownLeft, CircleDot, Clock, PiggyBank,
 } from 'lucide-react';
 
-const theme = themes.darkGold;
 const fmt = (v) => `${v.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 
 export default function Debts() {
   const { debts, setScreen } = useStore();
+  const { theme } = useThemeColors();
   const [expandedIdx, setExpandedIdx] = useState(null);
   const [showSnowball, setShowSnowball] = useState(false);
 

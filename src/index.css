@@ -19,8 +19,8 @@ body {
   height: 100%;
   overflow: auto;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #000;
-  color: #fff;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
@@ -75,7 +75,7 @@ body {
   background: transparent;
 }
 .poupt-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 215, 0, 0.15);
+  background: color-mix(in srgb, var(--gold) 15%, transparent);
   border-radius: 4px;
 }
 
@@ -83,15 +83,15 @@ body {
    Glass / Card Styles
    ============================ */
 .glass {
-  background: rgba(255, 215, 0, 0.04);
-  border: 1px solid rgba(255, 215, 0, 0.1);
+  background: color-mix(in srgb, var(--gold) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 10%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
 .glass-strong {
-  background: rgba(255, 215, 0, 0.08);
-  border: 1px solid rgba(255, 215, 0, 0.15);
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 15%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -108,8 +108,8 @@ body {
 }
 
 .feature-card {
-  background: rgba(255, 215, 0, 0.03);
-  border: 1px solid rgba(255, 215, 0, 0.08);
+  background: color-mix(in srgb, var(--gold) 3%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold) 8%, transparent);
   border-radius: 16px;
 }
 
@@ -139,13 +139,13 @@ body {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--gold) 30%, transparent);
   letter-spacing: 0.3px;
 }
 
 .btn-gold:hover {
   transform: scale(1.02);
-  box-shadow: 0 6px 28px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 6px 28px color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
 .btn-gold:active {
@@ -160,7 +160,7 @@ body {
 .btn-gold-outline {
   background: transparent;
   color: var(--gold);
-  border: 1.5px solid rgba(255, 215, 0, 0.4);
+  border: 1.5px solid color-mix(in srgb, var(--gold) 40%, transparent);
   border-radius: 50px;
   padding: 14px 28px;
   font-weight: 600;
@@ -170,7 +170,7 @@ body {
 }
 
 .btn-gold-outline:hover {
-  background: rgba(255, 215, 0, 0.06);
+  background: color-mix(in srgb, var(--gold) 6%, transparent);
   transform: scale(1.02);
 }
 
@@ -278,7 +278,7 @@ input[type="range"] {
   border-radius: 3px;
   outline: none;
   cursor: pointer;
-  background: #1a1a1a;
+  background: var(--border);
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -289,8 +289,8 @@ input[type="range"]::-webkit-slider-thumb {
   border-radius: 50%;
   background: var(--gold);
   cursor: pointer;
-  border: 3px solid #000;
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -299,8 +299,8 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 50%;
   background: var(--gold);
   cursor: pointer;
-  border: 3px solid #000;
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--gold) 40%, transparent);
 }
 
 /* ============================
@@ -333,7 +333,7 @@ input[type="range"]::-moz-range-thumb {
   .app-shell {
     max-width: 480px;
     margin: 0 auto;
-    border-left: 1px solid #1a1a1a;
-    border-right: 1px solid #1a1a1a;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
   }
 }

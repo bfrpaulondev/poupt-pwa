@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
+import useThemeColors from '../utils/useThemeColors';
 import {
   TrendingUp, BarChart3, Building2, Bitcoin, Landmark, Home, PiggyBank,
   Lock, Crown, Shield, BookOpen, Sparkles, ChevronRight, Star
@@ -24,7 +25,7 @@ const tips = [
 ];
 
 export default function Investments() {
-  const theme = themes.darkGold;
+  const { theme } = useThemeColors();
   const { user } = useStore();
 
   const s = (color, alpha) => `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
