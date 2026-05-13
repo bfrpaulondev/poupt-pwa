@@ -1,12 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import useStore from '../store/useStore';
-import { themes } from '../themes';
-import { Bot, Snowflake, Sparkles, ArrowRight } from 'lucide-react';
+import { Bot, Snowflake, Sparkles } from 'lucide-react';
 
-function FlaskIcon({ color, size = 22 }) {
+function FlaskIcon({ color = '#E4B94F', size = 21 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M9 3h6" />
       <path d="M10 9V3h4v6l5 8.5a2 2 0 0 1-1.7 3H6.7a2 2 0 0 1-1.7-3L10 9z" />
     </svg>
@@ -15,7 +23,6 @@ function FlaskIcon({ color, size = 22 }) {
 
 export default function Landing() {
   const { setScreen, setOnboardingStep } = useStore();
-  const theme = themes.darkGold;
 
   const handleStart = () => {
     setOnboardingStep(0);
@@ -28,145 +35,314 @@ export default function Landing() {
 
   const features = [
     {
-      icon: <FlaskIcon color="#FFD700" />,
+      icon: <FlaskIcon />,
       title: '6 Frascos',
-      desc: 'Metodo de gestao financeira comprovado',
+      desc: 'Método de gestão financeira comprovado',
     },
     {
-      icon: <Bot size={22} color="#FFD700" />,
+      icon: <Bot size={21} color="#E4B94F" />,
       title: 'AI Coach',
       desc: 'Treinador pessoal com 2 personalidades',
     },
     {
-      icon: <Snowflake size={22} color="#FFD700" />,
+      icon: <Snowflake size={21} color="#E4B94F" />,
       title: 'Snowball',
-      desc: 'Metodo bola de neve para eliminar dividas',
+      desc: 'Método bola de neve para eliminar dívidas',
     },
   ];
 
   return (
     <div
-      className="flex flex-col items-center min-h-full px-5 py-8 relative overflow-y-auto poupt-scroll"
-      style={{ background: theme.background }}
+      style={{
+        minHeight: '100dvh',
+        width: '100%',
+        background:
+          'radial-gradient(circle at 50% 0%, rgba(228,185,79,0.06) 0%, rgba(7,7,12,0) 38%), #07070C',
+        display: 'flex',
+        justifyContent: 'center',
+        overflowY: 'auto',
+      }}
     >
-      {/* Ambient glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
+      <main
         style={{
-          background: `radial-gradient(ellipse at 50% 15%, rgba(255,215,0,0.08) 0%, transparent 55%)`,
+          width: '100%',
+          maxWidth: 361,
+          padding: '74px 15px 22px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}
-      />
-
-      {/* Logo Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 text-center pt-4 pb-2"
       >
-        <div className="text-7xl mb-4 select-none">🐷</div>
-        <h1
-          className="text-4xl font-extrabold gradient-text leading-tight"
+        <motion.section
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
           style={{
-            backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+            width: '100%',
+            textAlign: 'center',
           }}
         >
-          PoupPT
-        </h1>
-        <p className="text-sm mt-2 font-medium" style={{ color: theme.textMuted }}>
-          O teu treinador financeiro pessoal
-        </p>
-      </motion.div>
+          <div
+            style={{
+              fontSize: 54,
+              lineHeight: '54px',
+              marginBottom: 13,
+              userSelect: 'none',
+            }}
+          >
+            🐷
+          </div>
 
-      {/* Hero Card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="relative z-10 w-full glass rounded-2xl p-5 mt-6"
-      >
-        <h2
-          className="text-xl font-bold mb-5 text-center leading-tight"
-          style={{ color: theme.text }}
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 34,
+              lineHeight: '38px',
+              fontWeight: 800,
+              letterSpacing: '-0.7px',
+              color: '#E4B94F',
+            }}
+          >
+            PoupPT
+          </h1>
+
+          <p
+            style={{
+              margin: '5px 0 0',
+              fontSize: 13,
+              lineHeight: '18px',
+              fontWeight: 400,
+              color: '#A8A4D6',
+            }}
+          >
+            O teu treinador financeiro pessoal
+          </p>
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          style={{
+            width: '100%',
+            marginTop: 2,
+            padding: '22px 23px 24px',
+            borderRadius: 15,
+            background: 'rgba(255,255,255,0.055)',
+            border: '1px solid rgba(255,255,255,0.11)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          }}
         >
-          Sai da crise.{'\n'}Toma o controlo.
-        </h2>
+          <h2
+            style={{
+              margin: '0 0 20px',
+              fontSize: 20,
+              lineHeight: '24px',
+              fontWeight: 800,
+              color: '#FFFFFF',
+              letterSpacing: '-0.35px',
+            }}
+          >
+            Sai da crise. Toma o controlo.
+          </h2>
 
-        <div className="flex flex-col gap-4">
-          {features.map((f, i) => (
-            <div key={i} className="flex items-start gap-3.5">
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            {features.map((feature) => (
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'rgba(255,215,0,0.1)' }}
+                key={feature.title}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
               >
-                {f.icon}
+                <div
+                  style={{
+                    width: 41,
+                    height: 41,
+                    borderRadius: 13,
+                    background: 'rgba(228,185,79,0.13)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {feature.icon}
+                </div>
+
+                <div
+                  style={{
+                    minWidth: 0,
+                    textAlign: 'left',
+                  }}
+                >
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 14,
+                      lineHeight: '17px',
+                      fontWeight: 800,
+                      color: '#FFFFFF',
+                    }}
+                  >
+                    {feature.title}
+                  </p>
+
+                  <p
+                    style={{
+                      margin: '2px 0 0',
+                      fontSize: 12,
+                      lineHeight: '16px',
+                      fontWeight: 400,
+                      color: '#A8A4D6',
+                    }}
+                  >
+                    {feature.desc}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold" style={{ color: theme.primary }}>
-                  {f.title}
-                </p>
-                <p className="text-xs mt-0.5 leading-relaxed" style={{ color: theme.textMuted }}>
-                  {f.desc}
-                </p>
-              </div>
-            </div>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.18 }}
+          style={{
+            width: '100%',
+            marginTop: 25,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleStart}
+            style={{
+              width: '100%',
+              height: 55,
+              border: 'none',
+              borderRadius: 14,
+              background: 'linear-gradient(135deg, #DFAF3C 0%, #F5D77B 100%)',
+              color: '#000000',
+              fontSize: 15,
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              cursor: 'pointer',
+              boxShadow: '0 8px 26px rgba(228,185,79,0.18)',
+            }}
+          >
+            <Sparkles size={17} strokeWidth={2.4} />
+            Começar Grátis
+          </button>
+
+          <button
+            type="button"
+            onClick={handleLogin}
+            style={{
+              width: '100%',
+              height: 46,
+              borderRadius: 15,
+              background: 'transparent',
+              border: '1px solid rgba(228,185,79,0.58)',
+              color: '#E4B94F',
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+            }}
+          >
+            Já tenho conta
+          </button>
+        </motion.section>
+
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35, delay: 0.28 }}
+          style={{
+            marginTop: 28,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            width: '100%',
+          }}
+        >
+          {['Gratuito', 'Sem cartão', '+1000 users'].map((item) => (
+            <span
+              key={item}
+              style={{
+                fontSize: 11,
+                lineHeight: '14px',
+                fontWeight: 400,
+                color: '#A8A4D6',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ✓ {item}
+            </span>
           ))}
-        </div>
-      </motion.div>
+        </motion.section>
 
-      {/* Buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-        className="relative z-10 w-full flex flex-col gap-3 mt-8"
-      >
-        <button
-          onClick={handleStart}
-          className="btn-gold w-full flex items-center justify-center gap-2"
+        <section
+          style={{
+            marginTop: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 11,
+            width: '100%',
+          }}
         >
-          <Sparkles size={18} />
-          Comecar Gratis
-        </button>
+          <div
+            style={{
+              height: 34,
+              padding: '0 14px',
+              borderRadius: 9,
+              background: 'rgba(42,39,78,0.72)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              color: '#A8A4D6',
+              fontSize: 12,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            🍎 App Store
+          </div>
 
-        <button
-          onClick={handleLogin}
-          className="btn-gold-outline w-full flex items-center justify-center gap-2"
-        >
-          Ja tenho conta
-          <ArrowRight size={14} />
-        </button>
-      </motion.div>
-
-      {/* Trust badges */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7 }}
-        className="relative z-10 flex items-center justify-center gap-5 mt-6"
-      >
-        {['Gratuito', 'Sem cartao', '+1000 users'].map((t) => (
-          <span key={t} className="text-[11px] font-medium" style={{ color: theme.textMuted }}>
-            &#10003; {t}
-          </span>
-        ))}
-      </motion.div>
-
-      {/* App store badges */}
-      <div className="relative z-10 flex items-center justify-center gap-3 mt-5 mb-4">
-        <div
-          className="px-4 py-2 rounded-lg text-[11px] font-medium flex items-center gap-1.5"
-          style={{ background: theme.surface, color: theme.textMuted, border: `1px solid ${theme.border}` }}
-        >
-          🍎 App Store
-        </div>
-        <div
-          className="px-4 py-2 rounded-lg text-[11px] font-medium flex items-center gap-1.5"
-          style={{ background: theme.surface, color: theme.textMuted, border: `1px solid ${theme.border}` }}
-        >
-          ▶️ Google Play
-        </div>
-      </div>
+          <div
+            style={{
+              height: 34,
+              padding: '0 14px',
+              borderRadius: 9,
+              background: 'rgba(42,39,78,0.72)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              color: '#A8A4D6',
+              fontSize: 12,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            ▶️ Google Play
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
