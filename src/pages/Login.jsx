@@ -23,7 +23,9 @@ export default function Login() {
     setError('');
     try {
       const res = await api.login(email, password);
-      const { token, user } = res.data || res;
+      // API returns {success, token, data: {user}} or {data: {token, user}}
+      const token = res.token || res.data?.token;
+      const user = res.data?.user || res.data;
       login(user, token);
     } catch (err) {
       const msg = err.message || 'Erro ao entrar';
