@@ -19,7 +19,7 @@ export default function Landing() {
 
   const handleStart = () => {
     setOnboardingStep(0);
-    setScreen('onboarding');
+    setScreen('register');
   };
 
   const handleLogin = () => {
