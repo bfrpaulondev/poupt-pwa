@@ -25,14 +25,20 @@ export default function Coach() {
 
   const loadHistory = async () => {
     const token = localStorage.getItem('poupt_token');
-    if (!token) return; // Not authenticated yet
+    if (!token) {
+      // Not authenticated yet, show welcome without error
+      return;
+    }
     try {
       const res = await api.getCoachHistory();
-      if (res.data.messages?.length) {
+      if (res.data?.messages?.length) {
         setCoachMessages(res.data.messages);
       }
     } catch (err) {
-      console.error(err);
+      // Only log if it's not an auth error (first session may not have history)
+      if (!err.message?.includes('401') && !err.message?.includes('autenticado')) {
+        console.error(err);
+      }
     }
   };
 
@@ -95,7 +101,7 @@ export default function Coach() {
           </div>
           <div>
             <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-              {user?.coachName || 'Ricardo'}
+              {user?.coachName || 'Coach'}
             </p>
             <p className="text-xs" style={{ color: modeColor }}>
               O teu alter ego financeiro
@@ -119,7 +125,7 @@ export default function Coach() {
               Ola, {user?.name || 'amigo'}!
             </h3>
             <p className="text-sm max-w-xs mx-auto" style={{ color: 'var(--text-secondary)' }}>
-              Eu sou o {user?.coachName || 'Ricardo'}, o teu alter ego financeiro.
+              Eu sou o {user?.coachName || 'Coach'}, o teu alter ego financeiro.
               Pergunta-me qualquer coisa sobre as tuas financas.
             </p>
           </div>

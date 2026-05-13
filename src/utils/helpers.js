@@ -1,7 +1,26 @@
-export const formatCurrency = (value) => {
-  return new Intl.NumberFormat('pt-PT', {
+const currencyConfig = {
+  EUR: { locale: 'pt-PT', currency: 'EUR', symbol: '€' },
+  USD: { locale: 'en-US', currency: 'USD', symbol: '$' },
+  BRL: { locale: 'pt-BR', currency: 'BRL', symbol: 'R$' },
+  GBP: { locale: 'en-GB', currency: 'GBP', symbol: '£' },
+};
+
+let _currentCurrency = 'EUR';
+
+export const setCurrencyGlobal = (currency) => {
+  _currentCurrency = currency || 'EUR';
+};
+
+export const getCurrencySymbol = (currency) => {
+  return currencyConfig[currency || _currentCurrency]?.symbol || '€';
+};
+
+export const formatCurrency = (value, currency) => {
+  const curr = currency || _currentCurrency;
+  const config = currencyConfig[curr] || currencyConfig.EUR;
+  return new Intl.NumberFormat(config.locale, {
     style: 'currency',
-    currency: 'EUR'
+    currency: config.currency
   }).format(value || 0);
 };
 

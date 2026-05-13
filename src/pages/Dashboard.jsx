@@ -20,6 +20,14 @@ export default function Dashboard() {
     loadDashboardData();
   }, []);
 
+  // Re-fetch data when screen gains focus (e.g., returning from addTransaction)
+  useEffect(() => {
+    // Listen for custom refresh event from AddTransaction
+    const handleRefresh = () => loadDashboardData();
+    window.addEventListener('poupt-refresh-dashboard', handleRefresh);
+    return () => window.removeEventListener('poupt-refresh-dashboard', handleRefresh);
+  }, []);
+
   const loadDashboardData = async () => {
     setLoading(true);
     try {

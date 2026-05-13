@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useStore from './store/useStore';
 import { themes } from './themes';
 import { api } from './services/api';
+import { setCurrencyGlobal } from './utils/helpers';
 import ErrorBoundary from './components/ErrorBoundary';
 import OfflineIndicator from './components/OfflineIndicator';
 import {
@@ -280,6 +281,13 @@ function App() {
 
   const theme = themes[currentTheme] || themes.darkGold;
 
+  // Sync currency globally
+  useEffect(() => {
+    if (user?.currency) {
+      setCurrencyGlobal(user.currency);
+    }
+  }, [user?.currency]);
+
   // Inject theme as CSS custom properties into :root
   useEffect(() => {
     const root = document.documentElement;
@@ -302,6 +310,13 @@ function App() {
   useEffect(() => {
     const init = async () => {
       restoreSession();
+
+      // Sync currency from saved user
+      const savedUser = JSON.parse(localStorage.getItem('poupt_user') || 'null');
+      if (savedUser?.currency) {
+        setCurrencyGlobal(savedUser.currency);
+      }
+
       setReady(true);
 
       // Validate token with API

@@ -34,7 +34,7 @@ export default function Onboarding() {
         const coachName = onboardingData.coachMode === 'sargento' ? 'Sargento' : 'Amigo';
         const coachPersonality = onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel';
         const defaultJars = useStore.getState().defaultJarPercentages;
-        await api.completeOnboarding({
+        const onboardingPayload = {
           name: onboardingData.name,
           income: onboardingData.income,
           hasDebts: onboardingData.hasDebts,
@@ -43,17 +43,25 @@ export default function Onboarding() {
           coachGender: 'm',
           avatar: onboardingData.avatar,
           jarPercentages: defaultJars,
-          financialMode: onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade'
-        });
-        updateUser({
+          financialMode: onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade',
+          onboardingComplete: true
+        };
+        const res = await api.completeOnboarding(onboardingPayload);
+        // Use the API response user data for consistency
+        const apiUser = res.data?.user;
+        const updatedData = {
           onboardingComplete: true,
-          name: onboardingData.name,
-          income: onboardingData.income,
-          coachName,
-          coachPersonality,
-          jarPercentages: defaultJars,
-          financialMode: onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade'
-        });
+          name: apiUser?.name || onboardingData.name,
+          income: apiUser?.income || onboardingData.income,
+          coachName: apiUser?.coachName || coachName,
+          coachPersonality: apiUser?.coachPersonality || coachPersonality,
+          jarPercentages: apiUser?.jarPercentages || defaultJars,
+          financialMode: apiUser?.financialMode || (onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade'),
+          avatar: apiUser?.avatar || onboardingData.avatar,
+          currency: apiUser?.currency || 'EUR',
+          theme: apiUser?.theme || 'darkGold'
+        };
+        updateUser(updatedData);
       } catch (err) {
         console.error('Onboarding save error:', err);
         // Still proceed - data saved locally

@@ -52,7 +52,9 @@ export default function Debts() {
   const loadSnowball = async () => {
     try {
       const res = await api.getSnowballOrder();
-      setSnowball(res.data);
+      // Backend returns data.plan array, normalize to order
+      const planData = res.data?.plan || res.data?.order || [];
+      setSnowball({ order: planData, totalMinimumPayment: planData.reduce((s, d) => s + (d.minimumPayment || d.pagamentoMinimo || 0), 0) });
       setShowSnowball(true);
     } catch (err) {
       console.error(err);
@@ -372,8 +374,10 @@ export default function Debts() {
           </p>
           {snowball.order && snowball.order.length > 0 ? (
             <div className="space-y-2">
-              {snowball.order.map((debt, idx) => (
-                <div key={debt._id || idx} className="flex items-center gap-3 p-2 rounded-xl"
+              {snowball.order.map((debt, idx) => {
+                const remaining = debt.remaining || debt.remainingAmount || (debt.totalAmount - (debt.amountPaid || 0)) || 0;
+                return (
+                <div key={debt._id || debt.debt || idx} className="flex items-center gap-3 p-2 rounded-xl"
                   style={{ background: idx === 0 ? 'rgba(16,185,129,0.1)' : 'transparent', border: idx === 0 ? '1px solid rgba(16,185,129,0.3)' : '1px solid transparent' }}>
                   <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
                     style={{ background: idx === 0 ? '#10B981' : 'var(--bg-secondary)', color: idx === 0 ? 'white' : 'var(--text-secondary)' }}>
@@ -382,7 +386,7 @@ export default function Debts() {
                   <div className="flex-1">
                     <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{debt.creditorName}</p>
                     <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                      {formatCurrency(debt.remainingAmount || (debt.amount - (debt.amountPaid || 0)))} restante
+                      {formatCurrency(remaining)} restante
                     </p>
                   </div>
                   {idx === 0 && (
@@ -392,7 +396,8 @@ export default function Debts() {
                     </span>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-xs text-center py-4" style={{ color: 'var(--text-muted)' }}>

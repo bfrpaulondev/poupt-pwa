@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
-import { categoryLabels, categoryIcons, jarLabels, jarColors, jarIcons } from '../utils/helpers';
+import { categoryLabels, categoryIcons, jarLabels, jarColors, jarIcons, formatCurrency, setCurrencyGlobal } from '../utils/helpers';
 import {
   ArrowUpRight, ArrowDownLeft, Save, X, ShoppingCart, Home, TrainFront,
   Heart, GraduationCap, Gamepad2, Shirt, AlertTriangle, TrendingUp,
@@ -60,6 +60,9 @@ export default function AddTransaction() {
         recurringFrequency: form.isRecurring ? form.recurringFrequency : undefined
       });
       addTransaction(res.data.transaction);
+
+      // Notify dashboard to refresh
+      window.dispatchEvent(new CustomEvent('poupt-refresh-dashboard'));
 
       try {
         const moedasRes = await api.earnMoedas('add_transaction', 5);
@@ -134,7 +137,7 @@ export default function AddTransaction() {
           </span>
           <div className="flex items-center justify-center gap-1 mt-2">
             <span className="text-lg font-semibold" style={{ color: type === 'receita' ? '#10B981' : '#EF4444' }}>
-              EUR
+              {JSON.parse(localStorage.getItem('poupt_user') || '{}')?.currency || 'EUR'}
             </span>
             <input type="number" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})}
               placeholder="0.00" required min="0.01" step="0.01"
@@ -258,8 +261,6 @@ export default function AddTransaction() {
 }
 
 function formatDisplayAmount(value) {
-  return new Intl.NumberFormat('pt-PT', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(value) + ' EUR';
+  const curr = JSON.parse(localStorage.getItem('poupt_user') || '{}')?.currency || 'EUR';
+  return formatCurrency(value, curr);
 }

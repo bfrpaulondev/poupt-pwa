@@ -2,7 +2,7 @@ import { useState } from 'react';
 import useStore from '../store/useStore';
 import { themes as themeMap } from '../themes';
 import { api } from '../services/api';
-import { modeLabels, modeColors, modeDescriptions } from '../utils/helpers';
+import { modeLabels, modeColors, modeDescriptions, setCurrencyGlobal } from '../utils/helpers';
 import {
   Save, Shield, Bell, Trash2, LogOut,
   Palette, Download, Info, ChevronRight,
@@ -102,6 +102,7 @@ export default function Settings() {
 
   const handleCurrencyChange = async (curr) => {
     setCurrency(curr);
+    setCurrencyGlobal(curr);
     try {
       await api.updateMe({ currency: curr });
       updateUser({ currency: curr });
