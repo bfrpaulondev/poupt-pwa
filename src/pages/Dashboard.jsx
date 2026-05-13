@@ -77,8 +77,8 @@ export default function Dashboard() {
   const modeColor = modeColors[user?.financialMode] || modeColors.sobrevivencia;
   const modeLabel = modeLabels[user?.financialMode] || 'Sobrevivencia';
 
-  const totalIncome = summary?.totalIncome || 0;
-  const totalExpenses = summary?.totalExpenses || 0;
+  const totalIncome = summary?.totalIncome ?? summary?.income ?? 0;
+  const totalExpenses = summary?.totalExpenses ?? summary?.expenses ?? 0;
   const available = totalIncome - totalExpenses;
   const spentPercent = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
   const barColor = spentPercent > 80 ? '#FF4444' : spentPercent > 50 ? '#FFB020' : '#4CAF50';
