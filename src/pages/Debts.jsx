@@ -78,8 +78,12 @@ export default function Debts() {
         minimumPayment: Number(form.minimumPayment),
         interestRate: Number(form.interestRate)
       };
-      // Only include dueDate if provided
-      if (!debtData.dueDate) delete debtData.dueDate;
+      // Only include dueDate if provided and valid
+      if (!debtData.dueDate || debtData.dueDate === '') {
+        delete debtData.dueDate;
+      } else {
+        debtData.dueDate = new Date(debtData.dueDate).toISOString();
+      }
       await api.createDebt(debtData);
       setShowForm(false);
       setForm({ creditorName: '', amount: '', minimumPayment: '', interestRate: '', dueDate: '', relationshipType: 'banco', notes: '' });
@@ -93,7 +97,11 @@ export default function Debts() {
     e.preventDefault();
     try {
       const debtData = { ...informalForm, amount: Number(informalForm.amount) };
-      if (!debtData.dueDate) delete debtData.dueDate;
+      if (!debtData.dueDate || debtData.dueDate === '') {
+        delete debtData.dueDate;
+      } else {
+        debtData.dueDate = new Date(debtData.dueDate).toISOString();
+      }
       await api.createInformalDebt(debtData);
       setShowInformalForm(false);
       setInformalForm({ creditorName: '', amount: '', dueDate: '', relationshipType: 'amigo', notes: '' });

@@ -18,7 +18,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboardData();
-  }, [user]);
+  }, []);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -245,7 +245,7 @@ export default function Dashboard() {
               >
                 <div
                   className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: tx.type === 'income' ? '#4CAF50' : '#FF6B6B' }}
+                  style={{ background: (tx.type === 'income' || tx.type === 'receita') ? '#4CAF50' : '#FF6B6B' }}
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate" style={{ color: theme.text }}>
@@ -258,10 +258,10 @@ export default function Dashboard() {
                 <span
                   className="text-sm font-bold shrink-0"
                   style={{
-                    color: tx.type === 'income' ? '#4CAF50' : '#FF6B6B',
+                    color: (tx.type === 'income' || tx.type === 'receita') ? '#4CAF50' : '#FF6B6B',
                   }}
                 >
-                  {tx.type === 'income' ? '+' : '-'}{formatCurrency(Math.abs(tx.amount))}
+                  {(tx.type === 'income' || tx.type === 'receita') ? '+' : '-'}{formatCurrency(Math.abs(tx.amount))}
                 </span>
               </div>
             ))}

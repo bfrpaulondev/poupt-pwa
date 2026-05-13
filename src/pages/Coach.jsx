@@ -24,6 +24,8 @@ export default function Coach() {
   };
 
   const loadHistory = async () => {
+    const token = localStorage.getItem('poupt_token');
+    if (!token) return; // Not authenticated yet
     try {
       const res = await api.getCoachHistory();
       if (res.data.messages?.length) {

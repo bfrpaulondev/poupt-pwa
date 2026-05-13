@@ -146,12 +146,17 @@ const useStore = create((set, get) => ({
       try {
         const user = JSON.parse(userStr);
         const savedTheme = localStorage.getItem('poupt_theme') || user.theme || 'darkGold';
+
+        // Check hash for deep link navigation
+        const hash = window.location.hash.slice(1);
+        const screen = hash || (user.onboardingComplete ? 'dashboard' : 'onboarding');
+
         set({
           user,
           token,
           isAuthenticated: true,
           currentTheme: (savedTheme && themes[savedTheme]) ? savedTheme : 'darkGold',
-          currentScreen: user.onboardingComplete ? 'dashboard' : 'onboarding'
+          currentScreen: screen
         });
       } catch {
         localStorage.removeItem('poupt_token');

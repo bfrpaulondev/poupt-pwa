@@ -20,7 +20,8 @@ export default function AddTransaction() {
   const [type, setType] = useState('despesa');
   const [form, setForm] = useState({
     amount: '', category: 'alimentacao', description: '', jar: '',
-    date: new Date().toISOString().split('T')[0], notes: ''
+    date: new Date().toISOString().split('T')[0], notes: '',
+    isRecurring: false, recurringFrequency: 'monthly'
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -54,7 +55,9 @@ export default function AddTransaction() {
         ...form,
         type,
         amount: Number(form.amount),
-        jar: form.jar || null
+        jar: form.jar || null,
+        isRecurring: form.isRecurring || undefined,
+        recurringFrequency: form.isRecurring ? form.recurringFrequency : undefined
       });
       addTransaction(res.data.transaction);
 
@@ -211,6 +214,31 @@ export default function AddTransaction() {
             placeholder="Adiciona notas ou detalhes..."
             rows={2}
             className="w-full input-field resize-none" />
+        </div>
+
+        {/* Recurring Transaction Toggle */}
+        <div className="glass-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+              <Calendar size={12} className="inline mr-1" /> Transacao recorrente
+            </label>
+            <button type="button" onClick={() => setForm({...form, isRecurring: !form.isRecurring})}
+              className="w-10 h-6 rounded-full transition-all relative"
+              style={{ background: form.isRecurring ? 'var(--gold)' : 'var(--border)' }}>
+              <div className="w-4 h-4 rounded-full bg-white absolute top-1 transition-all"
+                style={{ left: form.isRecurring ? '22px' : '4px' }} />
+            </button>
+          </div>
+          {form.isRecurring && (
+            <select value={form.recurringFrequency || 'monthly'}
+              onChange={e => setForm({...form, recurringFrequency: e.target.value})}
+              className="w-full input-field mt-2">
+              <option value="weekly">Semanal</option>
+              <option value="biweekly">Quinzenal</option>
+              <option value="monthly">Mensal</option>
+              <option value="yearly">Anual</option>
+            </select>
+          )}
         </div>
 
         <div className="flex gap-3">

@@ -40,8 +40,10 @@ export default function Onboarding() {
           hasDebts: onboardingData.hasDebts,
           coachName,
           coachPersonality,
+          coachGender: 'm',
           avatar: onboardingData.avatar,
-          jarPercentages: defaultJars
+          jarPercentages: defaultJars,
+          financialMode: onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade'
         });
         updateUser({
           onboardingComplete: true,
@@ -50,6 +52,7 @@ export default function Onboarding() {
           coachName,
           coachPersonality,
           jarPercentages: defaultJars,
+          financialMode: onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade'
         });
       } catch (err) {
         console.error('Onboarding save error:', err);

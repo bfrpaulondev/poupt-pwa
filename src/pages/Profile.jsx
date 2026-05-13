@@ -384,8 +384,8 @@ export default function Profile() {
             <p className="text-2xl font-bold" style={{ color: 'var(--gold)' }}>{user?.poupMoedas || 0}</p>
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Saldo actual</p>
           </div>
-          <button onClick={() => setScreen('poupMoedas')}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+          <button type="button" onClick={() => setScreen('poupMoedas')}
+            className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 cursor-pointer"
             style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
             <Sparkles size={14} /> Loja
           </button>
@@ -484,24 +484,27 @@ export default function Profile() {
 
       {/* Quick Navigation */}
       <div className="space-y-2">
-        <button onClick={() => setScreen('settings')}
-          className="w-full glass-card p-4 flex items-center gap-3 text-left">
+        <button type="button" onClick={() => setScreen('settings')}
+          className="w-full glass-card p-4 flex items-center gap-3 text-left cursor-pointer"
+          style={{ minHeight: '48px' }}>
           <Settings size={18} style={{ color: 'var(--text-secondary)' }} />
           <div className="flex-1">
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Configuracoes</span>
           </div>
           <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
         </button>
-        <button onClick={() => setScreen('coach')}
-          className="w-full glass-card p-4 flex items-center gap-3 text-left">
+        <button type="button" onClick={() => setScreen('coach')}
+          className="w-full glass-card p-4 flex items-center gap-3 text-left cursor-pointer"
+          style={{ minHeight: '48px' }}>
           <MessageCircle size={18} style={{ color: 'var(--gold)' }} />
           <div className="flex-1">
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Falar com Coach</span>
           </div>
           <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
         </button>
-        <button onClick={() => setScreen('reports')}
-          className="w-full glass-card p-4 flex items-center gap-3 text-left">
+        <button type="button" onClick={() => setScreen('reports')}
+          className="w-full glass-card p-4 flex items-center gap-3 text-left cursor-pointer"
+          style={{ minHeight: '48px' }}>
           <TrendingUp size={18} style={{ color: '#3B82F6' }} />
           <div className="flex-1">
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Ver Relatorios</span>

@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useStore from './store/useStore';
 import { themes } from './themes';
 import { api } from './services/api';
+import ErrorBoundary from './components/ErrorBoundary';
+import OfflineIndicator from './components/OfflineIndicator';
 import {
   Home,
   FlaskConical,
@@ -314,10 +316,12 @@ function App() {
             useStore.getState().updateUser(freshUser);
           }
         } catch (err) {
-          // Token expired or invalid
-          if (err.message?.includes('401') || err.message?.includes('Unauthorized') || err.message?.includes('invalid')) {
+          // Only logout on explicit auth errors, not network errors
+          const msg = (err.message || '').toLowerCase();
+          if (msg.includes('401') || msg.includes('unauthorized') || msg.includes('invalid token') || msg.includes('jwt')) {
             logout();
           }
+          // For network errors, keep the local session
         }
       }
       setSessionChecked(true);
@@ -452,7 +456,9 @@ function App() {
                   </div>
                 }
               >
+              <ErrorBoundary>
                 <ScreenComponent />
+              </ErrorBoundary>
               </Suspense>
             </motion.div>
           </AnimatePresence>
@@ -471,6 +477,9 @@ function App() {
           onNavigate={(id) => setScreen(id)}
           user={user}
         />
+
+        {/* Offline Indicator */}
+        <OfflineIndicator />
       </div>
 
       {/* Theme selector below phone */}

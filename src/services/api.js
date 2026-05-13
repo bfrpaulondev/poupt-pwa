@@ -145,4 +145,12 @@ export const api = {
   // Goal Progress
   updateGoalProgress: (id, amount) =>
     request(`/goals/${id}/progress`, { method: 'POST', body: { amount } }),
+
+  // Export data
+  exportCSV: (type = 'transactions', month, year) =>
+    request(`/reports/export?type=${type}${month ? `&month=${month}` : ''}${year ? `&year=${year}` : ''}`),
+
+  // Recurring transactions
+  createRecurringTransaction: (data) =>
+    request('/transactions', { method: 'POST', body: { ...data, isRecurring: true } }),
 };

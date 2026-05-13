@@ -61,8 +61,12 @@ export default function Goals() {
         currentAmount: Number(form.currentAmount || 0),
         monthlyContribution: Number(form.monthlyContribution || 0)
       };
-      // Only include deadline if provided
-      if (!goalData.deadline) delete goalData.deadline;
+      // Only include deadline if provided and valid
+      if (!goalData.deadline || goalData.deadline === '') {
+        delete goalData.deadline;
+      } else {
+        goalData.deadline = new Date(goalData.deadline).toISOString();
+      }
       await api.createGoal(goalData);
       setShowForm(false);
       setForm({ name: '', type: 'fundo_emergencia', targetAmount: '', currentAmount: 0, monthlyContribution: '', deadline: '', icon: '🎯', color: '#10B981' });
