@@ -103,16 +103,16 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="px-4 py-3 space-y-4" style={{ background: theme.background }}>
+    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5" style={{ background: theme.background }}>
       {/* Greeting row */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold" style={{ color: theme.text }}>
+          <h2 className="text-lg sm:text-xl font-bold" style={{ color: theme.text }}>
             {greeting}, {userName} 🌅
           </h2>
           <div className="flex items-center gap-3 mt-1">
             <span
-              className="text-xs font-semibold px-2 py-0.5 rounded-full coin-sparkle"
+              className="text-xs sm:text-sm font-semibold px-2 py-0.5 rounded-full coin-sparkle"
               style={{ background: `${theme.primary}20`, color: theme.primary }}
             >
               🪙 {user?.poupMoedas || 0} PoupMoedas
@@ -150,13 +150,13 @@ export default function Dashboard() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass rounded-2xl p-5"
+        className="glass rounded-2xl p-5 sm:p-6"
       >
         <p className="text-xs font-medium mb-1" style={{ color: theme.textMuted }}>
           Disponivel este mes
         </p>
         <h2
-          className="text-3xl font-extrabold mb-3 gradient-text"
+          className="text-3xl sm:text-4xl font-extrabold mb-3 gradient-text"
           style={{
             backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
           }}
@@ -206,7 +206,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Camera, label: 'Scanner', screen: 'poupMoedas' },
           { icon: Plus, label: 'Adicionar', screen: 'addTransaction' },
@@ -217,11 +217,11 @@ export default function Dashboard() {
             key={action.label}
             whileTap={{ scale: 0.9 }}
             onClick={() => setScreen(action.screen)}
-            className="flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors duration-150"
+            className="flex flex-col items-center gap-1.5 p-3 sm:p-4 rounded-xl transition-colors duration-150"
             style={{ background: theme.surface }}
           >
             <action.icon size={20} style={{ color: theme.primary }} />
-            <span className="text-[10px] font-medium" style={{ color: theme.textMuted }}>
+            <span className="text-[10px] sm:text-xs font-medium" style={{ color: theme.textMuted }}>
               {action.label}
             </span>
           </motion.button>
@@ -244,11 +244,11 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 sm:gap-3">
             {recentTransactions.map((tx) => (
               <div
                 key={tx._id || tx.id}
-                className="flex items-center gap-3 p-3 rounded-xl"
+                className="flex items-center gap-3 p-3 sm:p-4 rounded-xl"
                 style={{ background: theme.surface }}
               >
                 <div
@@ -281,7 +281,7 @@ export default function Dashboard() {
       <motion.button
         onClick={() => setScreen('coach')}
         whileTap={{ scale: 0.98 }}
-        className="w-full glass rounded-xl p-4 flex items-center gap-3"
+        className="w-full glass rounded-xl p-4 sm:p-5 flex items-center gap-3"
       >
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
@@ -317,7 +317,7 @@ export default function Dashboard() {
 
       {/* Empty state when no data */}
       {!summary && recentTransactions.length === 0 && !loading && (
-        <div className="text-center py-8">
+        <div className="text-center py-12">
           <Coins size={40} className="mx-auto mb-3" style={{ color: theme.textMuted }} />
           <p className="text-sm font-medium" style={{ color: theme.text }}>
             Bem-vindo ao PoupPT!

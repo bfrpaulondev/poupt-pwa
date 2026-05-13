@@ -28,7 +28,7 @@ export default function Landing() {
 
   return (
     <div
-      className="flex flex-col items-center justify-between min-h-full px-6 py-8 relative overflow-hidden"
+      className="flex flex-col items-center justify-between min-h-screen px-5 sm:px-8 py-6 sm:py-10 relative overflow-hidden"
       style={{ background: theme.background }}
     >
       {/* Animated background gradient */}
@@ -44,7 +44,7 @@ export default function Landing() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 text-center mt-8"
+        className="relative z-10 text-center mt-4 sm:mt-8"
       >
         <div className="text-6xl mb-3">🐷</div>
         <h1
@@ -65,7 +65,7 @@ export default function Landing() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="relative z-10 w-full glass rounded-2xl p-5 mb-6"
+        className="relative z-10 w-full glass rounded-2xl p-5 sm:p-6 mb-6"
       >
         <h2
           className="text-xl font-bold mb-4 text-center"
@@ -74,8 +74,8 @@ export default function Landing() {
           Sai da crise. Toma o controlo.
         </h2>
 
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-4 sm:gap-5">
+          <div className="flex items-center gap-4 sm:gap-5">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: `${theme.primary}20` }}
@@ -92,7 +92,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 sm:gap-5">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: `${theme.primary}20` }}
@@ -109,7 +109,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 sm:gap-5">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: `${theme.primary}20` }}
@@ -133,11 +133,11 @@ export default function Landing() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6 }}
-        className="relative z-10 w-full flex flex-col gap-3"
+        className="relative z-10 w-full flex flex-col gap-4 sm:gap-5"
       >
         <button
           onClick={handleStart}
-          className="w-full py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full py-3.5 sm:py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
           style={{
             background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
             color: theme.textInverse,
@@ -150,7 +150,7 @@ export default function Landing() {
 
         <button
           onClick={handleLogin}
-          className="w-full py-3 rounded-2xl font-semibold text-sm transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full py-3 sm:py-3.5 rounded-2xl font-semibold text-sm transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
           style={{
             background: 'transparent',
             color: theme.primary,
@@ -166,7 +166,7 @@ export default function Landing() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.9 }}
-        className="relative z-10 flex items-center justify-center gap-4 mt-6"
+        className="relative z-10 flex items-center justify-center gap-6 mt-8"
       >
         <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Gratuito</span>
         <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Sem cartao</span>
@@ -174,7 +174,7 @@ export default function Landing() {
       </motion.div>
 
       {/* App store badges (mock) */}
-      <div className="relative z-10 flex items-center gap-3 mt-4 mb-2">
+      <div className="relative z-10 flex items-center gap-4 mt-6 mb-4">
         <div
           className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1"
           style={{ background: theme.surface, color: theme.textMuted, border: `1px solid ${theme.border}` }}

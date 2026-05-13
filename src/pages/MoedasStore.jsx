@@ -151,9 +151,9 @@ export default function MoedasStore() {
   ];
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
       {/* Balance Card with Animated Counter */}
-      <div className="gold-gradient p-6 rounded-2xl text-center relative overflow-hidden">
+      <div className="gold-gradient p-6 sm:p-8 rounded-2xl text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10"
           style={{ background: 'radial-gradient(circle at 30% 50%, white 0%, transparent 50%)' }} />
         <div className="relative">
@@ -183,10 +183,10 @@ export default function MoedasStore() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2.5 sm:gap-3">
         {tabs.map(({ id, label, icon: Icon, activeColor }) => (
           <button key={id} onClick={() => setActiveTab(id)}
-            className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1"
+            className="flex-1 py-3 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
             style={{
               background: activeTab === id ? `${activeColor}15` : 'var(--bg-secondary)',
               color: activeTab === id ? activeColor : 'var(--text-secondary)',
@@ -199,15 +199,15 @@ export default function MoedasStore() {
 
       {/* Ganhar Tab */}
       {activeTab === 'earn' && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h3 className="text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
             Ganhar PoupMoedas
           </h3>
 
           {/* Watch Ad - Special card */}
           {watchingAd ? (
-            <div className="glass-card p-4">
-              <div className="flex items-center gap-3 mb-3">
+            <div className="glass-card p-5">
+              <div className="flex items-center gap-4 mb-3">
                 <Play size={20} style={{ color: '#3B82F6' }} />
                 <div>
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Ver Anuncio</p>
@@ -224,9 +224,9 @@ export default function MoedasStore() {
             </div>
           ) : (
             <button onClick={handleWatchAd}
-              className="w-full glass-card p-4 flex items-center gap-3 text-left"
+              className="w-full glass-card p-5 flex items-center gap-4 text-left"
               style={{ border: '1px solid rgba(59,130,246,0.3)' }}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center"
                 style={{ background: 'rgba(59,130,246,0.15)' }}>
                 <Play size={22} style={{ color: '#3B82F6' }} />
               </div>
@@ -247,9 +247,9 @@ export default function MoedasStore() {
             const isEarning = earning === action.id;
             return (
               <button key={action.id} onClick={() => handleEarn(action)} disabled={isEarning}
-                className="w-full glass-card p-4 flex items-center gap-3 text-left"
+                className="w-full glass-card p-5 flex items-center gap-4 text-left"
                 style={{ opacity: isEarning ? 0.6 : 1 }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center"
                   style={{ background: `${action.color}15` }}>
                   <Icon size={18} style={{ color: action.color }} />
                 </div>
@@ -269,7 +269,7 @@ export default function MoedasStore() {
 
       {/* Gastar Tab */}
       {activeTab === 'spend' && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h3 className="text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
             Gastar PoupMoedas
           </h3>
@@ -278,8 +278,8 @@ export default function MoedasStore() {
             const canAfford = balance >= item.cost;
             const isPurchasing = purchasing === item.id;
             return (
-              <div key={item.id} className="glass-card p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              <div key={item.id} className="glass-card p-5 flex items-center gap-4">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center"
                   style={{ background: `${item.color}15` }}>
                   <Icon size={18} style={{ color: item.color }} />
                 </div>
@@ -304,7 +304,7 @@ export default function MoedasStore() {
 
           {/* Premium CTA */}
           {user?.plan !== 'premium' && (
-            <div className="p-4 rounded-2xl flex items-center gap-3 mt-3"
+            <div className="p-5 rounded-2xl flex items-center gap-4 mt-3"
               style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)' }}>
               <Crown size={20} style={{ color: 'var(--gold)' }} />
               <div className="flex-1">
@@ -321,14 +321,14 @@ export default function MoedasStore() {
 
       {/* Historico Tab */}
       {activeTab === 'history' && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h3 className="text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
             Historico de Transacoes
           </h3>
           {transactions.length > 0 ? (
-            <div className="max-h-96 overflow-y-auto space-y-2" style={{ scrollbarWidth: 'thin' }}>
+            <div className="max-h-96 overflow-y-auto space-y-3" style={{ scrollbarWidth: 'thin' }}>
               {transactions.map((tx, idx) => (
-                <div key={idx} className="glass-card p-3 flex items-center gap-3">
+                <div key={idx} className="glass-card p-3.5 sm:p-4 flex items-center gap-4">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center"
                     style={{ background: tx.type === 'earn' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)' }}>
                     {tx.type === 'earn'
@@ -338,7 +338,7 @@ export default function MoedasStore() {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{tx.action}</p>
-                    <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{getTimeAgo(tx.date)}</p>
+                    <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>{getTimeAgo(tx.date)}</p>
                   </div>
                   <p className="text-xs font-bold"
                     style={{ color: tx.type === 'earn' ? '#10B981' : '#EF4444' }}>

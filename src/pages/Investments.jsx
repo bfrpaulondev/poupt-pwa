@@ -153,10 +153,10 @@ export default function Investments() {
   }
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
       {/* Premium Notice for free users */}
       {!isPremium && (
-        <div className="p-4 rounded-2xl flex items-center gap-3"
+        <div className="p-5 sm:p-6 rounded-2xl flex items-center gap-4"
           style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)' }}>
           <Crown size={20} style={{ color: 'var(--gold)' }} />
           <div className="flex-1">
@@ -171,9 +171,9 @@ export default function Investments() {
 
       {/* Portfolio Summary */}
       {portfolio && (
-        <div className="glass-card p-4">
+        <div className="glass-card p-5 sm:p-6">
           <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>Portfolio</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5">
             <div>
               <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Valor Atual</span>
               <p className="text-lg font-bold" style={{ color: '#10B981' }}>{formatCurrency(portfolio.currentValue)}</p>
@@ -221,7 +221,7 @@ export default function Investments() {
 
       {/* Add Investment Button */}
       <button onClick={() => { if (isPremium) setShowForm(!showForm); }}
-        className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+        className="w-full py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
         style={{
           background: isPremium ? 'rgba(16,185,129,0.1)' : 'rgba(100,116,139,0.1)',
           color: isPremium ? '#10B981' : 'var(--text-muted)',
@@ -233,7 +233,7 @@ export default function Investments() {
 
       {/* Add Investment Form */}
       {showForm && isPremium && (
-        <form onSubmit={handleCreate} className="glass-card p-4 space-y-3 animate-fade-in">
+        <form onSubmit={handleCreate} className="glass-card p-5 sm:p-6 space-y-4 animate-fade-in">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
               Novo Investimento
@@ -249,24 +249,24 @@ export default function Investments() {
 
           {/* Type selector with PPR label */}
           <div>
-            <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
+            <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
               Tipo de ativo
             </label>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-2">
               {Object.entries(typeLabels).map(([key, label]) => {
                 const Icon = typeIcons[key];
                 return (
                   <button key={key} type="button" onClick={() => setForm({...form, type: key})}
-                    className="py-2 rounded-xl text-xs font-medium flex flex-col items-center gap-1 relative"
+                    className="py-2.5 rounded-xl text-xs font-medium flex flex-col items-center gap-1 relative"
                     style={{
                       background: form.type === key ? `${typeColors[key]}15` : 'var(--bg-secondary)',
                       color: form.type === key ? typeColors[key] : 'var(--text-muted)',
                       border: form.type === key ? `1px solid ${typeColors[key]}` : '1px solid var(--border)'
                     }}>
                     <Icon size={14} />
-                    <span className="text-[9px]">{label}</span>
+                    <span className="text-[9px] sm:text-[10px]">{label}</span>
                     {key === 'ppr' && (
-                      <span className="text-[7px] leading-none" style={{ color: typeColors[key] }}>
+                      <span className="text-[7px] sm:text-[8px] leading-none" style={{ color: typeColors[key] }}>
                         Poupanca Reforma
                       </span>
                     )}
@@ -278,13 +278,13 @@ export default function Investments() {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Quantidade</label>
+              <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Quantidade</label>
               <input type="number" placeholder="0" value={form.quantity}
                 onChange={e => setForm({...form, quantity: e.target.value})} required min="0.01" step="0.01"
                 className="w-full input-field" />
             </div>
             <div>
-              <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco medio</label>
+              <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco medio</label>
               <input type="number" placeholder="0.00 EUR" value={form.avgPrice}
                 onChange={e => setForm({...form, avgPrice: e.target.value})} required min="0.01" step="0.01"
                 className="w-full input-field" />
@@ -293,13 +293,13 @@ export default function Investments() {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco atual</label>
+              <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco atual</label>
               <input type="number" placeholder="0.00 EUR" value={form.currentPrice}
                 onChange={e => setForm({...form, currentPrice: e.target.value})} min="0.01" step="0.01"
                 className="w-full input-field" />
             </div>
             <div>
-              <label className="text-[10px] font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Dividendo/acao</label>
+              <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Dividendo/acao</label>
               <input type="number" placeholder="0.00 EUR" value={form.dividendPerShare}
                 onChange={e => setForm({...form, dividendPerShare: e.target.value})} min="0" step="0.01"
                 className="w-full input-field" />
@@ -324,7 +324,7 @@ export default function Investments() {
       )}
 
       {/* Investments List */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {investments.map(inv => {
           const TypeIcon = typeIcons[inv.type] || Building2;
           const typeColor = typeColors[inv.type] || '#64748B';
@@ -334,7 +334,7 @@ export default function Investments() {
           const isEditing = editingId === inv._id;
 
           return (
-            <div key={inv._id} className="glass-card p-4"
+            <div key={inv._id} className="glass-card p-5 sm:p-6"
               style={{ borderLeft: `3px solid ${inv.profitLoss >= 0 ? '#10B981' : '#EF4444'}` }}>
               <div className="flex items-center gap-3"
                 onClick={() => { if (!isEditing) { setExpandedId(isExpanded ? null : inv._id); setDeleteConfirmId(null); } }}>
@@ -347,7 +347,7 @@ export default function Investments() {
                     <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                       {inv.name}
                     </p>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full shrink-0"
+                    <span className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full shrink-0"
                       style={{ background: `${typeColor}15`, color: typeColor }}>
                       {typeLabels[inv.type] || inv.type}
                     </span>
@@ -374,7 +374,7 @@ export default function Investments() {
               {/* Profit/Loss bar */}
               {inv.avgPrice > 0 && (
                 <div className="mt-3">
-                  <div className="flex justify-between text-[10px] mb-1">
+                  <div className="flex justify-between text-[10px] sm:text-xs mb-1">
                     <span style={{ color: 'var(--text-secondary)' }}>
                       {inv.profitLossPercent >= 0 ? '+' : ''}{inv.profitLossPercent?.toFixed(1) || 0}%
                     </span>
@@ -397,33 +397,33 @@ export default function Investments() {
                 <div className="mt-3 pt-3 space-y-3 animate-fade-in" style={{ borderTop: '1px solid var(--border)' }}>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                      <span className="text-[10px] block" style={{ color: 'var(--text-muted)' }}>Investido</span>
+                      <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Investido</span>
                       <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
                         {formatCurrency(inv.quantity * inv.avgPrice)}
                       </p>
                     </div>
                     <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                      <span className="text-[10px] block" style={{ color: 'var(--text-muted)' }}>Valor atual</span>
+                      <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Valor atual</span>
                       <p className="text-xs font-semibold" style={{ color: '#10B981' }}>
                         {formatCurrency(inv.currentValue)}
                       </p>
                     </div>
                     {totalDividends > 0 && (
                       <div className="p-2 rounded-xl" style={{ background: 'rgba(255,215,0,0.1)' }}>
-                        <span className="text-[10px] block" style={{ color: 'var(--gold)' }}>
+                        <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--gold)' }}>
                           <Percent size={8} className="inline mr-0.5" />Dividendos
                         </span>
                         <p className="text-xs font-semibold" style={{ color: 'var(--gold)' }}>
                           {formatCurrency(totalDividends)}
                         </p>
-                        <span className="text-[9px]" style={{ color: 'var(--text-muted)' }}>
+                        <span className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>
                           {formatCurrency(inv.dividendPerShare)}/acao
                         </span>
                       </div>
                     )}
                     {inv.platform && (
                       <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                        <span className="text-[10px] block" style={{ color: 'var(--text-muted)' }}>Plataforma</span>
+                        <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Plataforma</span>
                         <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{inv.platform}</p>
                       </div>
                     )}

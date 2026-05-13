@@ -94,7 +94,7 @@ export default function AddTransaction() {
 
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
       {moedasEarned && (
         <div className="p-3 rounded-xl text-sm font-medium text-center animate-fade-in flex items-center justify-center gap-2"
           style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)' }}>
@@ -111,7 +111,7 @@ export default function AddTransaction() {
 
       <div className="flex gap-2">
         <button onClick={() => handleTypeChange('despesa')}
-          className="flex-1 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
+          className="flex-1 py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
           style={{
             background: type === 'despesa' ? 'rgba(239,68,68,0.15)' : 'var(--bg-secondary)',
             color: type === 'despesa' ? '#EF4444' : 'var(--text-secondary)',
@@ -120,7 +120,7 @@ export default function AddTransaction() {
           <ArrowDownLeft size={14} /> Despesa
         </button>
         <button onClick={() => handleTypeChange('receita')}
-          className="flex-1 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
+          className="flex-1 py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
           style={{
             background: type === 'receita' ? 'rgba(16,185,129,0.15)' : 'var(--bg-secondary)',
             color: type === 'receita' ? '#10B981' : 'var(--text-secondary)',
@@ -130,8 +130,8 @@ export default function AddTransaction() {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="glass-card p-6 text-center">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="glass-card p-6 sm:p-8 text-center">
           <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
             {type === 'receita' ? 'Receita' : 'Despesa'}
           </span>
@@ -152,7 +152,7 @@ export default function AddTransaction() {
         </div>
 
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
+          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
             Descricao
           </label>
           <input type="text" value={form.description} onChange={e => setForm({...form, description: e.target.value})}
@@ -161,13 +161,13 @@ export default function AddTransaction() {
         </div>
 
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
+          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
             Categoria
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
             {categories.map(cat => (
               <button key={cat} type="button" onClick={() => setForm({...form, category: cat})}
-                className="py-2.5 px-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
+                className="py-3 px-2.5 sm:px-3 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
                 style={{
                   background: form.category === cat ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                   color: form.category === cat ? 'var(--gold)' : 'var(--text-secondary)',
@@ -181,14 +181,14 @@ export default function AddTransaction() {
         </div>
 
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
+          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
             Frasco (opcional)
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
             {Object.entries(jarLabels).map(([key, label]) => (
               <button key={key} type="button"
                 onClick={() => setForm({...form, jar: form.jar === key ? '' : key})}
-                className="py-2.5 px-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
+                className="py-3 px-2.5 sm:px-3 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
                 style={{
                   background: form.jar === key ? `${jarColors[key]}20` : 'var(--bg-secondary)',
                   color: form.jar === key ? jarColors[key] : 'var(--text-secondary)',
@@ -202,7 +202,7 @@ export default function AddTransaction() {
         </div>
 
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
+          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
             <Calendar size={12} className="inline mr-1" /> Data
           </label>
           <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})}
@@ -210,7 +210,7 @@ export default function AddTransaction() {
         </div>
 
         <div>
-          <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
+          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
             <FileText size={12} className="inline mr-1" /> Notas (opcional)
           </label>
           <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
@@ -220,7 +220,7 @@ export default function AddTransaction() {
         </div>
 
         {/* Recurring Transaction Toggle */}
-        <div className="glass-card p-4">
+        <div className="glass-card p-5 sm:p-6">
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
               <Calendar size={12} className="inline mr-1" /> Transacao recorrente
@@ -244,7 +244,7 @@ export default function AddTransaction() {
           )}
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 sm:gap-4">
           <button type="button" onClick={() => setScreen('dashboard')}
             className="px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2"
             style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>

@@ -50,13 +50,13 @@ export default function Register() {
 
   return (
     <div
-      className="flex flex-col min-h-full px-6 py-4"
+      className="flex flex-col min-h-screen px-5 sm:px-8 py-6 sm:py-8"
       style={{ background: theme.background }}
     >
       {/* Back button */}
       <button
         onClick={() => setScreen('landing')}
-        className="flex items-center gap-1 mb-6 text-sm font-medium"
+        className="flex items-center gap-1 mb-5 sm:mb-6 text-sm font-medium"
         style={{ color: theme.textMuted }}
       >
         <ArrowLeft size={16} />
@@ -67,7 +67,7 @@ export default function Register() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-8"
+        className="text-center mb-6 sm:mb-8"
       >
         <div className="text-5xl mb-3">🐷</div>
         <h1
@@ -88,10 +88,10 @@ export default function Register() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 sm:gap-5"
       >
         <div>
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
+          <div className="flex items-center gap-2 px-4 py-3.5 sm:py-4 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
             <User size={18} style={{ color: theme.textMuted }} />
             <input
               type="text"
@@ -107,7 +107,7 @@ export default function Register() {
         </div>
 
         <div>
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
+          <div className="flex items-center gap-2 px-4 py-3.5 sm:py-4 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
             <Mail size={18} style={{ color: theme.textMuted }} />
             <input
               type="email"
@@ -123,7 +123,7 @@ export default function Register() {
         </div>
 
         <div>
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
+          <div className="flex items-center gap-2 px-4 py-3.5 sm:py-4 rounded-xl" style={{ background: theme.surface, border: `1.5px solid ${theme.border}` }}>
             <Lock size={18} style={{ color: theme.textMuted }} />
             <input
               type={showPassword ? 'text' : 'password'}
@@ -152,7 +152,7 @@ export default function Register() {
         <button
           onClick={handleRegister}
           disabled={loading}
-          className="w-full py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+          className="w-full py-3.5 sm:py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
           style={{
             background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
             color: theme.textInverse,
@@ -164,7 +164,7 @@ export default function Register() {
       </motion.div>
 
       {/* Login link */}
-      <div className="mt-6 text-center">
+      <div className="mt-6 sm:mt-8 text-center">
         <p className="text-xs" style={{ color: theme.textMuted }}>
           Ja tens conta?{' '}
           <button
@@ -178,7 +178,7 @@ export default function Register() {
       </div>
 
       {/* Trust badges */}
-      <div className="mt-auto pt-6 flex items-center justify-center gap-4">
+      <div className="mt-auto pt-8 flex items-center justify-center gap-6">
         <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Gratuito</span>
         <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Sem cartao</span>
       </div>

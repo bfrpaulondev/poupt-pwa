@@ -99,11 +99,11 @@ export default function Profile() {
 
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
       {/* Avatar & Identity Card */}
-      <div className="glass-card p-6 text-center">
+      <div className="glass-card p-6 sm:p-8 text-center">
         <div className="relative inline-block mb-3">
-          <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-3xl font-bold"
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full flex items-center justify-center text-3xl sm:text-4xl font-bold"
             style={{ background: `${modeColor}20`, color: modeColor }}>
             {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
@@ -158,26 +158,26 @@ export default function Profile() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-2">
-        <div className="glass-card p-3 text-center">
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        <div className="glass-card p-3 sm:p-4 text-center">
           <Flame size={16} className="mx-auto mb-1" style={{ color: '#F97316' }} />
-          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{user?.streak || 0}</p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Streak</p>
+          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.streak || 0}</p>
+          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Streak</p>
         </div>
-        <div className="glass-card p-3 text-center">
+        <div className="glass-card p-3 sm:p-4 text-center">
           <Zap size={16} className="mx-auto mb-1" style={{ color: '#3B82F6' }} />
-          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{user?.xp || 0}</p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>XP</p>
+          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.xp || 0}</p>
+          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>XP</p>
         </div>
-        <div className="glass-card p-3 text-center">
+        <div className="glass-card p-3 sm:p-4 text-center">
           <Coins size={16} className="mx-auto mb-1" style={{ color: 'var(--gold)' }} />
-          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{user?.poupMoedas || 0}</p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Moedas</p>
+          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.poupMoedas || 0}</p>
+          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Moedas</p>
         </div>
-        <div className="glass-card p-3 text-center">
+        <div className="glass-card p-3 sm:p-4 text-center">
           <Trophy size={16} className="mx-auto mb-1" style={{ color: '#F59E0B' }} />
-          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{user?.trophies?.length || 0}</p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Trofeus</p>
+          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.trophies?.length || 0}</p>
+          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Trofeus</p>
         </div>
       </div>
 
@@ -234,12 +234,12 @@ export default function Profile() {
             <Edit3 size={14} style={{ color: 'var(--gold)' }} /> Alterar Modo
           </h3>
           <button onClick={handleDetectMode} disabled={detecting}
-            className="text-[10px] font-medium px-2 py-1 rounded-lg"
+            className="text-[10px] sm:text-xs font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg"
             style={{ background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
             {detecting ? 'A detectar...' : 'Auto-detectar'}
           </button>
         </div>
-        <div className="grid grid-cols-5 gap-1.5">
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
           {modeOrder.map((mode) => (
             <button key={mode} onClick={async () => {
               try {
@@ -247,7 +247,7 @@ export default function Profile() {
                 updateUser({ financialMode: mode });
               } catch (err) { console.error(err); }
             }}
-              className="py-2 rounded-xl text-center transition-all"
+              className="py-2 sm:py-2.5 rounded-xl text-center transition-all"
               style={{
                 background: currentMode === mode ? `${modeColors[mode]}20` : 'var(--bg-secondary)',
                 border: currentMode === mode ? `1px solid ${modeColors[mode]}` : '1px solid var(--border)'
@@ -307,7 +307,7 @@ export default function Profile() {
               <div className="grid grid-cols-3 gap-2">
                 {Object.entries(genderLabels).map(([key, label]) => (
                   <button key={key} onClick={() => setCoachGender(key)}
-                    className="py-2 rounded-xl text-xs font-medium"
+                    className="py-2 sm:py-2.5 rounded-xl text-xs font-medium"
                     style={{
                       background: coachGender === key ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                       color: coachGender === key ? 'var(--gold)' : 'var(--text-secondary)',
@@ -325,7 +325,7 @@ export default function Profile() {
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(personalityLabels).map(([key, label]) => (
                   <button key={key} onClick={() => setCoachPersonality(key)}
-                    className="py-2 rounded-xl text-xs font-medium"
+                    className="py-2 sm:py-2.5 rounded-xl text-xs font-medium"
                     style={{
                       background: coachPersonality === key ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                       color: coachPersonality === key ? 'var(--gold)' : 'var(--text-secondary)',
@@ -448,7 +448,7 @@ export default function Profile() {
         <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>
           Resumo Rapido
         </h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
           <div className="text-center">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1"
               style={{ background: 'rgba(16,185,129,0.1)' }}>
@@ -457,7 +457,7 @@ export default function Profile() {
             <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
               {transactions?.length || stats?.totalTransactions || 0}
             </p>
-            <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Transacoes</p>
+            <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Transacoes</p>
           </div>
           <div className="text-center">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1"
@@ -467,7 +467,7 @@ export default function Profile() {
             <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
               {goals?.length || 0}
             </p>
-            <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Metas</p>
+            <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Metas</p>
           </div>
           <div className="text-center">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1"
@@ -477,7 +477,7 @@ export default function Profile() {
             <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
               {debts?.length || 0}
             </p>
-            <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Dividas</p>
+            <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Dividas</p>
           </div>
         </div>
       </div>
@@ -485,7 +485,7 @@ export default function Profile() {
       {/* Quick Navigation */}
       <div className="space-y-2">
         <button type="button" onClick={() => setScreen('settings')}
-          className="w-full glass-card p-4 flex items-center gap-3 text-left cursor-pointer"
+          className="w-full glass-card p-4 sm:p-5 flex items-center gap-3 text-left cursor-pointer"
           style={{ minHeight: '48px' }}>
           <Settings size={18} style={{ color: 'var(--text-secondary)' }} />
           <div className="flex-1">
@@ -494,7 +494,7 @@ export default function Profile() {
           <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
         </button>
         <button type="button" onClick={() => setScreen('coach')}
-          className="w-full glass-card p-4 flex items-center gap-3 text-left cursor-pointer"
+          className="w-full glass-card p-4 sm:p-5 flex items-center gap-3 text-left cursor-pointer"
           style={{ minHeight: '48px' }}>
           <MessageCircle size={18} style={{ color: 'var(--gold)' }} />
           <div className="flex-1">
@@ -503,7 +503,7 @@ export default function Profile() {
           <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
         </button>
         <button type="button" onClick={() => setScreen('reports')}
-          className="w-full glass-card p-4 flex items-center gap-3 text-left cursor-pointer"
+          className="w-full glass-card p-4 sm:p-5 flex items-center gap-3 text-left cursor-pointer"
           style={{ minHeight: '48px' }}>
           <TrendingUp size={18} style={{ color: '#3B82F6' }} />
           <div className="flex-1">

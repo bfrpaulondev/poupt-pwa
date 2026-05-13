@@ -115,7 +115,7 @@ export default function Reports() {
   }
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Relatorios</h2>
@@ -138,31 +138,31 @@ export default function Reports() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="glass-card p-3 text-center">
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+        <div className="glass-card p-4 sm:p-5 text-center">
           <ArrowDownLeft size={14} className="mx-auto mb-1" style={{ color: '#10B981' }} />
           <p className="text-sm font-bold" style={{ color: '#10B981' }}>{formatCurrency(totalIncome)}</p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Receitas</p>
+          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Receitas</p>
         </div>
-        <div className="glass-card p-3 text-center">
+        <div className="glass-card p-4 sm:p-5 text-center">
           <ArrowUpRight size={14} className="mx-auto mb-1" style={{ color: '#EF4444' }} />
           <p className="text-sm font-bold" style={{ color: '#EF4444' }}>{formatCurrency(totalExpenses)}</p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Despesas</p>
+          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Despesas</p>
         </div>
-        <div className="glass-card p-3 text-center">
+        <div className="glass-card p-4 sm:p-5 text-center">
           <TrendingUp size={14} className="mx-auto mb-1" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }} />
           <p className="text-sm font-bold" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }}>
             {savingsRate.toFixed(1)}%
           </p>
-          <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>Poupanca</p>
+          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Poupanca</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2.5 sm:gap-3">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => setActiveTab(id)}
-            className="flex-1 py-2.5 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 py-3 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
             style={{
               background: activeTab === id ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
               color: activeTab === id ? 'var(--gold)' : 'var(--text-secondary)',
@@ -177,7 +177,7 @@ export default function Reports() {
       {activeTab === 'mensal' && (
         <div className="space-y-4">
           {/* Income vs Expenses Bar Chart */}
-          <div className="glass-card p-4">
+          <div className="glass-card p-5 sm:p-6">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Receitas vs Despesas
             </h3>
@@ -201,7 +201,7 @@ export default function Reports() {
           </div>
 
           {/* 6 Jars Allocation Donut */}
-          <div className="glass-card p-4">
+          <div className="glass-card p-5 sm:p-6">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Alocacao dos 6 Frascos
             </h3>
@@ -225,10 +225,10 @@ export default function Reports() {
                   <div key={idx} className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{ background: jarColors[j.jar] || CHART_COLORS[idx % CHART_COLORS.length] }} />
-                    <span className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>
+                    <span className="text-[10px] sm:text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
                       {j.name || jarLabels[j.jar] || j.jar}
                     </span>
-                    <span className="text-[10px] font-medium ml-auto" style={{ color: 'var(--text-primary)' }}>
+                    <span className="text-[10px] sm:text-xs font-medium ml-auto" style={{ color: 'var(--text-primary)' }}>
                       {j.percentage?.toFixed(0) || 0}%
                     </span>
                   </div>
@@ -238,7 +238,7 @@ export default function Reports() {
           </div>
 
           {/* Savings Rate Trend */}
-          <div className="glass-card p-4">
+          <div className="glass-card p-5 sm:p-6">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Taxa de Poupanca
             </h3>
@@ -267,7 +267,7 @@ export default function Reports() {
       {activeTab === 'categorias' && (
         <div className="space-y-4">
           {/* Category Breakdown Pie */}
-          <div className="glass-card p-4">
+          <div className="glass-card p-5 sm:p-6">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Distribuicao por Categoria
             </h3>
@@ -295,10 +295,10 @@ export default function Reports() {
                     <div key={idx} className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ background: CHART_COLORS[idx % CHART_COLORS.length] }} />
-                      <span className="text-[10px] truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
+                      <span className="text-[10px] sm:text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
                         {categoryLabels[c.category] || c.category}
                       </span>
-                      <span className="text-[10px] font-medium" style={{ color: 'var(--text-primary)' }}>
+                      <span className="text-[10px] sm:text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                         {formatCurrency(c.total || c.amount || 0)}
                       </span>
                     </div>
@@ -313,7 +313,7 @@ export default function Reports() {
           </div>
 
           {/* Top Categories List */}
-          <div className="glass-card p-4">
+          <div className="glass-card p-5 sm:p-6">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Maiores Despesas
             </h3>
@@ -359,7 +359,7 @@ export default function Reports() {
       {activeTab === 'dividas' && (
         <div className="space-y-4">
           {/* Debt Payoff Progress */}
-          <div className="glass-card p-4">
+          <div className="glass-card p-5 sm:p-6">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Progresso de Pagamento
             </h3>
@@ -367,14 +367,14 @@ export default function Reports() {
               <div className="space-y-4">
                 {/* Summary */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <span className="text-[10px] block" style={{ color: 'var(--text-muted)' }}>Total em divida</span>
+                  <div className="p-4 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+                    <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Total em divida</span>
                     <p className="text-sm font-bold" style={{ color: '#EF4444' }}>
                       {formatCurrency(debtProgress.totalRemaining || debtProgress.totalDebt || 0)}
                     </p>
                   </div>
-                  <div className="p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <span className="text-[10px] block" style={{ color: 'var(--text-muted)' }}>Ja pago</span>
+                  <div className="p-4 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+                    <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Ja pago</span>
                     <p className="text-sm font-bold" style={{ color: '#10B981' }}>
                       {formatCurrency(debtProgress.totalPaid || 0)}
                     </p>
@@ -408,7 +408,7 @@ export default function Reports() {
                       const total = d.total || d.originalAmount || d.amount || 1;
                       const pct = Math.min(100, (paid / total) * 100);
                       return (
-                        <div key={idx} className="p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+                        <div key={idx} className="p-4 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
                           <div className="flex justify-between text-xs mb-1.5">
                             <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                               {d.creditorName || d.name || `Divida ${idx + 1}`}
@@ -419,7 +419,7 @@ export default function Reports() {
                             <div className="h-2 rounded-full transition-all"
                               style={{ width: `${pct}%`, background: pct >= 100 ? '#10B981' : 'var(--gold)' }} />
                           </div>
-                          <div className="flex justify-between text-[10px] mt-1">
+                          <div className="flex justify-between text-[10px] sm:text-xs mt-1">
                             <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(paid)} pago</span>
                             <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(total)} total</span>
                           </div>
@@ -438,14 +438,14 @@ export default function Reports() {
           </div>
 
           {/* Snowball Strategy */}
-          <div className="glass-card p-4">
+          <div className="glass-card p-5 sm:p-6">
             <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--gold)' }}>
               <TrendingDown size={16} /> Estrategia Snowball
             </h3>
             <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
               Paga primeiro as dividas menores para criar momento
             </p>
-            <div className="p-3 rounded-xl text-center" style={{ background: 'rgba(255,215,0,0.1)' }}>
+            <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(255,215,0,0.1)' }}>
               <p className="text-xs" style={{ color: 'var(--gold)' }}>
                 Acede a estrategia detalhada na pagina de Dividas
               </p>

@@ -112,9 +112,9 @@ export default function Notifications() {
   }
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
       {/* Header with unread count */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -140,7 +140,7 @@ export default function Notifications() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowFilters(!showFilters)}
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{ background: showFilters ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
               <Filter size={14} style={{ color: showFilters ? 'var(--gold)' : 'var(--text-muted)' }} />
             </button>
@@ -157,11 +157,11 @@ export default function Notifications() {
 
       {/* Priority Filters */}
       {showFilters && (
-        <div className="glass-card p-3 animate-fade-in">
+        <div className="glass-card p-4 animate-fade-in">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Filtrar por prioridade:</span>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2.5 sm:gap-3 flex-wrap">
             <button onClick={() => setFilterPriority('all')}
               className="px-3 py-1.5 rounded-xl text-xs font-medium"
               style={{
@@ -202,7 +202,7 @@ export default function Notifications() {
       )}
 
       {/* Notifications List */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {filteredNotifications.map(notification => {
           const typeConf = notificationTypeConfig[notification.type] || notificationTypeConfig.sistema;
           const prioConf = priorityConfig[notification.priority] || priorityConfig.media;
@@ -210,14 +210,14 @@ export default function Notifications() {
 
           return (
             <div key={notification._id}
-              className="glass-card p-4 cursor-pointer transition-all"
+              className="glass-card p-5 sm:p-6 cursor-pointer transition-all"
               onClick={() => !notification.read && handleMarkRead(notification._id)}
               style={{
                 borderLeft: `3px solid ${prioConf.color}`,
                 opacity: notification.read ? 0.6 : 1
               }}>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              <div className="flex items-start gap-4">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
                   style={{ background: `${typeConf.color}15` }}>
                   <TypeIcon size={18} style={{ color: typeConf.color }} />
                 </div>
@@ -234,15 +234,15 @@ export default function Notifications() {
                     {notification.message}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                    <span className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
                       {getTimeAgo(notification.createdAt)}
                     </span>
-                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                    <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
                       style={{ background: prioConf.bg, color: prioConf.color }}>
                       {prioConf.label}
                     </span>
                     {notification.type && notification.type !== 'sistema' && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full"
+                      <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full"
                         style={{ background: `${typeConf.color}10`, color: typeConf.color }}>
                         {typeConf.label}
                       </span>

@@ -207,35 +207,35 @@ export default function Settings() {
   ];
 
   const Toggle = ({ isOn, onToggle }) => (
-    <button onClick={onToggle} className="w-11 h-6 rounded-full relative transition-all shrink-0"
+    <button onClick={onToggle} className="w-12 h-7 rounded-full relative transition-all shrink-0"
       style={{ background: isOn ? 'var(--gold)' : 'var(--border)' }}>
-      <div className="w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all"
+      <div className="w-5.5 h-5.5 rounded-full bg-white absolute top-0.5 transition-all"
         style={{ left: isOn ? '22px' : '2px' }} />
     </button>
   );
 
   return (
-    <div className="px-4 py-4 space-y-4 animate-fade-in">
+    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
       {/* Success Toast */}
       {saveSuccess && (
-        <div className="p-3 rounded-xl text-xs font-medium text-center animate-fade-in"
+        <div className="p-3.5 rounded-xl text-xs font-medium text-center animate-fade-in"
           style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981' }}>
           <Check size={12} className="inline mr-1" /> {saveSuccess}
         </div>
       )}
 
       {/* Tema */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Palette size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Tema
           </h3>
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
           {themeList.map(theme => (
             <button key={theme.id} onClick={() => handleThemeChange(theme.id)}
-              className="flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all"
+              className="flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl transition-all"
               style={{
                 background: selectedTheme === theme.id ? `${theme.color}15` : 'transparent',
                 border: selectedTheme === theme.id ? `1px solid ${theme.color}` : '1px solid transparent'
@@ -251,7 +251,7 @@ export default function Settings() {
                   </div>
                 )}
               </div>
-              <span className="text-[10px] font-medium text-center leading-tight"
+              <span className="text-[10px] sm:text-xs font-medium text-center leading-tight"
                 style={{ color: selectedTheme === theme.id ? theme.color : 'var(--text-muted)' }}>
                 {theme.label}
               </span>
@@ -261,17 +261,17 @@ export default function Settings() {
       </div>
 
       {/* Notificacoes */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Bell size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Notificacoes
           </h3>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {notificationItems.map(({ key, label, desc, icon: Icon }) => (
-            <div key={key} className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            <div key={key} className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: notifications[key] ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
                 <Icon size={16} style={{ color: notifications[key] ? 'var(--gold)' : 'var(--text-muted)' }} />
               </div>
@@ -286,17 +286,17 @@ export default function Settings() {
       </div>
 
       {/* Moeda */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Euro size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Moeda de Referencia
           </h3>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
           {currencies.map(curr => (
             <button key={curr.code} onClick={() => handleCurrencyChange(curr.code)}
-              className="py-2.5 px-3 rounded-xl text-left transition-all flex items-center gap-2"
+              className="py-3 px-4 rounded-xl text-left transition-all flex items-center gap-2"
               style={{
                 background: currency === curr.code ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
                 border: currency === curr.code ? '1px solid var(--gold)' : '1px solid var(--border)'
@@ -317,17 +317,17 @@ export default function Settings() {
       </div>
 
       {/* Idioma */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Languages size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Idioma
           </h3>
         </div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
           {languages.map(lang => (
             <button key={lang.code} onClick={() => handleLanguageChange(lang.code)}
-              className="py-2.5 rounded-xl text-sm font-medium transition-all text-center"
+              className="py-3 rounded-xl text-sm font-medium transition-all text-center"
               style={{
                 background: language === lang.code ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
                 color: language === lang.code ? 'var(--gold)' : 'var(--text-secondary)',
@@ -340,7 +340,7 @@ export default function Settings() {
       </div>
 
       {/* Coach Settings */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -371,7 +371,7 @@ export default function Settings() {
                     style={{ color: coachPersonality === key ? 'var(--gold)' : 'var(--text-primary)' }}>
                     {label}
                   </p>
-                  <p className="text-[10px] mt-0.5"
+                  <p className="text-[10px] sm:text-xs mt-0.5"
                     style={{ color: coachPersonality === key ? 'var(--gold)' : 'var(--text-muted)' }}>
                     {personalityDescriptions[key]}
                   </p>
@@ -380,24 +380,24 @@ export default function Settings() {
             </div>
           </div>
           <button onClick={handleSaveCoach} disabled={saving}
-            className="w-full py-2.5 rounded-xl text-sm font-bold text-white gold-gradient disabled:opacity-50 flex items-center justify-center gap-2">
+            className="w-full py-3 rounded-xl text-sm font-bold text-white gold-gradient disabled:opacity-50 flex items-center justify-center gap-2">
             <Save size={14} /> {saving ? 'A guardar...' : 'Guardar Coach'}
           </button>
         </div>
       </div>
 
       {/* Modo de Vida */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Shield size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Modo de Vida
           </h3>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {Object.entries(modeLabels).map(([key, label]) => (
             <button key={key} onClick={() => handleModeChange(key)}
-              className="w-full p-3 rounded-xl text-left transition-all flex items-center gap-3"
+              className="w-full p-4 rounded-xl text-left transition-all flex items-center gap-4"
               style={{
                 background: selectedMode === key ? `${modeColors[key]}15` : 'transparent',
                 border: selectedMode === key ? `1px solid ${modeColors[key]}` : '1px solid transparent'
@@ -416,7 +416,7 @@ export default function Settings() {
       </div>
 
       {/* Exportar Dados */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Download size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -432,16 +432,16 @@ export default function Settings() {
       </div>
 
       {/* Privacidade */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Lock size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Privacidade
           </h3>
         </div>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: privacySettings.analytics ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
               <Eye size={16} style={{ color: privacySettings.analytics ? 'var(--gold)' : 'var(--text-muted)' }} />
             </div>
@@ -451,8 +451,8 @@ export default function Settings() {
             </div>
             <Toggle isOn={privacySettings.analytics} onToggle={() => handlePrivacyToggle('analytics')} />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: privacySettings.personalizedTips ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)' }}>
               <Heart size={16} style={{ color: privacySettings.personalizedTips ? 'var(--gold)' : 'var(--text-muted)' }} />
             </div>
@@ -466,7 +466,7 @@ export default function Settings() {
       </div>
 
       {/* About */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-3">
           <Info size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -500,7 +500,7 @@ export default function Settings() {
       </div>
 
       {/* Logout */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <button onClick={handleLogout}
           className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
           style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
@@ -509,7 +509,7 @@ export default function Settings() {
       </div>
 
       {/* Delete Account */}
-      <div className="glass-card p-4">
+      <div className="glass-card p-5 sm:p-6">
         <h3 className="text-xs font-semibold mb-2 uppercase" style={{ color: '#EF4444' }}>
           Zona de Perigo
         </h3>
