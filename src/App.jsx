@@ -205,6 +205,7 @@ function App() {
     restoreSession,
     user,
     logout,
+    notifications,
   } = useStore();
 
   const [ready, setReady] = useState(false);
@@ -232,6 +233,20 @@ function App() {
     root.style.setProperty('--danger', '#EF4444');
     root.style.setProperty('--success', '#10B981');
     root.style.setProperty('--warning', '#F59E0B');
+    root.style.setProperty('--is-dark', theme.isDark ? '1' : '0');
+    root.style.setProperty('--glass-bg', theme.glassBg || 'rgba(255,255,255,0.06)');
+    root.style.setProperty('--glass-border', theme.glassBorder || 'rgba(255,255,255,0.08)');
+    root.style.setProperty('--glass-strong-bg', theme.glassStrongBg || 'rgba(255,255,255,0.1)');
+    root.style.setProperty('--glass-strong-border', theme.glassStrongBorder || 'rgba(255,255,255,0.12)');
+    root.style.setProperty('--gradient-start', theme.gradient[0]);
+    root.style.setProperty('--gradient-end', theme.gradient[1]);
+    root.style.setProperty('--shadow-color', theme.shadow);
+
+    // Update meta theme-color for PWA
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme.background);
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -284,6 +299,15 @@ function App() {
 
     init();
   }, []);
+
+  useEffect(() => {
+    // Update notification badge visibility based on unread notifications
+    const badge = document.getElementById('notification-badge');
+    if (badge) {
+      const hasUnread = notifications?.some(n => !n.read);
+      badge.style.display = hasUnread ? 'block' : 'none';
+    }
+  }, [notifications]);
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -340,7 +364,7 @@ function App() {
     >
       {!isFullScreen && (
         <div className="shrink-0" style={{ background: theme.background }}>
-          <div className="mx-auto flex w-full max-w-[390px] items-center justify-between px-3 py-2">
+          <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 sm:px-6 py-2.5">
             <button
               onClick={() => setMenuOpen(true)}
               className="p-2 rounded-xl transition-colors duration-150"
@@ -361,7 +385,8 @@ function App() {
               style={{ color: theme.text }}
             >
               <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FF4D5E]" />
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FF4D5E]" id="notification-badge" 
+                style={{ display: 'none' }} />
             </button>
           </div>
         </div>
@@ -371,7 +396,7 @@ function App() {
         <div
           className="mx-auto w-full"
           style={{
-            maxWidth: isFullScreen ? 'none' : 390,
+            maxWidth: isFullScreen ? 'none' : '42rem',
           }}
         >
           <AnimatePresence mode="wait">
@@ -402,7 +427,7 @@ function App() {
       </div>
 
       {!isFullScreen && (
-        <div className="mx-auto w-full max-w-[390px] shrink-0">
+        <div className="mx-auto w-full max-w-2xl shrink-0">
           <BottomNav
             theme={theme}
             currentScreen={currentScreen}

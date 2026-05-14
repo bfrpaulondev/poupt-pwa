@@ -176,10 +176,7 @@ export default function Settings() {
       return;
     }
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'https://poupt-api.onrender.com/api'}/auth/me`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('poupt_token')}` }
-      });
+      await api.deleteAccount();
       logout();
     } catch (err) {
       console.error(err);

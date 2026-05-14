@@ -16,7 +16,7 @@ html, body {
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg-primary, #0A0A14);
-  color: #F0F0F5;
+  color: var(--text-primary, #F0F0F5);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
@@ -42,11 +42,13 @@ body {
   background: transparent;
 }
 .poupt-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--text-muted, rgba(255, 255, 255, 0.12));
   border-radius: 4px;
+  opacity: 0.3;
 }
 .poupt-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: var(--text-muted, rgba(255, 255, 255, 0.22));
+  opacity: 0.5;
 }
 
 /* Pulse animation for survival mode */
@@ -68,19 +70,19 @@ body {
   animation: sparkle 1.5s ease-in-out infinite;
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism utility - theme-aware */
 .glass {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.06));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--glass-strong-bg, rgba(255, 255, 255, 0.1));
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--glass-strong-border, rgba(255, 255, 255, 0.12));
 }
 
 /* Typing indicator */
@@ -112,12 +114,12 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-/* Glass Card — consistent card styling with proper spacing */
+/* Glass Card — consistent card styling with proper spacing - theme-aware */
 .glass-card {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.06));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
   border-radius: 16px;
   padding: 20px;
 }
@@ -129,9 +131,9 @@ body {
   }
 }
 
-/* Gold Gradient Button */
+/* Theme-aware gradient button */
 .btn-gold {
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  background: linear-gradient(135deg, var(--gradient-start, #D4A843), var(--gradient-end, #F0D78C));
   color: #000;
   font-weight: 700;
   border-radius: 14px;
@@ -145,7 +147,7 @@ body {
 .btn-gold:hover {
   opacity: 0.95;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(212, 168, 67, 0.3);
+  box-shadow: 0 4px 16px var(--shadow-color, rgba(0,0,0,0.2));
 }
 
 .btn-gold:active {
@@ -153,13 +155,13 @@ body {
   opacity: 0.9;
 }
 
-/* Gold Outline Button */
+/* Outline button - theme-aware */
 .btn-gold-outline {
   background: transparent;
-  color: var(--gold);
+  color: var(--gold, #D4A843);
   font-weight: 600;
   border-radius: 14px;
-  border: 1.5px solid var(--gold);
+  border: 1.5px solid var(--gold, #D4A843);
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 12px 20px;
@@ -167,7 +169,7 @@ body {
 }
 
 .btn-gold-outline:active {
-  background: rgba(255, 215, 0, 0.1);
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
 }
 
 /* Input Field */
@@ -180,7 +182,7 @@ body {
   font-size: 15px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
 }
 
@@ -191,21 +193,21 @@ body {
 
 .input-field:focus {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.12);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
-/* Feature Card */
+/* Feature Card - theme-aware */
 .feature-card {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.04));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.06));
   border-radius: 16px;
 }
 
-/* Gold Gradient */
+/* Gold Gradient - theme-aware */
 .gold-gradient {
-  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  background: linear-gradient(135deg, var(--gradient-start, #D4A843), var(--gradient-end, #F0D78C));
 }
 
 /* Gold Shimmer */
@@ -256,7 +258,7 @@ input[type="range"]::-webkit-slider-thumb {
   height: 22px;
   border-radius: 50%;
   background: var(--gold);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.3));
   cursor: pointer;
 }
 
@@ -265,7 +267,7 @@ input[type="range"]::-moz-range-thumb {
   height: 22px;
   border-radius: 50%;
   background: var(--gold);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px var(--shadow-color, rgba(0, 0, 0, 0.3));
   cursor: pointer;
   border: none;
 }
@@ -316,15 +318,7 @@ select.input-field {
   .glass-card { border-radius: 20px; }
 }
 
-/* Smooth transitions for theme changes */
-* {
-  transition-property: background-color, border-color;
-  transition-duration: 0.3s;
-  transition-timing-function: ease;
-}
-
-/* Override transition for elements that shouldn't animate */
-button, a, input, select, textarea {
-  transition-property: background-color, border-color, color, opacity, transform, box-shadow;
-  transition-duration: 0.2s;
+/* Smooth transitions for theme changes - only on layout properties */
+body, #root {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

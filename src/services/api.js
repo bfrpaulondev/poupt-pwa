@@ -134,6 +134,9 @@ export const api = {
   createCreditor: (data) => request('/creditors', { method: 'POST', body: data }),
   updateCreditor: (id, data) => request(`/creditors/${id}`, { method: 'PUT', body: data }),
 
+  // Account
+  deleteAccount: () => request('/auth/me', { method: 'DELETE' }),
+
   // Password Reset
   forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email } }),
   resetPassword: (token, password) => request('/auth/reset-password', { method: 'PUT', body: { token, password } }),
