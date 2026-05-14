@@ -16,7 +16,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
+    if (!email || !password) {
       setError('Preenche todos os campos');
       return;
     }
@@ -32,7 +32,7 @@ export default function Login() {
 
       login(user, token);
     } catch (err) {
-      const msg = err.message || '';
+      const msg = err.message || 'Erro ao entrar';
 
       if (
         msg.includes('invalid') ||
@@ -55,20 +55,18 @@ export default function Login() {
   return (
     <div
       style={{
-        width: '100vw',
+        width: '100%',
         minHeight: '100dvh',
         background: theme.background,
         overflowY: 'auto',
       }}
     >
       <div
+        className="flex flex-col min-h-screen py-5"
         style={{
-          width: 'min(calc(100vw - 26px), 430px)',
-          minHeight: '100dvh',
+          width: 'calc(100% - 26px)',
+          maxWidth: 430,
           margin: '0 auto',
-          padding: '20px 0',
-          display: 'flex',
-          flexDirection: 'column',
         }}
       >
         <button
@@ -183,6 +181,7 @@ export default function Login() {
             )}
 
             <button
+              type="button"
               onClick={handleLogin}
               disabled={loading}
               className="w-full h-[56px] rounded-2xl font-extrabold text-base transition-transform duration-200 active:scale-[0.98] disabled:opacity-50"
@@ -199,6 +198,7 @@ export default function Login() {
 
         <div className="mt-5 text-center">
           <button
+            type="button"
             onClick={() => setScreen('register')}
             className="text-sm font-bold"
             style={{ color: theme.primary }}

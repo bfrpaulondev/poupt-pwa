@@ -12,13 +12,12 @@ export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleRegister = async () => {
-    if (!name.trim() || !email.trim() || !password.trim()) {
+    if (!name || !email || !password) {
       setError('Preenche todos os campos');
       return;
     }
@@ -39,7 +38,7 @@ export default function Register() {
 
       login(user, token);
     } catch (err) {
-      const msg = err.message || '';
+      const msg = err.message || 'Erro ao criar conta';
 
       if (
         msg.includes('exist') ||
@@ -62,20 +61,18 @@ export default function Register() {
   return (
     <div
       style={{
-        width: '100vw',
+        width: '100%',
         minHeight: '100dvh',
         background: theme.background,
         overflowY: 'auto',
       }}
     >
       <div
+        className="flex flex-col min-h-screen py-5"
         style={{
-          width: 'min(calc(100vw - 26px), 430px)',
-          minHeight: '100dvh',
+          width: 'calc(100% - 26px)',
+          maxWidth: 430,
           margin: '0 auto',
-          padding: '20px 0',
-          display: 'flex',
-          flexDirection: 'column',
         }}
       >
         <button
@@ -211,6 +208,7 @@ export default function Register() {
             )}
 
             <button
+              type="button"
               onClick={handleRegister}
               disabled={loading}
               className="w-full h-[56px] rounded-2xl font-extrabold text-base transition-transform duration-200 active:scale-[0.98] disabled:opacity-50"
@@ -227,6 +225,7 @@ export default function Register() {
 
         <div className="mt-5 text-center">
           <button
+            type="button"
             onClick={() => setScreen('login')}
             className="text-sm font-bold"
             style={{ color: theme.primary }}
