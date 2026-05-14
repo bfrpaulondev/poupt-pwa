@@ -1,55 +1,126 @@
 import { useState } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
-import { categoryLabels, categoryIcons, jarLabels, jarColors, jarIcons, formatCurrency, setCurrencyGlobal } from '../utils/helpers';
 import {
-  ArrowUpRight, ArrowDownLeft, Save, X, ShoppingCart, Home, TrainFront,
-  Heart, GraduationCap, Gamepad2, Shirt, AlertTriangle, TrendingUp,
-  PiggyBank, Banknote, Laptop, Plus, Minus, CreditCard, Landmark,
-  Calendar, FileText, Coins
+  categoryLabels,
+  categoryIcons,
+  jarLabels,
+  jarColors,
+  jarIcons,
+  formatCurrency,
+} from '../utils/helpers';
+import {
+  ArrowUpRight,
+  ArrowDownLeft,
+  Save,
+  X,
+  ShoppingCart,
+  Home,
+  TrainFront,
+  Heart,
+  GraduationCap,
+  Gamepad2,
+  Shirt,
+  AlertTriangle,
+  TrendingUp,
+  PiggyBank,
+  Banknote,
+  Laptop,
+  Plus,
+  Minus,
+  CreditCard,
+  Landmark,
+  Calendar,
+  FileText,
+  Coins,
+  Repeat,
+  Wallet,
 } from 'lucide-react';
+import { Page, Card, SectionHeader, Button } from '../components/ui';
 
 const iconMap = {
-  ShoppingCart, Home, TrainFront, Heart, GraduationCap, Gamepad2, Shirt,
-  AlertTriangle, TrendingUp, PiggyBank, Banknote, Laptop, Plus, Minus,
-  ArrowUpRight, ArrowDownLeft, CreditCard, Landmark
+  ShoppingCart,
+  Home,
+  TrainFront,
+  Heart,
+  GraduationCap,
+  Gamepad2,
+  Shirt,
+  AlertTriangle,
+  TrendingUp,
+  PiggyBank,
+  Banknote,
+  Laptop,
+  Plus,
+  Minus,
+  ArrowUpRight,
+  ArrowDownLeft,
+  CreditCard,
+  Landmark,
 };
+
+const incomeCategories = ['salario', 'freelance', 'outro_rendimento', 'emprestimo_recebido'];
+const expenseCategories = [
+  'alimentacao',
+  'habitacao',
+  'transportes',
+  'saude',
+  'educacao',
+  'lazer',
+  'roupa',
+  'divida',
+  'investimento',
+  'poupanca',
+  'pagamento_divida',
+  'emprestimo_dado',
+  'outro_gasto',
+];
 
 export default function AddTransaction() {
   const { user, addTransaction, setScreen, updateUser } = useStore();
   const [type, setType] = useState('despesa');
   const [form, setForm] = useState({
-    amount: '', category: 'alimentacao', description: '', jar: '',
-    date: new Date().toISOString().split('T')[0], notes: '',
-    isRecurring: false, recurringFrequency: 'monthly'
+    amount: '',
+    category: 'alimentacao',
+    description: '',
+    jar: '',
+    date: new Date().toISOString().split('T')[0],
+    notes: '',
+    isRecurring: false,
+    recurringFrequency: 'monthly',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [moedasEarned, setMoedasEarned] = useState(null);
 
-  const incomeCategories = ['salario', 'freelance', 'outro_rendimento', 'emprestimo_recebido'];
-  const expenseCategories = [
-    'alimentacao', 'habitacao', 'transportes', 'saude', 'educacao',
-    'lazer', 'roupa', 'divida', 'investimento', 'poupanca',
-    'pagamento_divida', 'emprestimo_dado', 'outro_gasto'
-  ];
-
   const categories = type === 'receita' ? incomeCategories : expenseCategories;
+  const isIncome = type === 'receita';
+  const toneColor = isIncome ? '#16A34A' : '#DC2626';
+  const amountValue = Number(form.amount || 0);
+
+  const updateForm = (data) => {
+    setForm((prev) => ({ ...prev, ...data }));
+  };
 
   const handleTypeChange = (newType) => {
     setType(newType);
-    setForm({
-      ...form,
+    updateForm({
       category: newType === 'receita' ? 'salario' : 'alimentacao',
-      jar: ''
+      jar: '',
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.amount || Number(form.amount) <= 0) return;
+
+    if (!form.amount || Number(form.amount) <= 0) {
+      setError('Indica um valor válido.');
+      return;
+    }
+
     setSaving(true);
     setError(null);
+
     try {
       const res = await api.createTransaction({
         ...form,
@@ -57,11 +128,10 @@ export default function AddTransaction() {
         amount: Number(form.amount),
         jar: form.jar || null,
         isRecurring: form.isRecurring || undefined,
-        recurringFrequency: form.isRecurring ? form.recurringFrequency : undefined
+        recurringFrequency: form.isRecurring ? form.recurringFrequency : undefined,
       });
-      addTransaction(res.data.transaction);
 
-      // Notify dashboard to refresh
+      addTransaction(res.data.transaction);
       window.dispatchEvent(new CustomEvent('poupt-refresh-dashboard'));
 
       try {
@@ -73,7 +143,7 @@ export default function AddTransaction() {
 
       setScreen('dashboard');
     } catch (err) {
-      setError(err.message || 'Erro ao guardar transacao');
+      setError(err.message || 'Erro ao guardar transação.');
     } finally {
       setSaving(false);
     }
@@ -82,184 +152,263 @@ export default function AddTransaction() {
   const getCategoryIcon = (cat) => {
     const iconName = categoryIcons[cat];
     const Icon = iconMap[iconName];
-    return Icon ? <Icon size={14} /> : <Plus size={14} />;
+    return Icon ? <Icon size={16} /> : <Plus size={16} />;
   };
 
   const getJarIcon = (key) => {
     const iconName = jarIcons[key];
     const Icon = iconMap[iconName];
-    return Icon ? <Icon size={12} /> : null;
+    return Icon ? <Icon size={15} /> : <Wallet size={15} />;
   };
 
-
-
   return (
-    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
+    <Page
+      eyebrow="Nova transação"
+      title={isIncome ? 'Adicionar receita' : 'Adicionar despesa'}
+      description="Regista movimentos de forma simples para manter o orçamento atualizado."
+    >
       {moedasEarned && (
-        <div className="p-3 rounded-xl text-sm font-medium text-center animate-fade-in flex items-center justify-center gap-2"
-          style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)' }}>
-          <Coins size={14} /> +{moedasEarned} PoupMoedas ganhos!
+        <div
+          className="mb-4 flex items-center justify-center gap-2 rounded-2xl p-3 text-sm font-extrabold animate-fade-in"
+          style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#D97706' }}
+        >
+          <Coins size={16} /> +{moedasEarned} PoupMoedas ganhos
         </div>
       )}
 
       {error && (
-        <div className="p-3 rounded-xl text-sm text-center animate-fade-in"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--danger)' }}>
+        <div
+          className="mb-4 rounded-2xl border p-3 text-center text-sm font-bold animate-fade-in"
+          style={{ background: 'rgba(220, 38, 38, 0.08)', borderColor: 'rgba(220, 38, 38, 0.22)', color: 'var(--danger)' }}
+        >
           {error}
         </div>
       )}
 
-      <div className="flex gap-2">
-        <button onClick={() => handleTypeChange('despesa')}
-          className="flex-1 py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
-          style={{
-            background: type === 'despesa' ? 'rgba(239,68,68,0.15)' : 'var(--bg-secondary)',
-            color: type === 'despesa' ? '#EF4444' : 'var(--text-secondary)',
-            border: type === 'despesa' ? '1px solid #EF4444' : '1px solid var(--border)'
-          }}>
-          <ArrowDownLeft size={14} /> Despesa
-        </button>
-        <button onClick={() => handleTypeChange('receita')}
-          className="flex-1 py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all"
-          style={{
-            background: type === 'receita' ? 'rgba(16,185,129,0.15)' : 'var(--bg-secondary)',
-            color: type === 'receita' ? '#10B981' : 'var(--text-secondary)',
-            border: type === 'receita' ? '1px solid #10B981' : '1px solid var(--border)'
-          }}>
-          <ArrowUpRight size={14} /> Receita
-        </button>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="glass-card p-7 sm:p-9 text-center">
-          <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            {type === 'receita' ? 'Receita' : 'Despesa'}
-          </span>
-          <div className="flex items-center justify-center gap-1 mt-2">
-            <span className="text-lg font-semibold" style={{ color: type === 'receita' ? '#10B981' : '#EF4444' }}>
-              {user?.currency || 'EUR'}
-            </span>
-            <input type="number" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})}
-              placeholder="0.00" required min="0.01" step="0.01"
-              className="text-3xl font-bold flex-1 min-w-0 max-w-[160px] text-center bg-transparent outline-none"
-              style={{ color: type === 'receita' ? '#10B981' : '#EF4444' }} />
+        <Card className="space-y-5">
+          <div className="grid grid-cols-2 gap-3">
+            <TypeButton
+              active={!isIncome}
+              icon={ArrowDownLeft}
+              label="Despesa"
+              color="#DC2626"
+              onClick={() => handleTypeChange('despesa')}
+            />
+            <TypeButton
+              active={isIncome}
+              icon={ArrowUpRight}
+              label="Receita"
+              color="#16A34A"
+              onClick={() => handleTypeChange('receita')}
+            />
           </div>
-          {form.amount && Number(form.amount) > 0 && (
-            <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
-              {formatDisplayAmount(Number(form.amount), user?.currency)}
+
+          <div className="rounded-3xl border p-5 text-center" style={{ borderColor: 'var(--border)', background: 'var(--bg-primary)' }}>
+            <p className="text-xs font-extrabold uppercase tracking-[0.08em]" style={{ color: 'var(--text-muted)' }}>
+              Valor
             </p>
-          )}
-        </div>
 
-        <div>
-          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Descricao
-          </label>
-          <input type="text" value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-            placeholder={type === 'receita' ? 'Ex: Salario mensal' : 'Ex: Compras no supermercado'} required
-            className="w-full input-field" />
-        </div>
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <span className="text-base font-extrabold" style={{ color: toneColor }}>
+                {user?.currency || 'EUR'}
+              </span>
+              <input
+                type="number"
+                value={form.amount}
+                onChange={(e) => updateForm({ amount: e.target.value })}
+                placeholder="0.00"
+                required
+                min="0.01"
+                step="0.01"
+                className="w-full max-w-[190px] bg-transparent text-center text-4xl font-extrabold tracking-[-0.06em] outline-none"
+                style={{ color: toneColor }}
+              />
+            </div>
 
-        <div>
-          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Categoria
-          </label>
-          <div className="grid grid-cols-2 xs:grid-cols-3 gap-3 sm:gap-4">
-            {categories.map(cat => (
-              <button key={cat} type="button" onClick={() => setForm({...form, category: cat})}
-                className="py-3.5 px-3 sm:px-3.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
-                style={{
-                  background: form.category === cat ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
-                  color: form.category === cat ? 'var(--gold)' : 'var(--text-secondary)',
-                  border: form.category === cat ? '1px solid var(--gold)' : '1px solid var(--border)'
-                }}>
-                <span style={{ opacity: form.category === cat ? 1 : 0.6 }}>{getCategoryIcon(cat)}</span>
-                <span className="truncate w-full text-center">{categoryLabels[cat] || cat}</span>
+            {amountValue > 0 && (
+              <p className="mt-2 text-xs font-bold" style={{ color: 'var(--text-muted)' }}>
+                {formatCurrency(amountValue, user?.currency || 'EUR')}
+              </p>
+            )}
+          </div>
+        </Card>
+
+        <Card className="space-y-4">
+          <FieldLabel icon={FileText} label="Descrição" />
+          <input
+            type="text"
+            value={form.description}
+            onChange={(e) => updateForm({ description: e.target.value })}
+            placeholder={isIncome ? 'Ex: Salário mensal' : 'Ex: Compras no supermercado'}
+            required
+            className="input-field"
+          />
+
+          <div className="pt-1">
+            <FieldLabel label="Categoria" />
+            <div className="mt-3 grid grid-cols-2 xs:grid-cols-3 gap-2.5">
+              {categories.map((cat) => (
+                <OptionButton
+                  key={cat}
+                  active={form.category === cat}
+                  icon={getCategoryIcon(cat)}
+                  label={categoryLabels[cat] || cat}
+                  color={toneColor}
+                  onClick={() => updateForm({ category: cat })}
+                />
+              ))}
+            </div>
+          </div>
+        </Card>
+
+        <Card className="space-y-4">
+          <SectionHeader
+            title="Frasco"
+            description="Opcional. Associa esta transação a uma área do orçamento."
+            className="!mt-0 !mb-0"
+          />
+
+          <div className="grid grid-cols-2 xs:grid-cols-3 gap-2.5">
+            {Object.entries(jarLabels).map(([key, label]) => {
+              const active = form.jar === key;
+              const color = jarColors[key] || 'var(--gold)';
+
+              return (
+                <OptionButton
+                  key={key}
+                  active={active}
+                  icon={getJarIcon(key)}
+                  label={label.split(' ')[0]}
+                  color={color}
+                  onClick={() => updateForm({ jar: active ? '' : key })}
+                />
+              );
+            })}
+          </div>
+        </Card>
+
+        <Card className="space-y-4">
+          <div>
+            <FieldLabel icon={Calendar} label="Data" />
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => updateForm({ date: e.target.value })}
+              className="input-field mt-2"
+            />
+          </div>
+
+          <div>
+            <FieldLabel icon={FileText} label="Notas" optional />
+            <textarea
+              value={form.notes}
+              onChange={(e) => updateForm({ notes: e.target.value })}
+              placeholder="Adiciona detalhes úteis sobre este movimento."
+              rows={3}
+              className="input-field mt-2 resize-none"
+            />
+          </div>
+
+          <div className="rounded-2xl border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-primary)' }}>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-2xl" style={{ background: 'color-mix(in srgb, var(--gold) 10%, transparent)', color: 'var(--gold)' }}>
+                  <Repeat size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-extrabold" style={{ color: 'var(--text-primary)' }}>
+                    Transação recorrente
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    Útil para salários, rendas ou subscrições.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => updateForm({ isRecurring: !form.isRecurring })}
+                className="relative h-8 w-14 shrink-0 rounded-full transition-all"
+                style={{ background: form.isRecurring ? 'var(--gold)' : 'var(--border)' }}
+                aria-label="Alternar recorrência"
+              >
+                <span
+                  className="absolute top-1 h-6 w-6 rounded-full bg-white transition-all"
+                  style={{ left: form.isRecurring ? 26 : 4 }}
+                />
               </button>
-            ))}
+            </div>
+
+            {form.isRecurring && (
+              <select
+                value={form.recurringFrequency || 'monthly'}
+                onChange={(e) => updateForm({ recurringFrequency: e.target.value })}
+                className="input-field mt-4"
+              >
+                <option value="weekly">Semanal</option>
+                <option value="biweekly">Quinzenal</option>
+                <option value="monthly">Mensal</option>
+                <option value="yearly">Anual</option>
+              </select>
+            )}
           </div>
-        </div>
+        </Card>
 
-        <div>
-          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
-            Frasco (opcional)
-          </label>
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-            {Object.entries(jarLabels).map(([key, label]) => (
-              <button key={key} type="button"
-                onClick={() => setForm({...form, jar: form.jar === key ? '' : key})}
-                className="py-3.5 px-3 sm:px-3.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
-                style={{
-                  background: form.jar === key ? `${jarColors[key]}20` : 'var(--bg-secondary)',
-                  color: form.jar === key ? jarColors[key] : 'var(--text-secondary)',
-                  border: form.jar === key ? `1px solid ${jarColors[key]}` : '1px solid var(--border)'
-                }}>
-                <span style={{ opacity: form.jar === key ? 1 : 0.6 }}>{getJarIcon(key)}</span>
-                <span className="truncate w-full text-center">{label.split(' ')[0]}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
-            <Calendar size={12} className="inline mr-1" /> Data
-          </label>
-          <input type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})}
-            className="w-full input-field" />
-        </div>
-
-        <div>
-          <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
-            <FileText size={12} className="inline mr-1" /> Notas (opcional)
-          </label>
-          <textarea value={form.notes} onChange={e => setForm({...form, notes: e.target.value})}
-            placeholder="Adiciona notas ou detalhes..."
-            rows={2}
-            className="w-full input-field resize-none" />
-        </div>
-
-        {/* Recurring Transaction Toggle */}
-        <div className="glass-card p-6 sm:p-7">
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-              <Calendar size={12} className="inline mr-1" /> Transacao recorrente
-            </label>
-            <button type="button" onClick={() => setForm({...form, isRecurring: !form.isRecurring})}
-            className="w-12 h-7 rounded-full transition-all relative min-w-[44px] min-h-[44px] flex items-center"
-              style={{ background: form.isRecurring ? 'var(--gold)' : 'var(--border)' }}>
-              <div className="w-4 h-4 rounded-full bg-white absolute top-1 transition-all"
-                style={{ left: form.isRecurring ? '22px' : '4px' }} />
-            </button>
-          </div>
-          {form.isRecurring && (
-            <select value={form.recurringFrequency || 'monthly'}
-              onChange={e => setForm({...form, recurringFrequency: e.target.value})}
-              className="w-full input-field mt-2">
-              <option value="weekly">Semanal</option>
-              <option value="biweekly">Quinzenal</option>
-              <option value="monthly">Mensal</option>
-              <option value="yearly">Anual</option>
-            </select>
-          )}
-        </div>
-
-        <div className="flex gap-4 sm:gap-5">
-          <button type="button" onClick={() => setScreen('dashboard')}
-            className="px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2"
-            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-            <X size={14} /> Cancelar
-          </button>
-          <button type="submit" disabled={saving}
-            className="btn-gold flex-1 py-3.5 disabled:opacity-50 flex items-center justify-center gap-2">
-            <Save size={14} /> {saving ? 'A guardar...' : 'Guardar'}
-          </button>
+        <div className="grid grid-cols-[0.7fr_1fr] gap-3">
+          <Button type="button" variant="secondary" size="lg" onClick={() => setScreen('dashboard')}>
+            <X size={17} /> Cancelar
+          </Button>
+          <Button type="submit" variant="primary" size="lg" disabled={saving}>
+            <Save size={17} /> {saving ? 'A guardar...' : 'Guardar'}
+          </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }
 
-function formatDisplayAmount(value, currency) {
-  return formatCurrency(value, currency || 'EUR');
+function TypeButton({ active, icon: Icon, label, color, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="min-h-[58px] rounded-2xl border px-4 text-sm font-extrabold transition-all flex items-center justify-center gap-2"
+      style={{
+        background: active ? `${color}14` : 'var(--bg-primary)',
+        color: active ? color : 'var(--text-muted)',
+        borderColor: active ? color : 'var(--border)',
+      }}
+    >
+      <Icon size={18} /> {label}
+    </button>
+  );
+}
+
+function FieldLabel({ icon: Icon, label, optional = false }) {
+  return (
+    <label className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.08em]" style={{ color: 'var(--text-muted)' }}>
+      {Icon && <Icon size={13} />}
+      {label}
+      {optional && <span className="normal-case tracking-normal font-bold">(opcional)</span>}
+    </label>
+  );
+}
+
+function OptionButton({ active, icon, label, color, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="min-h-[74px] rounded-2xl border px-3 py-3 text-xs font-extrabold transition-all flex flex-col items-center justify-center gap-1.5"
+      style={{
+        background: active ? `${color}14` : 'var(--bg-primary)',
+        color: active ? color : 'var(--text-muted)',
+        borderColor: active ? color : 'var(--border)',
+      }}
+    >
+      <span>{icon}</span>
+      <span className="w-full truncate text-center">{label}</span>
+    </button>
+  );
 }
