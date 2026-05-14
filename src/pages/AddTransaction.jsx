@@ -137,7 +137,7 @@ export default function AddTransaction() {
           </span>
           <div className="flex items-center justify-center gap-1 mt-2">
             <span className="text-lg font-semibold" style={{ color: type === 'receita' ? '#10B981' : '#EF4444' }}>
-              {JSON.parse(localStorage.getItem('poupt_user') || '{}')?.currency || 'EUR'}
+              {user?.currency || 'EUR'}
             </span>
             <input type="number" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})}
               placeholder="0.00" required min="0.01" step="0.01"
@@ -146,7 +146,7 @@ export default function AddTransaction() {
           </div>
           {form.amount && Number(form.amount) > 0 && (
             <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
-              {formatDisplayAmount(Number(form.amount))}
+              {formatDisplayAmount(Number(form.amount), user?.currency)}
             </p>
           )}
         </div>
@@ -260,7 +260,6 @@ export default function AddTransaction() {
   );
 }
 
-function formatDisplayAmount(value) {
-  const curr = JSON.parse(localStorage.getItem('poupt_user') || '{}')?.currency || 'EUR';
-  return formatCurrency(value, curr);
+function formatDisplayAmount(value, currency) {
+  return formatCurrency(value, currency || 'EUR');
 }

@@ -114,7 +114,7 @@ export default function Coach() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-4 sm:py-6 space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-4 sm:py-6 space-y-4 min-h-0">
         {coachMessages.length === 0 && (
           <div className="text-center py-12 animate-fade-in">
             <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-3xl flex items-center justify-center"

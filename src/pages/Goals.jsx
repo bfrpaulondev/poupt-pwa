@@ -5,7 +5,7 @@ import { formatCurrency, formatDate, getDaysUntil } from '../utils/helpers';
 import {
   Target, Plus, Check, Trash2, X, Banknote, Calendar, Clock,
   Shield, PiggyBank, TrendingUp, CreditCard, ShoppingBag, Sparkles,
-  Coins, Filter, Heart, Palette, Search, PartyPopper, AlertCircle
+  Coins, Filter, Heart, Palette, PartyPopper, AlertCircle
 } from 'lucide-react';
 
 const goalTypes = [

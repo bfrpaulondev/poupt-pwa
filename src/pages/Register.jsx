@@ -33,8 +33,14 @@ export default function Register() {
     try {
       const res = await api.register(name, email, password);
 
-      const token = res.token || res.data?.token;
-      const user = res.data?.user || res.data;
+      // Robust token/user extraction from various API response shapes
+      const token = res.token || res.data?.token || res.data?.accessToken || null;
+      const user = res.data?.user || (res.data && !res.data.token ? res.data : null) || res.user || null;
+
+      if (!token || !user) {
+        setError('Erro ao processar registo. Tenta novamente.');
+        return;
+      }
 
       login(user, token);
     } catch (err) {

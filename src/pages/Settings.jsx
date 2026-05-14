@@ -2,7 +2,7 @@ import { useState } from 'react';
 import useStore from '../store/useStore';
 import { themes as themeMap } from '../themes';
 import { api } from '../services/api';
-import { modeLabels, modeColors, modeDescriptions, setCurrencyGlobal } from '../utils/helpers';
+import { modeLabels, modeColors, modeDescriptions, setCurrencyGlobal, personalityLabels } from '../utils/helpers';
 import {
   Save, Shield, Bell, Trash2, LogOut,
   Palette, Download, Info, ChevronRight,
@@ -21,13 +21,6 @@ const themeList = [
   { id: 'arcticWhite', label: 'Artico Claro', color: themeMap.arcticWhite.primary, bg: themeMap.arcticWhite.background },
   { id: 'midnightNeon', label: 'Neon Midnight', color: themeMap.midnightNeon.primary, bg: themeMap.midnightNeon.background },
 ];
-
-const personalityLabels = {
-  disciplinado: 'Disciplinado',
-  amigavel: 'Amigavel',
-  estrategico: 'Estrategico',
-  espiritual: 'Espiritual',
-};
 
 const personalityDescriptions = {
   disciplinado: 'Firme e direto, foca na disciplina financeira',

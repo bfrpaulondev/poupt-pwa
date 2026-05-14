@@ -6,8 +6,8 @@ import JarDonut from '../components/JarDonut';
 import { Save, RotateCcw, Info } from 'lucide-react';
 
 export default function Jars() {
-  const { user, updateUser } = useStore();
-  const defaultJars = useStore.getState().defaultJarPercentages;
+  const { user, updateUser, defaultJarPercentages } = useStore();
+  const defaultJars = defaultJarPercentages;
   const [percentages, setPercentages] = useState(user?.jarPercentages || defaultJars);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);

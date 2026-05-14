@@ -4,10 +4,10 @@ import useStore from '../store/useStore';
 import { themes } from '../themes';
 import { api } from '../services/api';
 import { modeColors, modeLabels, formatCurrency } from '../utils/helpers';
-import { Plus, Camera, BarChart3, Target, ChevronRight, AlertTriangle, Bot, Coins, RefreshCw } from 'lucide-react';
+import { Plus, Camera, BarChart3, Target, ChevronRight, AlertTriangle, Bot, Coins } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user, setScreen, currentTheme } = useStore();
+  const { user, setScreen, currentTheme, defaultJarPercentages } = useStore();
   const theme = themes[currentTheme] || themes.darkGold;
 
   const [summary, setSummary] = useState(null);
@@ -55,7 +55,7 @@ export default function Dashboard() {
         { key: 'play', label: 'Lazer', icon: '🎮', color: '#EF4444' },
         { key: 'give', label: 'Doar', icon: '💝', color: '#EC4899' },
       ];
-      const jarPcts = user?.jarPercentages || useStore.getState().defaultJarPercentages;
+      const jarPcts = user?.jarPercentages || defaultJarPercentages;
       const income = user?.income || 0;
       const jarsData = jarDefs.map(j => ({
         ...j,
@@ -196,7 +196,7 @@ export default function Dashboard() {
             {jars.map((jar) => (
               <div key={jar.key} className="flex-1 flex flex-col items-center">
                 <span className="text-xs">{jar.icon}</span>
-                <span className="text-[8px] font-medium mt-0.5" style={{ color: jar.color }}>
+                <span className="text-[10px] font-medium mt-0.5" style={{ color: jar.color }}>
                   {jar.percentage}%
                 </span>
               </div>

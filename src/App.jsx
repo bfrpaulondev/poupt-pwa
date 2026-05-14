@@ -97,10 +97,11 @@ function BottomNav({ theme, currentScreen, onTab }) {
           <button
             key={tab.id}
             onClick={() => onTab(tab.id)}
-            className="flex flex-1 flex-col items-center gap-0.5 py-1.5 rounded-xl transition-all duration-200"
+            className="flex flex-1 flex-col items-center gap-0.5 py-2 rounded-xl transition-all duration-200"
             style={{
               color: isActive ? theme.primary : theme.textMuted,
               background: isActive ? `${theme.primary}15` : 'transparent',
+              minHeight: '44px',
             }}
           >
             <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
@@ -209,6 +210,7 @@ function App() {
   } = useStore();
 
   const [ready, setReady] = useState(false);
+  const [hasUnreadNotif, setHasUnreadNotif] = useState(false);
   const theme = themes[currentTheme] || themes.darkGold;
 
   useEffect(() => {
@@ -241,6 +243,15 @@ function App() {
     root.style.setProperty('--gradient-start', theme.gradient[0]);
     root.style.setProperty('--gradient-end', theme.gradient[1]);
     root.style.setProperty('--shadow-color', theme.shadow);
+
+    // Apply jar colors from theme
+    const jarKeys = ['necessities', 'freedom', 'savings', 'education', 'play', 'give'];
+    const themeJarColors = theme.jarColors || [];
+    jarKeys.forEach((key, idx) => {
+      if (themeJarColors[idx]) {
+        root.style.setProperty(`--jar-${key}`, themeJarColors[idx]);
+      }
+    });
 
     // Update meta theme-color for PWA
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
@@ -285,39 +296,17 @@ function App() {
           }
         }
       }
-
-      const hash = window.location.hash.slice(1);
-
-      if (hash && screenComponents[hash]) {
-        const savedToken = localStorage.getItem('poupt_token');
-
-        if (savedToken) {
-          setScreen(hash);
-        }
-      }
+      // Note: hash-based navigation is already handled by restoreSession in the store
     };
 
     init();
   }, []);
 
   useEffect(() => {
-    // Update notification badge visibility based on unread notifications
-    const badge = document.getElementById('notification-badge');
-    if (badge) {
-      const hasUnread = notifications?.some(n => !n.read);
-      badge.style.display = hasUnread ? 'block' : 'none';
-    }
+    setHasUnreadNotif(notifications?.some(n => !n.read) || false);
   }, [notifications]);
 
-  useEffect(() => {
-    const link = document.createElement('link');
-
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
-    link.rel = 'stylesheet';
-
-    document.head.appendChild(link);
-  }, []);
+  // Font Inter is loaded via CSS @import in index.css - no need for JS append
 
   if (!ready) {
     return (
@@ -351,7 +340,6 @@ function App() {
 
   const handleTab = (id) => {
     setScreen(id);
-    window.location.hash = id;
   };
 
   return (
@@ -385,8 +373,9 @@ function App() {
               style={{ color: theme.text }}
             >
               <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FF4D5E]" id="notification-badge" 
-                style={{ display: 'none' }} />
+              {hasUnreadNotif && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FF4D5E]" />
+              )}
             </button>
           </div>
         </div>

@@ -283,6 +283,12 @@ select.input-field {
   padding-right: 40px;
 }
 
+/* Fix select dropdown options in dark themes */
+select.input-field option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 /* Page container — consistent padding for all pages */
 .page-container {
   padding: 20px 20px 24px;
@@ -318,7 +324,12 @@ select.input-field {
   .glass-card { border-radius: 20px; }
 }
 
-/* Smooth transitions for theme changes - only on layout properties */
+/* Smooth transitions for theme changes - only on layout container */
 body, #root {
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glass cards subtle transition */
+.glass, .glass-card, .glass-strong {
+  transition: background 0.3s ease, border-color 0.3s ease;
 }

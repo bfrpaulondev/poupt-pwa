@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
-import { formatCurrency, modeLabels, modeColors, modeDescriptions, calculateLevel } from '../utils/helpers';
+import { formatCurrency, modeLabels, modeColors, modeDescriptions, calculateLevel, personalityLabels, genderLabels } from '../utils/helpers';
 import {
   User, Trophy, Flame, Target, Coins, Settings, ChevronRight, Award,
   Star, Shield, CreditCard, Sparkles, Crown, TrendingUp, MessageCircle,
   Save, Zap, Calendar, Camera, Mail, Clock, AlertCircle, Check,
-  Edit3, Lock, Trash2, Eye, EyeOff
+  Edit3, Lock, Trash2
 } from 'lucide-react';
 
 export default function Profile() {
@@ -21,6 +21,7 @@ export default function Profile() {
   const [detecting, setDetecting] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     loadStats();
@@ -30,7 +31,12 @@ export default function Profile() {
     try {
       const res = await api.getReportSummary();
       setStats(res.data);
-    } catch {}
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Erro ao carregar estatisticas.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSaveCoach = async () => {
@@ -41,6 +47,7 @@ export default function Profile() {
       setEditingCoach(false);
     } catch (err) {
       console.error(err);
+      setErrorMsg('Erro ao guardar coach.');
     } finally {
       setSavingCoach(false);
     }
@@ -80,19 +87,6 @@ export default function Profile() {
   const currentModeIdx = modeOrder.indexOf(currentMode);
   const nextMode = currentModeIdx < modeOrder.length - 1 ? modeOrder[currentModeIdx + 1] : null;
 
-  const personalityLabels = {
-    disciplinado: 'Disciplinado',
-    amigavel: 'Amigavel',
-    estrategico: 'Estrategico',
-    espiritual: 'Espiritual'
-  };
-
-  const genderLabels = {
-    masculino: 'Masculino',
-    feminino: 'Feminino',
-    neutro: 'Neutro'
-  };
-
 
 
   return (
@@ -105,7 +99,15 @@ export default function Profile() {
             {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
           <button className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--gold)', color: '#fff' }}>
+            style={{ background: 'var(--gold)', color: '#fff' }}
+            onClick={() => {
+              const newName = prompt('Nome de exibicao:', user?.name || '');
+              if (newName && newName.trim()) {
+                api.updateMe({ name: newName.trim() }).then(() => {
+                  updateUser({ name: newName.trim() });
+                }).catch(() => {});
+              }
+            }}>
             <Camera size={12} />
           </button>
         </div>

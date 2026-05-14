@@ -225,7 +225,7 @@ function Step2Income({ theme }) {
       <input
         type="range"
         min={500}
-        max={3000}
+        max={10000}
         step={50}
         value={onboardingData.income}
         onChange={(e) => setOnboardingData({ income: parseInt(e.target.value) })}
@@ -235,13 +235,14 @@ function Step2Income({ theme }) {
 
       <div className="flex justify-between w-full text-xs" style={{ color: theme.textMuted }}>
         <span>€500</span>
-        <span>€3000</span>
+        <span>€10.000</span>
       </div>
 
       <input
         type="number"
+        min={0}
         value={onboardingData.income}
-        onChange={(e) => setOnboardingData({ income: parseInt(e.target.value) || 500 })}
+        onChange={(e) => setOnboardingData({ income: Math.max(0, parseInt(e.target.value) || 0) })}
         className="w-full px-4 py-3 rounded-xl text-base font-medium outline-none mt-4"
         style={{
           background: theme.surface,

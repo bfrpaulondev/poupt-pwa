@@ -423,7 +423,7 @@ export default function SurvivalMode() {
         <div className="grid grid-cols-2 gap-2">
           {[
             { icon: AlertTriangle, title: 'Ver dividas', desc: 'Prioriza o que esta vencido', screen: 'debts' },
-            { icon: CreditCard, title: 'Registar pagamento', desc: 'Actualiza progresso', screen: 'add-transaction' },
+            { icon: CreditCard, title: 'Registar pagamento', desc: 'Actualiza progresso', screen: 'addTransaction' },
             { icon: FileText, title: 'Ver relatorios', desc: 'Analisa as tuas financas', screen: 'reports' },
             { icon: HandHeart, title: 'Recursos de apoio', desc: 'DECO, Linha Sobreendividado', action: 'resources' },
           ].map(({ icon: Icon, title, desc, screen, action }) => (

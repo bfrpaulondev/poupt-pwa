@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
+import { getTimeAgo } from '../utils/helpers';
 import {
   Bell, BellOff, CheckCheck, AlertTriangle, CreditCard, Target,
   TrendingUp, Flame, Trophy, Lightbulb, MessageCircle, FileText,
-  Shield, Info, ChevronDown, Filter, X, Circle
+  Shield, Info, ChevronDown, Filter, Circle
 } from 'lucide-react';
 
 const notificationTypeConfig = {
@@ -69,22 +70,6 @@ export default function Notifications() {
     } finally {
       setMarkingAll(false);
     }
-  };
-
-  const getTimeAgo = (date) => {
-    if (!date) return '';
-    const now = new Date();
-    const diff = now - new Date(date);
-    const mins = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    const weeks = Math.floor(days / 7);
-
-    if (mins < 1) return 'agora';
-    if (mins < 60) return `ha ${mins} min`;
-    if (hours < 24) return `ha ${hours} hora${hours > 1 ? 's' : ''}`;
-    if (days < 7) return `ha ${days} dia${days > 1 ? 's' : ''}`;
-    return `ha ${weeks} semana${weeks > 1 ? 's' : ''}`;
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;

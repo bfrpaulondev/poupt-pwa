@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
-import { formatCurrency, categoryLabels, jarLabels, jarColors } from '../utils/helpers';
+import { formatCurrency, categoryLabels, jarLabels, jarColorsFallback } from '../utils/helpers';
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -11,7 +11,12 @@ import {
   TrendingDown, ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
-const CHART_COLORS = ['var(--gold)', '#10B981', '#3B82F6', '#8B5CF6', '#EF4444', '#EC4899', '#F97316', '#64748B'];
+// SVG/Recharts cannot resolve CSS variables (e.g., var(--gold)) in Safari
+// Use computed colors from the current theme
+const getChartColors = () => {
+  const primary = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#D4A843';
+  return [primary, '#10B981', '#3B82F6', '#8B5CF6', '#EF4444', '#EC4899', '#F97316', '#64748B'];
+};
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -50,6 +55,7 @@ export default function Reports() {
   const [monthlyData, setMonthlyData] = useState(null);
   const [debtProgress, setDebtProgress] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [chartColors, setChartColors] = useState(getChartColors());
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return { month: now.getMonth() + 1, year: now.getFullYear() };
@@ -214,7 +220,7 @@ export default function Reports() {
                     paddingAngle={3} dataKey="value"
                   >
                     {jarsAllocation.map((entry, idx) => (
-                      <Cell key={idx} fill={jarColors[entry.jar] || CHART_COLORS[idx % CHART_COLORS.length]} />
+                      <Cell key={idx} fill={jarColorsFallback[entry.jar] || chartColors[idx % chartColors.length]} />
                     ))}
                   </Pie>
                   <Tooltip content={<PieTooltip />} />
@@ -224,7 +230,7 @@ export default function Reports() {
                 {jarsAllocation.map((j, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full shrink-0"
-                      style={{ background: jarColors[j.jar] || CHART_COLORS[idx % CHART_COLORS.length] }} />
+                      style={{ background: jarColorsFallback[j.jar] || chartColors[idx % chartColors.length] }} />
                     <span className="text-[10px] sm:text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
                       {j.name || jarLabels[j.jar] || j.jar}
                     </span>
@@ -250,8 +256,8 @@ export default function Reports() {
                   <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={{ stroke: 'var(--border)' }}
                     unit="%" />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey="rate" name="Taxa de Poupanca" stroke="var(--gold)"
-                    strokeWidth={2} dot={{ fill: 'var(--gold)', r: 3 }} activeDot={{ r: 5 }} />
+                  <Line type="monotone" dataKey="rate" name="Taxa de Poupanca" stroke={chartColors[0]}
+                    strokeWidth={2} dot={{ fill: chartColors[0], r: 3 }} activeDot={{ r: 5 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -284,7 +290,7 @@ export default function Reports() {
                       paddingAngle={2} dataKey="value"
                     >
                       {categoryBreakdown.map((_, idx) => (
-                        <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+                        <Cell key={idx} fill={chartColors[idx % chartColors.length]} />
                       ))}
                     </Pie>
                     <Tooltip content={<PieTooltip />} />
@@ -294,7 +300,7 @@ export default function Reports() {
                   {categoryBreakdown.map((c, idx) => (
                     <div key={idx} className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ background: CHART_COLORS[idx % CHART_COLORS.length] }} />
+                        style={{ background: chartColors[idx % chartColors.length] }} />
                       <span className="text-[10px] sm:text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
                         {categoryLabels[c.category] || c.category}
                       </span>
@@ -340,7 +346,7 @@ export default function Reports() {
                         </div>
                         <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border)' }}>
                           <div className="h-1.5 rounded-full transition-all"
-                            style={{ width: `${pct}%`, background: CHART_COLORS[idx % CHART_COLORS.length] }} />
+                            style={{ width: `${pct}%`, background: chartColors[idx % chartColors.length] }} />
                         </div>
                       </div>
                     );
