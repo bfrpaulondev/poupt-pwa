@@ -20,9 +20,7 @@ import {
   Building2,
   Shield,
   Coins,
-  FileText,
   Settings,
-  Trophy,
   ChevronRight,
 } from 'lucide-react';
 
@@ -85,7 +83,7 @@ const menuItems = [
 function BottomNav({ theme, currentScreen, onTab }) {
   return (
     <div
-      className="flex items-center justify-around px-2 py-2 border-t safe-area-bottom"
+      className="flex items-center justify-around px-1 py-2 border-t safe-area-bottom"
       style={{
         background: theme.surface,
         borderColor: theme.border,
@@ -94,11 +92,12 @@ function BottomNav({ theme, currentScreen, onTab }) {
       {tabs.map((tab) => {
         const isActive = currentScreen === tab.id;
         const Icon = tab.icon;
+
         return (
           <button
             key={tab.id}
             onClick={() => onTab(tab.id)}
-            className="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200"
+            className="flex flex-1 flex-col items-center gap-0.5 py-1.5 rounded-xl transition-all duration-200"
             style={{
               color: isActive ? theme.primary : theme.textMuted,
               background: isActive ? `${theme.primary}15` : 'transparent',
@@ -126,6 +125,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
             style={{ background: '#000' }}
             onClick={onClose}
           />
+
           <motion.div
             initial={{ x: -280 }}
             animate={{ x: 0 }}
@@ -149,6 +149,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
                   PoupPT
                 </span>
               </div>
+
               <button onClick={onClose} style={{ color: theme.textMuted }}>
                 <X size={20} />
               </button>
@@ -157,15 +158,21 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
             <div className="flex-1 overflow-y-auto poupt-scroll py-2">
               {menuItems.map((item) => {
                 const Icon = item.icon;
+
                 return (
                   <button
                     key={item.id}
-                    onClick={() => { onNavigate(item.id); onClose(); }}
+                    onClick={() => {
+                      onNavigate(item.id);
+                      onClose();
+                    }}
                     className="flex items-center gap-3 w-full px-5 py-3.5 text-left transition-colors duration-150 hover:opacity-80"
                     style={{ color: theme.text }}
                   >
                     <Icon size={18} style={{ color: theme.textMuted }} />
-                    <span className="text-sm font-medium flex-1">{item.label}</span>
+                    <span className="text-sm font-medium flex-1">
+                      {item.label}
+                    </span>
                     <ChevronRight size={14} style={{ color: theme.textMuted }} />
                   </button>
                 );
@@ -189,22 +196,29 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
 }
 
 function App() {
-  const { currentScreen, setScreen, currentTheme, setTheme, menuOpen, setMenuOpen, restoreSession, user, logout } = useStore();
-  const [ready, setReady] = useState(false);
-  const [sessionChecked, setSessionChecked] = useState(false);
+  const {
+    currentScreen,
+    setScreen,
+    currentTheme,
+    menuOpen,
+    setMenuOpen,
+    restoreSession,
+    user,
+    logout,
+  } = useStore();
 
+  const [ready, setReady] = useState(false);
   const theme = themes[currentTheme] || themes.darkGold;
 
-  // Sync currency globally
   useEffect(() => {
     if (user?.currency) {
       setCurrencyGlobal(user.currency);
     }
   }, [user?.currency]);
 
-  // Inject theme as CSS custom properties into :root
   useEffect(() => {
     const root = document.documentElement;
+
     root.style.setProperty('--gold', theme.primary);
     root.style.setProperty('--gold-light', theme.primaryLight);
     root.style.setProperty('--gold-dark', theme.primaryDark);
@@ -220,24 +234,24 @@ function App() {
     root.style.setProperty('--warning', '#F59E0B');
   }, [theme]);
 
-  // Restore session and validate token
   useEffect(() => {
     const init = async () => {
       restoreSession();
 
-      // Sync currency from saved user
       const savedUser = JSON.parse(localStorage.getItem('poupt_user') || 'null');
+
       if (savedUser?.currency) {
         setCurrencyGlobal(savedUser.currency);
       }
 
       setReady(true);
 
-      // Validate token with API
       const token = localStorage.getItem('poupt_token');
+
       if (token && token !== 'mock-token-123') {
         try {
           const res = await api.getMe();
+
           if (res.data?.user) {
             const freshUser = res.data.user;
             localStorage.setItem('poupt_user', JSON.stringify(freshUser));
@@ -245,48 +259,69 @@ function App() {
           }
         } catch (err) {
           const msg = (err.message || '').toLowerCase();
-          if (msg.includes('401') || msg.includes('unauthorized') || msg.includes('invalid token') || msg.includes('jwt')) {
+
+          if (
+            msg.includes('401') ||
+            msg.includes('unauthorized') ||
+            msg.includes('invalid token') ||
+            msg.includes('jwt')
+          ) {
             logout();
           }
         }
       }
-      setSessionChecked(true);
 
-      // Handle hash-based navigation
       const hash = window.location.hash.slice(1);
+
       if (hash && screenComponents[hash]) {
         const savedToken = localStorage.getItem('poupt_token');
+
         if (savedToken) {
           setScreen(hash);
         }
       }
     };
+
     init();
   }, []);
 
-  // Load Inter font
   useEffect(() => {
     const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
     link.rel = 'stylesheet';
+
     document.head.appendChild(link);
   }, []);
 
   if (!ready) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: theme.background }}
+      >
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
-            style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}>
+          <div
+            className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
+            style={{
+              background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+            }}
+          >
             <span className="text-2xl font-bold text-black">P</span>
           </div>
-          <p className="text-sm" style={{ color: theme.textMuted }}>A carregar...</p>
+
+          <p className="text-sm" style={{ color: theme.textMuted }}>
+            A carregar...
+          </p>
         </div>
       </div>
     );
   }
 
-  const isFullScreen = ['landing', 'login', 'register', 'onboarding'].includes(currentScreen);
+  const isFullScreen = ['landing', 'login', 'register', 'onboarding'].includes(
+    currentScreen
+  );
 
   const ScreenComponent = screenComponents[currentScreen] || Dashboard;
 
@@ -303,37 +338,37 @@ function App() {
         transition: 'background-color 0.5s ease',
       }}
     >
-      {/* App Header with hamburger — hidden on fullscreen screens */}
       {!isFullScreen && (
-        <div
-          className="flex items-center justify-between px-5 py-3 shrink-0"
-          style={{ background: theme.background }}
-        >
-          <button
-            onClick={() => setMenuOpen(true)}
-            className="p-2 rounded-xl transition-colors duration-150"
-            style={{ color: theme.text }}
-          >
-            <Menu size={22} />
-          </button>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold" style={{ color: theme.primary }}>
-              🐷 PoupPT
-            </span>
+        <div className="shrink-0" style={{ background: theme.background }}>
+          <div className="mx-auto flex w-full max-w-[390px] items-center justify-between px-3 py-2">
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="p-2 rounded-xl transition-colors duration-150"
+              style={{ color: theme.text }}
+            >
+              <Menu size={22} />
+            </button>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold" style={{ color: theme.primary }}>
+                🐷 PoupPT
+              </span>
+            </div>
+
+            <button
+              onClick={() => setScreen('alerts')}
+              className="p-2 rounded-xl relative"
+              style={{ color: theme.text }}
+            >
+              <Bell size={20} />
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FF4D5E]" />
+            </button>
           </div>
-          <button
-            onClick={() => setScreen('alerts')}
-            className="p-2 rounded-xl relative"
-            style={{ color: theme.text }}
-          >
-            <Bell size={20} />
-          </button>
         </div>
       )}
 
-      {/* Screen Content — scrollable area with max-width for readability */}
       <div className="flex-1 overflow-y-auto poupt-scroll">
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="mx-auto w-full max-w-[390px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentScreen}
@@ -352,23 +387,25 @@ function App() {
                   </div>
                 }
               >
-              <ErrorBoundary>
-                <ScreenComponent />
-              </ErrorBoundary>
+                <ErrorBoundary>
+                  <ScreenComponent />
+                </ErrorBoundary>
               </Suspense>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
 
-      {/* Bottom Navigation — hidden on fullscreen screens */}
       {!isFullScreen && (
-        <div className="mx-auto w-full max-w-2xl shrink-0">
-          <BottomNav theme={theme} currentScreen={currentScreen} onTab={handleTab} />
+        <div className="mx-auto w-full max-w-[390px] shrink-0">
+          <BottomNav
+            theme={theme}
+            currentScreen={currentScreen}
+            onTab={handleTab}
+          />
         </div>
       )}
 
-      {/* Hamburger Menu */}
       <HamburgerMenu
         theme={theme}
         isOpen={menuOpen}
@@ -377,7 +414,6 @@ function App() {
         user={user}
       />
 
-      {/* Offline Indicator */}
       <OfflineIndicator />
     </div>
   );
