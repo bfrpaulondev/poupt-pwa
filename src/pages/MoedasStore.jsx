@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
-<<<<<<< HEAD
 import { themes, themeCatalog } from '../themes';
-=======
-import { formatCurrency, formatDate, getTimeAgo } from '../utils/helpers';
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
 import {
   Coins,
   Play,
@@ -229,7 +225,6 @@ export default function MoedasStore() {
     setPurchasing(null);
   };
 
-<<<<<<< HEAD
   const getTimeAgo = (date) => {
     const now = new Date();
     const diff = now - new Date(date);
@@ -243,8 +238,6 @@ export default function MoedasStore() {
     return `há ${days} dia${days > 1 ? 's' : ''}`;
   };
 
-=======
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
   const tabs = [
     { id: 'themes', label: 'Temas', icon: Palette, activeColor: 'var(--gold)' },
     { id: 'earn', label: 'Ganhar', icon: ArrowDownLeft, activeColor: '#10B981' },
@@ -253,31 +246,14 @@ export default function MoedasStore() {
   ];
 
   return (
-<<<<<<< HEAD
     <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
       <div className="gold-gradient p-6 sm:p-8 rounded-3xl text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at 30% 50%, white 0%, transparent 52%)' }} />
-=======
-    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
-      <button onClick={() => setScreen('dashboard')}
-        className="flex items-center gap-1 mb-3 text-sm font-semibold"
-        style={{ color: 'var(--text-secondary)' }}>
-        ← Voltar
-      </button>
-      {/* Balance Card with Animated Counter */}
-      <div className="gold-gradient p-7 sm:p-9 rounded-2xl text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10"
-          style={{ background: 'radial-gradient(circle at 30% 50%, white 0%, transparent 50%)' }} />
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
         <div className="relative">
           <div className="mx-auto mb-3 w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(5px)' }}>
             <Coins size={32} className="text-white" style={{ transform: coinSpin ? 'rotateY(180deg)' : 'rotateY(0deg)', transition: 'transform 0.6s' }} />
           </div>
-<<<<<<< HEAD
           <p className="text-4xl sm:text-5xl font-black text-white">
-=======
-          <p className="text-3xl xs:text-4xl font-bold text-white">
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
             <AnimatedCounter target={balance} />
           </p>
           <p className="text-sm text-white/80 mt-1">PoupMoedas disponíveis</p>
@@ -303,16 +279,11 @@ export default function MoedasStore() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
         {tabs.map(({ id, label, icon: Icon, activeColor }) => (
-<<<<<<< HEAD
           <button
             key={id}
             type="button"
             onClick={() => setActiveTab(id)}
             className="py-3 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5"
-=======
-          <button key={id} onClick={() => setActiveTab(id)}
-            className="flex-1 py-4 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
             style={{
               background: activeTab === id ? `${activeColor}18` : 'var(--bg-secondary)',
               color: activeTab === id ? activeColor : 'var(--text-secondary)',
@@ -404,7 +375,7 @@ export default function MoedasStore() {
           <h3 className="text-xs font-black uppercase" style={{ color: 'var(--text-muted)' }}>Ganhar PoupMoedas</h3>
 
           {watchingAd ? (
-            <div className="glass-card p-6">
+            <div className="glass-card p-5">
               <div className="flex items-center gap-4 mb-3">
                 <Play size={20} style={{ color: '#3B82F6' }} />
                 <div>
@@ -417,34 +388,12 @@ export default function MoedasStore() {
               </div>
               <p className="text-xs mt-2 text-center" style={{ color: 'var(--text-secondary)' }}>A ver anúncio...</p>
             </div>
-<<<<<<< HEAD
           ) : null}
-=======
-          ) : (
-            <button onClick={handleWatchAd}
-              className="w-full glass-card p-6 flex items-center gap-4 text-left"
-              style={{ border: '1px solid rgba(59,130,246,0.3)' }}>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(59,130,246,0.15)' }}>
-                <Play size={22} style={{ color: '#3B82F6' }} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Ver Anuncio</p>
-                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Ve um curto anuncio e ganha moedas</p>
-              </div>
-              <div className="px-3 py-1.5 rounded-xl"
-                style={{ background: 'rgba(16,185,129,0.15)' }}>
-                <p className="text-sm font-bold" style={{ color: '#10B981' }}>+50</p>
-              </div>
-            </button>
-          )}
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
 
           {earnActions.map((action) => {
             const Icon = action.icon;
             const isEarning = earning === action.id;
             return (
-<<<<<<< HEAD
               <button
                 key={action.id}
                 type="button"
@@ -454,13 +403,6 @@ export default function MoedasStore() {
                 style={{ opacity: isEarning || watchingAd ? 0.65 : 1 }}
               >
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${action.color}18` }}>
-=======
-              <button key={action.id} onClick={() => handleEarn(action)} disabled={isEarning}
-                className="w-full glass-card p-6 flex items-center gap-4 text-left"
-                style={{ opacity: isEarning ? 0.6 : 1 }}>
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center"
-                  style={{ background: `${action.color}15` }}>
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
                   <Icon size={18} style={{ color: action.color }} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -484,14 +426,8 @@ export default function MoedasStore() {
             const canAfford = balance >= item.cost;
             const isPurchasing = purchasing === item.id;
             return (
-<<<<<<< HEAD
               <div key={item.id} className="glass-card p-5 flex items-center gap-4">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${item.color}18` }}>
-=======
-              <div key={item.id} className="glass-card p-6 flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center"
-                  style={{ background: `${item.color}15` }}>
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
                   <Icon size={18} style={{ color: item.color }} />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -502,11 +438,7 @@ export default function MoedasStore() {
                   type="button"
                   onClick={() => handleSpend(item)}
                   disabled={!canAfford || isPurchasing}
-<<<<<<< HEAD
                   className="px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1"
-=======
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1"
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
                   style={{
                     background: canAfford ? 'rgba(255,215,0,0.16)' : 'var(--bg-secondary)',
                     color: canAfford ? 'var(--gold)' : 'var(--text-muted)',
@@ -546,13 +478,8 @@ export default function MoedasStore() {
                       : <ArrowUpRight size={14} style={{ color: '#EF4444' }} />}
                   </div>
                   <div className="flex-1">
-<<<<<<< HEAD
                     <p className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>{tx.action}</p>
                     <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>{getTimeAgo(tx.date)}</p>
-=======
-                    <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{tx.action}</p>
-                    <p className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>{getTimeAgo(tx.date)}</p>
->>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
                   </div>
                   <p className="text-xs font-black" style={{ color: tx.type === 'earn' ? '#10B981' : '#EF4444' }}>
                     {tx.type === 'earn' ? '+' : '-'}{tx.amount}
