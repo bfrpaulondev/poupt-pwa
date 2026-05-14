@@ -154,9 +154,9 @@ export default function Debts() {
 
 
   return (
-    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
-        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        className="flex items-center gap-1 mb-3 text-sm font-semibold"
         style={{ color: 'var(--text-secondary)' }}>
         ← Voltar
       </button>
@@ -168,7 +168,7 @@ export default function Debts() {
         </div>
       )}
       {summary && (
-        <div className="glass-card p-4 sm:p-5">
+        <div className="glass-card p-5 sm:p-6">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Resumo</h3>
             <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -223,7 +223,7 @@ export default function Debts() {
 
       <div className="flex gap-2">
         <button onClick={() => { setActiveTab('formal'); setShowForm(false); setShowInformalForm(false); }}
-          className="flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-medium transition-all text-center min-h-[44px]"
+          className="flex-1 py-3.5 sm:py-4 rounded-xl text-xs font-medium transition-all text-center min-h-[44px]"
           style={{
             background: activeTab === 'formal' ? 'rgba(239,68,68,0.15)' : 'var(--bg-secondary)',
             color: activeTab === 'formal' ? '#EF4444' : 'var(--text-secondary)',
@@ -232,7 +232,7 @@ export default function Debts() {
           <CreditCard size={12} className="inline mr-1" /> Formais ({formalDebts.length})
         </button>
         <button onClick={() => { setActiveTab('informal'); setShowForm(false); setShowInformalForm(false); }}
-          className="flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-medium transition-all text-center min-h-[44px]"
+          className="flex-1 py-3.5 sm:py-4 rounded-xl text-xs font-medium transition-all text-center min-h-[44px]"
           style={{
             background: activeTab === 'informal' ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
             color: activeTab === 'informal' ? 'var(--gold)' : 'var(--text-secondary)',
@@ -245,12 +245,12 @@ export default function Debts() {
       {activeTab === 'formal' && (
         <div className="flex gap-2">
           <button onClick={() => { setShowForm(!showForm); setShowInformalForm(false); }}
-            className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
+            className="flex-1 py-4 sm:py-4.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
             style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
             <Plus size={14} /> Divida Formal
           </button>
           <button onClick={loadSnowball}
-            className="px-4 py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
+            className="px-4 py-4 sm:py-4.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
             style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' }}>
             <Snowflake size={14} /> Snowball
           </button>
@@ -259,14 +259,14 @@ export default function Debts() {
 
       {activeTab === 'informal' && (
         <button onClick={() => { setShowInformalForm(!showInformalForm); setShowForm(false); }}
-          className="w-full py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
+          className="w-full py-4 sm:py-4.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
           style={{ background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
           <Plus size={14} /> Divida Informal
         </button>
       )}
 
       {showForm && (
-        <form onSubmit={handleCreateDebt} className="glass-card p-4 sm:p-5 space-y-3 sm:space-y-4 animate-fade-in">
+        <form onSubmit={handleCreateDebt} className="glass-card p-5 sm:p-6 space-y-4 sm:space-y-5 animate-fade-in">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Nova Divida Formal</h3>
             <button type="button" onClick={() => setShowForm(false)}>
@@ -320,7 +320,7 @@ export default function Debts() {
       )}
 
       {showInformalForm && (
-        <form onSubmit={handleCreateInformal} className="glass-card p-4 sm:p-5 space-y-3 sm:space-y-4 animate-fade-in">
+        <form onSubmit={handleCreateInformal} className="glass-card p-5 sm:p-6 space-y-4 sm:space-y-5 animate-fade-in">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>
               <Users size={14} className="inline mr-1" /> Nova Divida Informal
@@ -374,7 +374,7 @@ export default function Debts() {
       )}
 
       {showSnowball && snowball && (
-        <div className="glass-card p-4 sm:p-5 space-y-3 sm:space-y-4 animate-fade-in">
+        <div className="glass-card p-5 sm:p-6 space-y-4 sm:space-y-5 animate-fade-in">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: '#10B981' }}>
               <Snowflake size={16} /> Metodo Snowball
@@ -439,7 +439,7 @@ export default function Debts() {
           const daysLeft = getDaysUntil(debt.dueDate);
 
           return (
-            <div key={debt._id} className="glass-card p-4 sm:p-5"
+            <div key={debt._id} className="glass-card p-5 sm:p-6"
               style={{ borderLeft: overdue ? '3px solid #EF4444' : debt.status === 'pago' ? '3px solid #10B981' : '3px solid transparent' }}>
               <div className="flex items-center justify-between"
                 onClick={() => setExpandedId(expandedId === debt._id ? null : debt._id)}>
@@ -560,7 +560,7 @@ export default function Debts() {
           const overdue = isOverdue(debt);
 
           return (
-            <div key={debt._id} className="glass-card p-4 sm:p-5"
+            <div key={debt._id} className="glass-card p-5 sm:p-6"
               style={{ borderLeft: overdue ? '3px solid #EF4444' : '3px solid var(--gold)' }}>
               <div className="flex items-center justify-between"
                 onClick={() => setExpandedId(expandedId === debt._id ? null : debt._id)}>

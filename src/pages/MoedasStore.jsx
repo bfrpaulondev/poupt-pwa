@@ -139,14 +139,14 @@ export default function MoedasStore() {
   ];
 
   return (
-    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
-        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        className="flex items-center gap-1 mb-3 text-sm font-semibold"
         style={{ color: 'var(--text-secondary)' }}>
         ← Voltar
       </button>
       {/* Balance Card with Animated Counter */}
-      <div className="gold-gradient p-6 sm:p-8 rounded-2xl text-center relative overflow-hidden">
+      <div className="gold-gradient p-7 sm:p-9 rounded-2xl text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10"
           style={{ background: 'radial-gradient(circle at 30% 50%, white 0%, transparent 50%)' }} />
         <div className="relative">
@@ -179,7 +179,7 @@ export default function MoedasStore() {
       <div className="flex gap-2.5 sm:gap-3">
         {tabs.map(({ id, label, icon: Icon, activeColor }) => (
           <button key={id} onClick={() => setActiveTab(id)}
-            className="flex-1 py-3 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 py-4 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
             style={{
               background: activeTab === id ? `${activeColor}15` : 'var(--bg-secondary)',
               color: activeTab === id ? activeColor : 'var(--text-secondary)',
@@ -199,7 +199,7 @@ export default function MoedasStore() {
 
           {/* Watch Ad - Special card */}
           {watchingAd ? (
-            <div className="glass-card p-5">
+            <div className="glass-card p-6">
               <div className="flex items-center gap-4 mb-3">
                 <Play size={20} style={{ color: '#3B82F6' }} />
                 <div>
@@ -217,7 +217,7 @@ export default function MoedasStore() {
             </div>
           ) : (
             <button onClick={handleWatchAd}
-              className="w-full glass-card p-5 flex items-center gap-4 text-left"
+              className="w-full glass-card p-6 flex items-center gap-4 text-left"
               style={{ border: '1px solid rgba(59,130,246,0.3)' }}>
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center"
                 style={{ background: 'rgba(59,130,246,0.15)' }}>
@@ -240,7 +240,7 @@ export default function MoedasStore() {
             const isEarning = earning === action.id;
             return (
               <button key={action.id} onClick={() => handleEarn(action)} disabled={isEarning}
-                className="w-full glass-card p-5 flex items-center gap-4 text-left"
+                className="w-full glass-card p-6 flex items-center gap-4 text-left"
                 style={{ opacity: isEarning ? 0.6 : 1 }}>
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center"
                   style={{ background: `${action.color}15` }}>
@@ -271,7 +271,7 @@ export default function MoedasStore() {
             const canAfford = balance >= item.cost;
             const isPurchasing = purchasing === item.id;
             return (
-              <div key={item.id} className="glass-card p-5 flex items-center gap-4">
+              <div key={item.id} className="glass-card p-6 flex items-center gap-4">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center"
                   style={{ background: `${item.color}15` }}>
                   <Icon size={18} style={{ color: item.color }} />

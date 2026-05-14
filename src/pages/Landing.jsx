@@ -15,10 +15,10 @@ function FlaskIcon({ color }) {
 
 function FeatureItem({ icon, title, description, theme }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
       <div
         style={{
-          width: 48, height: 48, flexShrink: 0, borderRadius: 13,
+          width: 52, height: 52, flexShrink: 0, borderRadius: 14,
           background: `${theme.primary}20`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
@@ -49,7 +49,7 @@ function StoreBadge({ icon, text, theme }) {
   return (
     <div
       style={{
-        height: 44, padding: '0 15px', borderRadius: 9,
+        height: 48, padding: '0 16px', borderRadius: 11,
         background: theme.surface, color: theme.textMuted,
         border: `1px solid ${theme.border}`,
         display: 'flex', alignItems: 'center', gap: 6,
@@ -99,8 +99,8 @@ export default function Landing() {
           width: 'min(calc(100vw - 32px), 480px)',
           minHeight: '100dvh',
           margin: '0 auto',
-          paddingTop: 32,
-          paddingBottom: 20,
+          paddingTop: 40,
+          paddingBottom: 28,
           position: 'relative',
           zIndex: 1,
           display: 'flex',
@@ -113,7 +113,7 @@ export default function Landing() {
           transition={{ duration: 0.45 }}
           style={{ textAlign: 'center' }}
         >
-          <div style={{ fontSize: 48, lineHeight: '48px', height: 48, marginBottom: 8 }}>
+          <div style={{ fontSize: 52, lineHeight: '52px', height: 52, marginBottom: 10 }}>
             🐷
           </div>
 
@@ -137,8 +137,8 @@ export default function Landing() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.35, delay: 0.12 }}
           style={{
-            marginTop: 12, width: '100%', borderRadius: 16,
-            padding: '22px 19px 18px',
+            marginTop: 16, width: '100%', borderRadius: 18,
+            padding: '26px 22px 22px',
             background: theme.glassBg,
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
@@ -148,14 +148,14 @@ export default function Landing() {
         >
           <h2
             style={{
-              margin: '0 0 19px', textAlign: 'center', fontSize: 20, lineHeight: '24px',
+              margin: '0 0 22px', textAlign: 'center', fontSize: 20, lineHeight: '24px',
               fontWeight: 900, color: theme.text,
             }}
           >
             Sai da crise. Toma o controlo.
           </h2>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <FeatureItem
               icon={<FlaskIcon color={theme.primary} />}
               title="6 Frascos"
@@ -181,12 +181,12 @@ export default function Landing() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.2 }}
-          style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 13 }}
+          style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 14 }}
         >
           <button
             onClick={handleStart}
             style={{
-              width: '100%', height: 55, border: 'none', borderRadius: 15,
+              width: '100%', height: 58, border: 'none', borderRadius: 16,
               background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
               color: theme.textInverse, fontSize: 16, fontWeight: 900,
               boxShadow: `0 12px 30px ${theme.primary}35`, cursor: 'pointer',
@@ -201,7 +201,7 @@ export default function Landing() {
           <button
             onClick={handleLogin}
             style={{
-              width: '100%', height: 46, borderRadius: 15,
+              width: '100%', height: 50, borderRadius: 16,
               background: 'transparent', color: theme.primary,
               border: `1.5px solid ${theme.primary}60`,
               fontSize: 14, fontWeight: 800, cursor: 'pointer',
@@ -215,14 +215,14 @@ export default function Landing() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.28 }}
-          style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}
+          style={{ marginTop: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, flexWrap: 'wrap' }}
         >
           <TrustItem text="Gratuito" theme={theme} />
           <TrustItem text="Sem cartao" theme={theme} />
           <TrustItem text="+1000 users" theme={theme} />
         </motion.div>
 
-        <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
           <StoreBadge icon="Apple" text="App Store" theme={theme} />
           <StoreBadge icon="Play" text="Google Play" theme={theme} />
         </div>

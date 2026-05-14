@@ -94,7 +94,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-4">
+      <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-5">
         <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
@@ -103,9 +103,9 @@ export default function Profile() {
   }
 
   return (
-    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
       {/* Avatar & Identity Card */}
-      <div className="glass-card p-6 sm:p-8 text-center">
+      <div className="glass-card p-7 sm:p-9 text-center">
         <div className="relative inline-block mb-3">
           <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full flex items-center justify-center text-3xl sm:text-4xl font-bold"
             style={{ background: `${modeColor}20`, color: modeColor }}>
@@ -170,23 +170,23 @@ export default function Profile() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 sm:gap-3">
-        <div className="glass-card p-3 sm:p-4 text-center">
+      <div className="grid grid-cols-2 xs:grid-cols-4 gap-3 sm:gap-4">
+        <div className="glass-card p-4 sm:p-5 text-center">
           <Flame size={16} className="mx-auto mb-1" style={{ color: '#F97316' }} />
           <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.streak || 0}</p>
           <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Streak</p>
         </div>
-        <div className="glass-card p-3 sm:p-4 text-center">
+        <div className="glass-card p-4 sm:p-5 text-center">
           <Zap size={16} className="mx-auto mb-1" style={{ color: '#3B82F6' }} />
           <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.xp || 0}</p>
           <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>XP</p>
         </div>
-        <div className="glass-card p-3 sm:p-4 text-center">
+        <div className="glass-card p-4 sm:p-5 text-center">
           <Coins size={16} className="mx-auto mb-1" style={{ color: 'var(--gold)' }} />
           <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.poupMoedas || 0}</p>
           <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Moedas</p>
         </div>
-        <div className="glass-card p-3 sm:p-4 text-center">
+        <div className="glass-card p-4 sm:p-5 text-center">
           <Trophy size={16} className="mx-auto mb-1" style={{ color: '#F59E0B' }} />
           <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.trophies?.length || 0}</p>
           <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Trofeus</p>
@@ -497,8 +497,8 @@ export default function Profile() {
       {/* Quick Navigation */}
       <div className="space-y-2">
         <button type="button" onClick={() => setScreen('settings')}
-          className="w-full glass-card p-4 sm:p-5 flex items-center gap-3 text-left cursor-pointer"
-          style={{ minHeight: '48px' }}>
+          className="w-full glass-card p-5 sm:p-6 flex items-center gap-3 text-left cursor-pointer"
+          style={{ minHeight: '52px' }}>
           <Settings size={18} style={{ color: 'var(--text-secondary)' }} />
           <div className="flex-1">
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Configuracoes</span>
@@ -506,8 +506,8 @@ export default function Profile() {
           <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
         </button>
         <button type="button" onClick={() => setScreen('coach')}
-          className="w-full glass-card p-4 sm:p-5 flex items-center gap-3 text-left cursor-pointer"
-          style={{ minHeight: '48px' }}>
+          className="w-full glass-card p-5 sm:p-6 flex items-center gap-3 text-left cursor-pointer"
+          style={{ minHeight: '52px' }}>
           <MessageCircle size={18} style={{ color: 'var(--gold)' }} />
           <div className="flex-1">
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Falar com Coach</span>
@@ -515,8 +515,8 @@ export default function Profile() {
           <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
         </button>
         <button type="button" onClick={() => setScreen('reports')}
-          className="w-full glass-card p-4 sm:p-5 flex items-center gap-3 text-left cursor-pointer"
-          style={{ minHeight: '48px' }}>
+          className="w-full glass-card p-5 sm:p-6 flex items-center gap-3 text-left cursor-pointer"
+          style={{ minHeight: '52px' }}>
           <TrendingUp size={18} style={{ color: '#3B82F6' }} />
           <div className="flex-1">
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Ver Relatorios</span>

@@ -83,7 +83,7 @@ const menuItems = [
 function BottomNav({ theme, currentScreen, onTab }) {
   return (
     <div
-      className="flex items-center justify-around px-1 py-1.5 border-t safe-area-bottom"
+      className="flex items-center justify-around px-1 py-3 border-t safe-area-bottom"
       style={{
         background: theme.surface,
         borderColor: theme.border,
@@ -97,14 +97,14 @@ function BottomNav({ theme, currentScreen, onTab }) {
           <button
             key={tab.id}
             onClick={() => onTab(tab.id)}
-            className="flex flex-1 flex-col items-center gap-0.5 py-1.5 sm:py-2 rounded-xl transition-all duration-200 min-h-[48px]"
+            className="flex flex-1 flex-col items-center gap-1 py-2 sm:py-2.5 rounded-xl transition-all duration-200 min-h-[60px]"
             style={{
               color: isActive ? theme.primary : theme.textMuted,
               background: isActive ? `${theme.primary}15` : 'transparent',
             }}
           >
-            <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
-            <span className="text-[11px] font-medium">{tab.label}</span>
+            <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+            <span className="text-xs font-medium">{tab.label}</span>
           </button>
         );
       })}
@@ -166,10 +166,10 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
                       onNavigate(item.id);
                       onClose();
                     }}
-                    className="flex items-center gap-3 w-full px-5 py-4 text-left transition-colors duration-150 hover:opacity-80 min-h-[48px]"
+                    className="flex items-center gap-4 w-full px-6 py-5 text-left transition-colors duration-150 hover:opacity-80 min-h-[52px]"
                     style={{ color: theme.text }}
                   >
-                    <Icon size={18} style={{ color: theme.textMuted }} />
+                    <Icon size={20} style={{ color: theme.textMuted }} />
                     <span className="text-sm font-medium flex-1">
                       {item.label}
                     </span>
@@ -359,7 +359,7 @@ function App() {
     >
       {!isFullScreen && (
         <div className="shrink-0 safe-area-top" style={{ background: theme.background }}>
-          <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 sm:px-6 py-3">
+          <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 sm:px-6 py-4">
             <button
               onClick={() => setMenuOpen(true)}
               className="p-2.5 rounded-xl transition-colors duration-150 min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -369,7 +369,7 @@ function App() {
             </button>
 
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold" style={{ color: theme.primary }}>
+              <span className="text-base font-bold" style={{ color: theme.primary }}>
                 🐷 PoupPT
               </span>
             </div>

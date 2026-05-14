@@ -94,7 +94,7 @@ export default function AddTransaction() {
 
 
   return (
-    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
       {moedasEarned && (
         <div className="p-3 rounded-xl text-sm font-medium text-center animate-fade-in flex items-center justify-center gap-2"
           style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)' }}>
@@ -131,7 +131,7 @@ export default function AddTransaction() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="glass-card p-6 sm:p-8 text-center">
+        <div className="glass-card p-7 sm:p-9 text-center">
           <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
             {type === 'receita' ? 'Receita' : 'Despesa'}
           </span>
@@ -164,10 +164,10 @@ export default function AddTransaction() {
           <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
             Categoria
           </label>
-          <div className="grid grid-cols-2 xs:grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-2 xs:grid-cols-3 gap-3 sm:gap-4">
             {categories.map(cat => (
               <button key={cat} type="button" onClick={() => setForm({...form, category: cat})}
-                className="py-3 px-2.5 sm:px-3 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
+                className="py-3.5 px-3 sm:px-3.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
                 style={{
                   background: form.category === cat ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                   color: form.category === cat ? 'var(--gold)' : 'var(--text-secondary)',
@@ -188,7 +188,7 @@ export default function AddTransaction() {
             {Object.entries(jarLabels).map(([key, label]) => (
               <button key={key} type="button"
                 onClick={() => setForm({...form, jar: form.jar === key ? '' : key})}
-                className="py-3 px-2.5 sm:px-3 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
+                className="py-3.5 px-3 sm:px-3.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
                 style={{
                   background: form.jar === key ? `${jarColors[key]}20` : 'var(--bg-secondary)',
                   color: form.jar === key ? jarColors[key] : 'var(--text-secondary)',
@@ -220,7 +220,7 @@ export default function AddTransaction() {
         </div>
 
         {/* Recurring Transaction Toggle */}
-        <div className="glass-card p-5 sm:p-6">
+        <div className="glass-card p-6 sm:p-7">
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
               <Calendar size={12} className="inline mr-1" /> Transacao recorrente
@@ -244,7 +244,7 @@ export default function AddTransaction() {
           )}
         </div>
 
-        <div className="flex gap-3 sm:gap-4">
+        <div className="flex gap-4 sm:gap-5">
           <button type="button" onClick={() => setScreen('dashboard')}
             className="px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2"
             style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>

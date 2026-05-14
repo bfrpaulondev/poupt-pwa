@@ -74,7 +74,7 @@ export default function Register() {
       }}
     >
       <div
-        className="flex flex-col min-h-screen px-4 xs:px-5 py-5"
+        className="flex flex-col min-h-screen px-5 xs:px-6 py-6"
         style={{
           width: '100%',
           maxWidth: 430,
@@ -86,7 +86,7 @@ export default function Register() {
           className="flex items-center gap-1 mb-8 text-sm font-semibold"
           style={{ color: theme.primary }}
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={18} />
           Voltar
         </button>
 
@@ -115,7 +115,7 @@ export default function Register() {
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.12 }}
-          className="glass rounded-2xl p-5"
+          className="glass rounded-2xl p-6"
         >
           <h2
             className="text-2xl font-extrabold text-center mb-2"
@@ -131,9 +131,9 @@ export default function Register() {
             O teu treinador financeiro pessoal
           </p>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             <div
-              className="flex items-center gap-3 px-4 h-[52px] rounded-2xl"
+              className="flex items-center gap-3 px-4 h-[54px] rounded-2xl"
               style={{
                 background: theme.surface,
                 border: `1.5px solid ${theme.border}`,
@@ -154,7 +154,7 @@ export default function Register() {
             </div>
 
             <div
-              className="flex items-center gap-3 px-4 h-[52px] rounded-2xl"
+              className="flex items-center gap-3 px-4 h-[54px] rounded-2xl"
               style={{
                 background: theme.surface,
                 border: `1.5px solid ${theme.border}`,
@@ -175,7 +175,7 @@ export default function Register() {
             </div>
 
             <div
-              className="flex items-center gap-3 px-4 h-[52px] rounded-2xl"
+              className="flex items-center gap-3 px-4 h-[54px] rounded-2xl"
               style={{
                 background: theme.surface,
                 border: `1.5px solid ${theme.border}`,
@@ -217,7 +217,7 @@ export default function Register() {
               type="button"
               onClick={handleRegister}
               disabled={loading}
-              className="w-full h-[56px] rounded-2xl font-extrabold text-base transition-transform duration-200 active:scale-[0.98] disabled:opacity-50"
+              className="w-full h-[58px] rounded-2xl font-extrabold text-base transition-transform duration-200 active:scale-[0.98] disabled:opacity-50"
               style={{
                 background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
                 color: theme.textInverse,
@@ -229,7 +229,7 @@ export default function Register() {
           </div>
         </motion.div>
 
-        <div className="mt-5 text-center">
+        <div className="mt-6 text-center">
           <button
             type="button"
             onClick={() => setScreen('login')}

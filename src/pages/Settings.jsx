@@ -197,17 +197,17 @@ export default function Settings() {
   ];
 
   const Toggle = ({ isOn, onToggle }) => (
-    <button onClick={onToggle} className="w-12 h-7 rounded-full relative transition-all shrink-0 min-h-[44px] min-w-[44px] flex items-center"
+    <button onClick={onToggle} className="w-14 h-8 rounded-full relative transition-all shrink-0 min-h-[48px] min-w-[48px] flex items-center"
       style={{ background: isOn ? 'var(--gold)' : 'var(--border)' }}>
-      <div className="w-5.5 h-5.5 rounded-full bg-white absolute top-0.5 transition-all my-auto"
-        style={{ left: isOn ? '22px' : '2px' }} />
+      <div className="w-6 h-6 rounded-full bg-white absolute top-1 transition-all my-auto"
+        style={{ left: isOn ? '28px' : '2px' }} />
     </button>
   );
 
   return (
-    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
-        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        className="flex items-center gap-1 mb-3 text-sm font-semibold"
         style={{ color: 'var(--text-secondary)' }}>
         ← Voltar
       </button>
@@ -220,7 +220,7 @@ export default function Settings() {
       )}
 
       {/* Tema */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Palette size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -256,7 +256,7 @@ export default function Settings() {
       </div>
 
       {/* Notificacoes */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Bell size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -281,7 +281,7 @@ export default function Settings() {
       </div>
 
       {/* Moeda */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Euro size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -312,7 +312,7 @@ export default function Settings() {
       </div>
 
       {/* Idioma */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Languages size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -335,7 +335,7 @@ export default function Settings() {
       </div>
 
       {/* Coach Settings */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -382,7 +382,7 @@ export default function Settings() {
       </div>
 
       {/* Modo de Vida */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Shield size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -411,7 +411,7 @@ export default function Settings() {
       </div>
 
       {/* Exportar Dados */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Download size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -427,7 +427,7 @@ export default function Settings() {
       </div>
 
       {/* Privacidade */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Lock size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -461,7 +461,7 @@ export default function Settings() {
       </div>
 
       {/* About */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center gap-2 mb-3">
           <Info size={16} style={{ color: 'var(--gold)' }} />
           <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -495,7 +495,7 @@ export default function Settings() {
       </div>
 
       {/* Logout */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <button onClick={handleLogout}
           className="w-full py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
           style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
@@ -504,7 +504,7 @@ export default function Settings() {
       </div>
 
       {/* Delete Account */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <h3 className="text-xs font-semibold mb-2 uppercase" style={{ color: '#EF4444' }}>
           Zona de Perigo
         </h3>

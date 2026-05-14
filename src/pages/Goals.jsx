@@ -160,9 +160,9 @@ export default function Goals() {
 
 
   return (
-    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
-        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        className="flex items-center gap-1 mb-3 text-sm font-semibold"
         style={{ color: 'var(--text-secondary)' }}>
         ← Voltar
       </button>
@@ -251,7 +251,7 @@ export default function Goals() {
 
       {/* Create Form */}
       {showForm && (
-        <form onSubmit={handleCreate} className="glass-card p-4 sm:p-5 space-y-3 sm:space-y-4 animate-fade-in">
+        <form onSubmit={handleCreate} className="glass-card p-5 sm:p-6 space-y-4 sm:space-y-5 animate-fade-in">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Nova Meta</h3>
             <button type="button" onClick={() => setShowForm(false)}>
@@ -315,7 +315,7 @@ export default function Goals() {
             <div className="flex flex-wrap gap-1.5">
               {goalIcons.map(icon => (
                 <button key={icon} type="button" onClick={() => setForm({...form, icon})}
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center text-sm transition-all"
+                  className="w-11 h-11 sm:w-12 sm:h-11 rounded-lg flex items-center justify-center text-sm transition-all"
                   style={{
                     background: form.icon === icon ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                     border: form.icon === icon ? '1px solid var(--gold)' : '1px solid var(--border)'
@@ -334,7 +334,7 @@ export default function Goals() {
             <div className="flex gap-2">
               {goalColors.map(color => (
                 <button key={color} type="button" onClick={() => setForm({...form, color})}
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full relative transition-all"
+                  className="w-11 h-11 sm:w-12 sm:h-11 rounded-full relative transition-all"
                   style={{
                     background: color,
                     boxShadow: form.color === color ? `0 0 0 2px var(--bg-primary), 0 0 0 4px ${color}` : 'none'
@@ -372,7 +372,7 @@ export default function Goals() {
           const isConfirmDelete = showDeleteConfirm === goal._id;
 
           return (
-            <div key={goal._id} className="glass-card p-4 sm:p-5"
+            <div key={goal._id} className="glass-card p-5 sm:p-6"
               style={{ borderLeft: `3px solid ${goal.isCompleted ? '#10B981' : goalColor}` }}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"

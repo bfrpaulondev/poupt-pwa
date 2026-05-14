@@ -157,14 +157,14 @@ export default function SurvivalMode() {
   const motivationIdx = Math.floor(Date.now() / 86400000) % currentMotivation.length;
 
   return (
-    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
-        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        className="flex items-center gap-1 mb-3 text-sm font-semibold"
         style={{ color: 'var(--text-secondary)' }}>
         ← Voltar
       </button>
       {/* Emergency Header */}
-      <div className="p-5 sm:p-6 rounded-2xl" style={{ background: `linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05))`, border: '1px solid rgba(239,68,68,0.3)' }}>
+      <div className="p-6 sm:p-7 rounded-2xl" style={{ background: `linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05))`, border: '1px solid rgba(239,68,68,0.3)' }}>
         <div className="flex items-center gap-3 mb-2">
           <Shield size={24} style={{ color: '#EF4444' }} />
           <div>
@@ -331,7 +331,7 @@ export default function SurvivalMode() {
         <div className="space-y-3">
           {actionChecklist.map(({ id, label, desc, icon: Icon, priority }) => (
             <button key={id} onClick={() => toggleCheck(id)}
-              className="w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-xl text-left transition-all"
+              className="w-full flex items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl text-left transition-all"
               style={{
                 background: checkedItems[id] ? 'rgba(16,185,129,0.05)' : 'transparent',
                 opacity: checkedItems[id] ? 0.6 : 1
@@ -425,7 +425,7 @@ export default function SurvivalMode() {
         <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>
           Atalhos Rapidos
         </h3>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {[
             { icon: AlertTriangle, title: 'Ver dividas', desc: 'Prioriza o que esta vencido', screen: 'debts' },
             { icon: CreditCard, title: 'Registar pagamento', desc: 'Actualiza progresso', screen: 'addTransaction' },

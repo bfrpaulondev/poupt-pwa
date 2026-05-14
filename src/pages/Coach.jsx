@@ -92,7 +92,7 @@ export default function Coach() {
   return (
     <div className="flex flex-col h-full">
       {/* Coach Header */}
-      <div className="px-4 xs:px-5 sm:px-8 py-3 sm:py-4 flex items-center justify-between"
+      <div className="px-5 xs:px-6 sm:px-8 py-4 sm:py-5 flex items-center justify-between"
         style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center"
@@ -133,7 +133,7 @@ export default function Coach() {
 
         {coachMessages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] sm:max-w-[70%] px-4 py-3 rounded-2xl ${
+            <div className={`max-w-[88%] sm:max-w-[70%] px-5 py-4 rounded-2xl ${
               msg.role === 'user'
                 ? 'rounded-br-md'
                 : 'rounded-bl-md'
@@ -170,14 +170,14 @@ export default function Coach() {
       </div>
 
       {/* Input */}
-      <div className="px-4 xs:px-5 sm:px-8 py-3 sm:py-4" style={{ borderTop: '1px solid var(--border)' }}>
+      <div className="px-5 xs:px-6 sm:px-8 py-4 sm:py-5" style={{ borderTop: '1px solid var(--border)' }}>
         <div className="flex gap-2">
           <input type="text" value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Pergunta ao ${user?.coachName || 'Coach'}...`}
             className="flex-1 input-field" />
           <button onClick={handleSend} disabled={!input.trim() || sending}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center gold-gradient disabled:opacity-40">
+            className="w-12 h-12 rounded-xl flex items-center justify-center gold-gradient disabled:opacity-40">
             <Send size={18} color="#000" />
           </button>
         </div>

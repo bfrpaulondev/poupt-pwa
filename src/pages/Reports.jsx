@@ -121,9 +121,9 @@ export default function Reports() {
   }
 
   return (
-    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
-        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        className="flex items-center gap-1 mb-3 text-sm font-semibold"
         style={{ color: 'var(--text-secondary)' }}>
         ← Voltar
       </button>
@@ -149,18 +149,18 @@ export default function Reports() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 xs:grid-cols-3 gap-2.5 sm:gap-3">
-        <div className="glass-card p-4 sm:p-5 text-center">
+      <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
+        <div className="glass-card p-5 sm:p-6 text-center">
           <ArrowDownLeft size={14} className="mx-auto mb-1" style={{ color: '#10B981' }} />
           <p className="text-sm font-bold" style={{ color: '#10B981' }}>{formatCurrency(totalIncome)}</p>
           <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Receitas</p>
         </div>
-        <div className="glass-card p-4 sm:p-5 text-center">
+        <div className="glass-card p-5 sm:p-6 text-center">
           <ArrowUpRight size={14} className="mx-auto mb-1" style={{ color: '#EF4444' }} />
           <p className="text-sm font-bold" style={{ color: '#EF4444' }}>{formatCurrency(totalExpenses)}</p>
           <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Despesas</p>
         </div>
-        <div className="glass-card p-4 sm:p-5 text-center">
+        <div className="glass-card p-5 sm:p-6 text-center">
           <TrendingUp size={14} className="mx-auto mb-1" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }} />
           <p className="text-sm font-bold" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }}>
             {savingsRate.toFixed(1)}%
@@ -173,7 +173,7 @@ export default function Reports() {
       <div className="flex gap-2.5 sm:gap-3">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => setActiveTab(id)}
-            className="flex-1 py-3 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 py-4 rounded-xl text-xs font-medium text-center transition-all flex items-center justify-center gap-1.5"
             style={{
               background: activeTab === id ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
               color: activeTab === id ? 'var(--gold)' : 'var(--text-secondary)',
@@ -188,7 +188,7 @@ export default function Reports() {
       {activeTab === 'mensal' && (
         <div className="space-y-4">
           {/* Income vs Expenses Bar Chart */}
-          <div className="glass-card p-5 sm:p-6">
+          <div className="glass-card p-6 sm:p-7">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Receitas vs Despesas
             </h3>
@@ -212,7 +212,7 @@ export default function Reports() {
           </div>
 
           {/* 6 Jars Allocation Donut */}
-          <div className="glass-card p-5 sm:p-6">
+          <div className="glass-card p-6 sm:p-7">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Alocacao dos 6 Frascos
             </h3>
@@ -249,7 +249,7 @@ export default function Reports() {
           </div>
 
           {/* Savings Rate Trend */}
-          <div className="glass-card p-5 sm:p-6">
+          <div className="glass-card p-6 sm:p-7">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Taxa de Poupanca
             </h3>
@@ -278,7 +278,7 @@ export default function Reports() {
       {activeTab === 'categorias' && (
         <div className="space-y-4">
           {/* Category Breakdown Pie */}
-          <div className="glass-card p-5 sm:p-6">
+          <div className="glass-card p-6 sm:p-7">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Distribuicao por Categoria
             </h3>
@@ -324,7 +324,7 @@ export default function Reports() {
           </div>
 
           {/* Top Categories List */}
-          <div className="glass-card p-5 sm:p-6">
+          <div className="glass-card p-6 sm:p-7">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Maiores Despesas
             </h3>
@@ -370,7 +370,7 @@ export default function Reports() {
       {activeTab === 'dividas' && (
         <div className="space-y-4">
           {/* Debt Payoff Progress */}
-          <div className="glass-card p-5 sm:p-6">
+          <div className="glass-card p-6 sm:p-7">
             <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
               Progresso de Pagamento
             </h3>
@@ -449,7 +449,7 @@ export default function Reports() {
           </div>
 
           {/* Snowball Strategy */}
-          <div className="glass-card p-5 sm:p-6">
+          <div className="glass-card p-6 sm:p-7">
             <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--gold)' }}>
               <TrendingDown size={16} /> Estrategia Snowball
             </h3>
