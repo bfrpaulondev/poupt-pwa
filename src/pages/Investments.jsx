@@ -1,43 +1,123 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
 import { formatCurrency } from '../utils/helpers';
 import {
   TrendingUp, TrendingDown, Plus, BarChart3, Trash2, X,
   Building2, Bitcoin, Landmark, Home, PiggyBank, Lock,
-  ChevronDown, ChevronUp, Coins, Crown, Percent, Edit3, Check,
-  Save
+  ChevronDown, ChevronUp, Crown, Percent, Edit3, Save,
+  ChevronLeft, Check, AlertCircle, Wallet,
 } from 'lucide-react';
 
-const typeLabels = {
-  stock: 'Acoes', etf: 'ETFs', fund: 'Fundos', crypto: 'Crypto',
-  real_estate: 'Imoveis', ppr: 'PPR', other: 'Outro'
+/* ============================================================ */
+/* Type configuration                                           */
+/* ============================================================ */
+
+const TYPES = {
+  stock:       { label: 'Ações',     icon: TrendingUp,  color: '#3B82F6', desc: 'Ações individuais' },
+  etf:         { label: 'ETFs',      icon: BarChart3,   color: '#10B981', desc: 'Fundos negociados' },
+  fund:        { label: 'Fundos',    icon: Landmark,    color: '#8B5CF6', desc: 'Fundos de investimento' },
+  crypto:      { label: 'Crypto',    icon: Bitcoin,     color: '#F59E0B', desc: 'Criptomoedas' },
+  real_estate: { label: 'Imóveis',   icon: Home,        color: '#EF4444', desc: 'Investimento imobiliário' },
+  ppr:         { label: 'PPR',       icon: PiggyBank,   color: '#EC4899', desc: 'Poupança Reforma' },
+  other:       { label: 'Outro',     icon: Building2,   color: '#64748B', desc: 'Outro tipo' },
 };
 
-const typeDescriptions = {
-  stock: 'Acoes individuais na bolsa',
-  etf: 'Fundos negociados na bolsa',
-  fund: 'Fundos de investimento',
-  crypto: 'Criptomoedas',
-  real_estate: 'Investimento imobiliario',
-  ppr: 'Plano Poupanca Reforma',
-  other: 'Outro tipo de investimento'
+const EMPTY_FORM = {
+  name: '', type: 'etf', quantity: '', avgPrice: '',
+  currentPrice: '', platform: '', currency: 'EUR', dividendPerShare: '',
 };
 
-const typeIcons = {
-  stock: TrendingUp, etf: BarChart3, fund: Landmark, crypto: Bitcoin,
-  real_estate: Home, ppr: PiggyBank, other: Building2
+/* ============================================================ */
+/* Helpers                                                      */
+/* ============================================================ */
+
+const hexToRgba = (hex, alpha = 1) => {
+  if (!hex || typeof hex !== 'string') return `rgba(212,175,55,${alpha})`;
+  let h = hex.replace('#', '').trim();
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  if (h.length !== 6) return `rgba(212,175,55,${alpha})`;
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  if ([r, g, b].some(Number.isNaN)) return `rgba(212,175,55,${alpha})`;
+  return `rgba(${r},${g},${b},${alpha})`;
 };
 
-const typeColors = {
-  stock: '#3B82F6', etf: '#10B981', fund: '#8B5CF6', crypto: '#F59E0B',
-  real_estate: '#EF4444', ppr: '#EC4899', other: '#64748B'
+/* ============================================================ */
+/* Layout primitives                                            */
+/* ============================================================ */
+
+const Shell = ({ children }) => (
+  <div
+    style={{
+      width: '100%',
+      maxWidth: 1100,
+      margin: '0 auto',
+      padding: 'clamp(16px, 3vw, 28px)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 'clamp(14px, 2.5vw, 20px)',
+      minWidth: 0,
+      boxSizing: 'border-box',
+    }}
+  >
+    {children}
+  </div>
+);
+
+const Card = ({ children, style = {} }) => (
+  <div
+    style={{
+      background: 'var(--card, #1a1a1a)',
+      border: '1px solid var(--border, rgba(255,255,255,0.08))',
+      borderRadius: 16,
+      minWidth: 0,
+      boxSizing: 'border-box',
+      ...style,
+    }}
+  >
+    {children}
+  </div>
+);
+
+const inputBase = {
+  width: '100%',
+  padding: '12px 14px',
+  borderRadius: 10,
+  border: '1px solid var(--border, rgba(255,255,255,0.1))',
+  background: 'rgba(255,255,255,0.04)',
+  color: 'var(--text, #fff)',
+  fontSize: 14,
+  outline: 'none',
+  boxSizing: 'border-box',
+  minWidth: 0,
 };
 
+const FieldLabel = ({ children }) => (
+  <label
+    style={{
+      display: 'block',
+      fontSize: 11,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      color: 'var(--text-secondary, #9CA3AF)',
+      marginBottom: 6,
+    }}
+  >
+    {children}
+  </label>
+);
 
+/* ============================================================ */
+/* Main                                                         */
+/* ============================================================ */
 
 export default function Investments() {
   const { user, setScreen } = useStore();
+
   const [investments, setInvestments] = useState([]);
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,20 +129,18 @@ export default function Investments() {
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [form, setForm] = useState({
-    name: '', type: 'etf', quantity: '', avgPrice: '', currentPrice: '',
-    platform: '', currency: 'EUR', dividendPerShare: ''
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const isPremium = user?.plan === 'premium' || user?.plan === 'pro';
 
+  /* ---------- Load ---------- */
   useEffect(() => { loadInvestments(); }, []);
 
   const loadInvestments = async () => {
     try {
       const res = await api.getInvestments();
-      setInvestments(res.data.investments);
-      setPortfolio(res.data.portfolio);
+      setInvestments(res?.data?.investments || []);
+      setPortfolio(res?.data?.portfolio || null);
     } catch (err) {
       console.error(err);
       setErrorMsg('Erro ao carregar investimentos. Tenta novamente.');
@@ -71,26 +149,32 @@ export default function Investments() {
     }
   };
 
+  /* ---------- Create ---------- */
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!isPremium) return;
+    setSaving(true);
+    setErrorMsg('');
     try {
       const data = {
         ...form,
         quantity: Number(form.quantity),
         avgPrice: Number(form.avgPrice),
         currentPrice: Number(form.currentPrice || form.avgPrice),
-        dividendPerShare: form.dividendPerShare ? Number(form.dividendPerShare) : 0
+        dividendPerShare: form.dividendPerShare ? Number(form.dividendPerShare) : 0,
       };
       await api.createInvestment(data);
       setShowForm(false);
-      setForm({ name: '', type: 'etf', quantity: '', avgPrice: '', currentPrice: '', platform: '', currency: 'EUR', dividendPerShare: '' });
-      loadInvestments();
+      setForm(EMPTY_FORM);
+      await loadInvestments();
     } catch (err) {
-      console.error(err);
+      setErrorMsg(err?.message || 'Não foi possível criar o investimento.');
+    } finally {
+      setSaving(false);
     }
   };
 
+  /* ---------- Edit ---------- */
   const handleEdit = (inv) => {
     setEditingId(inv._id);
     setEditForm({
@@ -101,7 +185,7 @@ export default function Investments() {
       currentPrice: String(inv.currentPrice),
       platform: inv.platform || '',
       currency: inv.currency || 'EUR',
-      dividendPerShare: String(inv.dividendPerShare || '')
+      dividendPerShare: String(inv.dividendPerShare || ''),
     });
     setExpandedId(inv._id);
   };
@@ -114,18 +198,19 @@ export default function Investments() {
         quantity: Number(editForm.quantity),
         avgPrice: Number(editForm.avgPrice),
         currentPrice: Number(editForm.currentPrice || editForm.avgPrice),
-        dividendPerShare: editForm.dividendPerShare ? Number(editForm.dividendPerShare) : 0
+        dividendPerShare: editForm.dividendPerShare ? Number(editForm.dividendPerShare) : 0,
       };
       await api.updateInvestment(id, data);
       setEditingId(null);
-      loadInvestments();
+      await loadInvestments();
     } catch (err) {
-      console.error(err);
+      setErrorMsg(err?.message || 'Não foi possível guardar.');
     } finally {
       setSaving(false);
     }
   };
 
+  /* ---------- Delete ---------- */
   const handleDelete = async (id) => {
     if (deleteConfirmId !== id) {
       setDeleteConfirmId(id);
@@ -135,398 +220,1305 @@ export default function Investments() {
     try {
       await api.deleteInvestment(id);
       setDeleteConfirmId(null);
-      loadInvestments();
+      await loadInvestments();
     } catch (err) {
-      console.error(err);
+      setErrorMsg(err?.message || 'Não foi possível eliminar.');
     } finally {
       setDeleting(false);
     }
   };
 
+  /* ---------- Derived ---------- */
+  const profitPct = useMemo(() => {
+    if (!portfolio?.totalInvested) return 0;
+    return (portfolio.totalProfitLoss / portfolio.totalInvested) * 100;
+  }, [portfolio]);
+
+  /* ---------- Loading ---------- */
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-3 rounded-xl gold-gradient gold-shimmer" />
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>A carregar investimentos...</p>
+      <Shell>
+        <div
+          style={{
+            minHeight: '50vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 14,
+          }}
+        >
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 1.4, repeat: Infinity }}
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+            }}
+          />
+          <p style={{ color: 'var(--text-secondary, #9CA3AF)', fontSize: 14 }}>
+            A carregar investimentos…
+          </p>
         </div>
-      </div>
+      </Shell>
     );
   }
 
+  /* ============================================================ */
   return (
-    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
-      <button onClick={() => setScreen('dashboard')}
-        className="flex items-center gap-1 mb-3 text-sm font-semibold"
-        style={{ color: 'var(--text-secondary)' }}>
-        ← Voltar
+    <Shell>
+      {/* Back */}
+      <button
+        type="button"
+        onClick={() => setScreen('dashboard')}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--text-secondary, #9CA3AF)',
+          cursor: 'pointer',
+          padding: 8,
+          margin: '-8px 0 0 -8px',
+          fontSize: 14,
+          fontWeight: 600,
+          minHeight: 44,
+          alignSelf: 'flex-start',
+        }}
+      >
+        <ChevronLeft size={18} /> Voltar
       </button>
-      {errorMsg && (
-        <div className="p-3 rounded-xl text-xs font-medium"
-          style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}
-          onClick={() => setErrorMsg('')}>
-          {errorMsg} ← to dismiss
-        </div>
-      )}
-      {/* Premium Notice for free users */}
-      {!isPremium && (
-        <div className="p-5 sm:p-6 rounded-2xl flex items-center gap-4"
-          style={{ background: 'rgba(255,215,0,0.1)', border: '1px solid rgba(255,215,0,0.3)' }}>
-          <Crown size={20} style={{ color: 'var(--gold)' }} />
-          <div className="flex-1">
-            <p className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>Funcionalidade Premium</p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-              Investimentos avancados e dividendos disponiveis no plano Premium
+
+      {/* ============== HEADER ============== */}
+      <Card style={{ padding: 'clamp(16px, 3vw, 22px)' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            flexWrap: 'wrap',
+            minWidth: 0,
+          }}
+        >
+          <div
+            style={{
+              width: 48, height: 48,
+              borderRadius: 12,
+              background: 'rgba(212,175,55,0.18)',
+              color: '#D4AF37',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <BarChart3 size={24} />
+          </div>
+
+          <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 'clamp(18px, 4vw, 22px)',
+                fontWeight: 800,
+                letterSpacing: '-0.01em',
+                color: 'var(--text, #fff)',
+              }}
+            >
+              Investimentos
+            </h1>
+            <p
+              style={{
+                margin: '4px 0 0',
+                fontSize: 13,
+                color: 'var(--text-secondary, #9CA3AF)',
+              }}
+            >
+              {investments.length === 0
+                ? 'Acompanha o teu portfolio'
+                : `${investments.length} ${investments.length === 1 ? 'ativo' : 'ativos'} no portfolio`}
             </p>
           </div>
-          <Lock size={16} style={{ color: 'var(--gold)' }} />
+
+          {isPremium && (
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 999,
+                background: 'rgba(212,175,55,0.18)',
+                border: '1px solid rgba(212,175,55,0.4)',
+                color: '#D4AF37',
+                fontSize: 11,
+                fontWeight: 800,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              <Crown size={12} /> Premium
+            </span>
+          )}
         </div>
+      </Card>
+
+      {/* ============== ERROR ============== */}
+      <AnimatePresence>
+        {errorMsg && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            onClick={() => setErrorMsg('')}
+            style={{
+              padding: '12px 16px',
+              background: 'rgba(239,68,68,0.12)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: 12,
+              color: '#FCA5A5',
+              fontSize: 13,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              cursor: 'pointer',
+            }}
+          >
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
+            <span style={{ flex: 1, minWidth: 0 }}>{errorMsg}</span>
+            <X size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ============== PREMIUM NOTICE ============== */}
+      {!isPremium && (
+        <Card
+          style={{
+            padding: 'clamp(16px, 3vw, 22px)',
+            background: 'linear-gradient(135deg, rgba(212,175,55,0.12), rgba(184,148,31,0.04))',
+            borderColor: 'rgba(212,175,55,0.3)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              flexWrap: 'wrap',
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                width: 46, height: 46,
+                borderRadius: 12,
+                background: 'rgba(212,175,55,0.22)',
+                color: '#D4AF37',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <Crown size={22} />
+            </div>
+            <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: '#D4AF37',
+                }}
+              >
+                Funcionalidade Premium
+              </p>
+              <p
+                style={{
+                  margin: '4px 0 0',
+                  fontSize: 12,
+                  color: 'var(--text-secondary, #9CA3AF)',
+                  lineHeight: 1.5,
+                }}
+              >
+                Investimentos avançados, dividendos e acompanhamento de portfolio disponíveis no plano Premium.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setScreen('settings')}
+              style={{
+                background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+                color: '#0B0B0B',
+                border: 'none',
+                padding: '10px 16px',
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 800,
+                cursor: 'pointer',
+                minHeight: 40,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              Upgrade
+            </button>
+          </div>
+        </Card>
       )}
 
-      {/* Portfolio Summary */}
+      {/* ============== PORTFOLIO SUMMARY ============== */}
       {portfolio && (
-        <div className="glass-card p-6 sm:p-7">
-          <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>Portfolio</h3>
-          <div className="grid grid-cols-2 gap-5">
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Valor Atual</span>
-              <p className="text-lg font-bold" style={{ color: '#10B981' }}>{formatCurrency(portfolio.currentValue)}</p>
-            </div>
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Ganho/Perda</span>
-              <p className="text-lg font-bold"
-                style={{ color: portfolio.totalProfitLoss >= 0 ? '#10B981' : '#EF4444' }}>
-                {portfolio.totalProfitLoss >= 0 ? '+' : ''}{formatCurrency(portfolio.totalProfitLoss)}
-              </p>
-            </div>
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Investido</span>
-              <p className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {formatCurrency(portfolio.totalInvested)}
-              </p>
-            </div>
-            <div>
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Dividendos</span>
-              <p className="text-base font-semibold" style={{ color: 'var(--gold)' }}>
-                {formatCurrency(portfolio.totalDividends)}
-              </p>
-            </div>
+        <Card style={{ padding: 'clamp(18px, 3.5vw, 24px)' }}>
+          <div style={{ marginBottom: 16 }}>
+            <h3
+              style={{
+                margin: 0,
+                fontSize: 12,
+                fontWeight: 800,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--text-secondary, #9CA3AF)',
+              }}
+            >
+              Portfolio
+            </h3>
           </div>
+
+          {/* Stats grid */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gap: 14,
+              marginBottom: portfolio.totalInvested > 0 ? 18 : 0,
+            }}
+          >
+            <SummaryStat
+              label="Valor atual"
+              value={formatCurrency(portfolio.currentValue)}
+              color="#10B981"
+              large
+            />
+            <SummaryStat
+              label="Ganho/Perda"
+              value={`${portfolio.totalProfitLoss >= 0 ? '+' : ''}${formatCurrency(portfolio.totalProfitLoss)}`}
+              color={portfolio.totalProfitLoss >= 0 ? '#10B981' : '#EF4444'}
+              large
+            />
+            <SummaryStat
+              label="Investido"
+              value={formatCurrency(portfolio.totalInvested)}
+              color="var(--text, #fff)"
+            />
+            <SummaryStat
+              label="Dividendos"
+              value={formatCurrency(portfolio.totalDividends)}
+              color="#D4AF37"
+            />
+          </div>
+
+          {/* Profitability bar */}
           {portfolio.totalInvested > 0 && (
-            <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
-              <div className="flex justify-between text-xs mb-1">
-                <span style={{ color: 'var(--text-secondary)' }}>Rentabilidade</span>
-                <span className="font-semibold"
-                  style={{ color: portfolio.totalProfitLoss >= 0 ? '#10B981' : '#EF4444' }}>
-                  {((portfolio.totalProfitLoss / portfolio.totalInvested) * 100).toFixed(2)}%
+            <div
+              style={{
+                paddingTop: 16,
+                borderTop: '1px solid var(--border, rgba(255,255,255,0.08))',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 8,
+                  gap: 8,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span style={{ fontSize: 12, color: 'var(--text-secondary, #9CA3AF)', fontWeight: 600 }}>
+                  Rentabilidade
+                </span>
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: profitPct >= 0 ? '#10B981' : '#EF4444',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {profitPct >= 0 ? '+' : ''}{profitPct.toFixed(2)}%
                 </span>
               </div>
-              <div className="w-full rounded-full h-2" style={{ background: 'var(--border)' }}>
-                <div className="h-2 rounded-full transition-all"
+              <div
+                style={{
+                  width: '100%',
+                  height: 8,
+                  borderRadius: 999,
+                  background: 'rgba(255,255,255,0.08)',
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                {/* Center marker */}
+                <div
                   style={{
-                    width: `${Math.min(100, Math.max(0, 50 + (portfolio.totalProfitLoss / portfolio.totalInvested) * 50))}%`,
-                    background: portfolio.totalProfitLoss >= 0 ? '#10B981' : '#EF4444'
-                  }} />
+                    position: 'absolute',
+                    top: 0,
+                    bottom: 0,
+                    left: '50%',
+                    width: 2,
+                    background: 'rgba(255,255,255,0.15)',
+                    zIndex: 1,
+                  }}
+                />
+                <motion.div
+                  initial={{ width: '50%' }}
+                  animate={{
+                    width: `${Math.min(100, Math.max(0, 50 + profitPct * 0.5))}%`,
+                  }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  style={{
+                    height: '100%',
+                    background: profitPct >= 0
+                      ? 'linear-gradient(90deg, rgba(16,185,129,0.5), #10B981)'
+                      : 'linear-gradient(90deg, #EF4444, rgba(239,68,68,0.5))',
+                    borderRadius: 999,
+                  }}
+                />
               </div>
             </div>
           )}
+        </Card>
+      )}
+
+      {/* ============== ADD BUTTON ============== */}
+      <button
+        type="button"
+        onClick={() => { if (isPremium) setShowForm(!showForm); }}
+        disabled={!isPremium}
+        style={{
+          width: '100%',
+          minHeight: 52,
+          padding: '12px 18px',
+          borderRadius: 14,
+          background: isPremium
+            ? showForm
+              ? 'rgba(239,68,68,0.12)'
+              : 'rgba(16,185,129,0.12)'
+            : 'rgba(255,255,255,0.04)',
+          color: isPremium
+            ? showForm ? '#EF4444' : '#10B981'
+            : 'var(--text-muted, #6B7280)',
+          border: `1px solid ${
+            isPremium
+              ? showForm ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'
+              : 'var(--border, rgba(255,255,255,0.08))'
+          }`,
+          fontSize: 14,
+          fontWeight: 700,
+          cursor: isPremium ? 'pointer' : 'not-allowed',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          transition: 'all 0.15s ease',
+        }}
+      >
+        {!isPremium ? (
+          <><Lock size={15} /> Premium necessário</>
+        ) : showForm ? (
+          <><X size={15} /> Cancelar</>
+        ) : (
+          <><Plus size={15} /> Adicionar investimento</>
+        )}
+      </button>
+
+      {/* ============== ADD FORM ============== */}
+      <AnimatePresence>
+        {showForm && isPremium && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <Card style={{ padding: 'clamp(18px, 3vw, 24px)' }}>
+              <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: 'var(--text, #fff)' }}>
+                  Novo investimento
+                </h3>
+
+                {/* Name */}
+                <div>
+                  <FieldLabel>Nome do ativo</FieldLabel>
+                  <input
+                    type="text"
+                    placeholder="Ex: VWCE ETF"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    required
+                    style={inputBase}
+                  />
+                </div>
+
+                {/* Type selector */}
+                <div>
+                  <FieldLabel>Tipo de ativo</FieldLabel>
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                      gap: 8,
+                    }}
+                  >
+                    {Object.entries(TYPES).map(([key, cfg]) => {
+                      const Icon = cfg.icon;
+                      const active = form.type === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => setForm({ ...form, type: key })}
+                          style={{
+                            padding: '10px 8px',
+                            borderRadius: 10,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            minHeight: 64,
+                            background: active ? hexToRgba(cfg.color, 0.15) : 'rgba(255,255,255,0.04)',
+                            color: active ? cfg.color : 'var(--text-secondary, #9CA3AF)',
+                            border: `1px solid ${active ? hexToRgba(cfg.color, 0.5) : 'var(--border, rgba(255,255,255,0.08))'}`,
+                            cursor: 'pointer',
+                            transition: 'all 0.12s ease',
+                            minWidth: 0,
+                          }}
+                        >
+                          <Icon size={16} />
+                          <span style={{ fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                            {cfg.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Quantities row */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                    gap: 12,
+                  }}
+                >
+                  <div>
+                    <FieldLabel>Quantidade</FieldLabel>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={form.quantity}
+                      onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                      required
+                      min="0.01"
+                      step="0.01"
+                      inputMode="decimal"
+                      style={inputBase}
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Preço médio (€)</FieldLabel>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      value={form.avgPrice}
+                      onChange={(e) => setForm({ ...form, avgPrice: e.target.value })}
+                      required
+                      min="0.01"
+                      step="0.01"
+                      inputMode="decimal"
+                      style={inputBase}
+                    />
+                  </div>
+                </div>
+
+                {/* Current price row */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                    gap: 12,
+                  }}
+                >
+                  <div>
+                    <FieldLabel>Preço atual (€)</FieldLabel>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      value={form.currentPrice}
+                      onChange={(e) => setForm({ ...form, currentPrice: e.target.value })}
+                      min="0.01"
+                      step="0.01"
+                      inputMode="decimal"
+                      style={inputBase}
+                    />
+                  </div>
+                  <div>
+                    <FieldLabel>Dividendo/ação (€)</FieldLabel>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      value={form.dividendPerShare}
+                      onChange={(e) => setForm({ ...form, dividendPerShare: e.target.value })}
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      style={inputBase}
+                    />
+                  </div>
+                </div>
+
+                {/* Platform */}
+                <div>
+                  <FieldLabel>Plataforma</FieldLabel>
+                  <input
+                    type="text"
+                    placeholder="Ex: Degiro, Interactive Brokers"
+                    value={form.platform}
+                    onChange={(e) => setForm({ ...form, platform: e.target.value })}
+                    style={inputBase}
+                  />
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
+                    style={{
+                      flex: '1 1 120px',
+                      minHeight: 48,
+                      padding: '12px 16px',
+                      borderRadius: 12,
+                      background: 'transparent',
+                      color: 'var(--text, #fff)',
+                      border: '1px solid var(--border, rgba(255,255,255,0.1))',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    style={{
+                      flex: '1 1 120px',
+                      minHeight: 48,
+                      padding: '12px 16px',
+                      borderRadius: 12,
+                      background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+                      color: '#0B0B0B',
+                      border: 'none',
+                      fontSize: 14,
+                      fontWeight: 800,
+                      cursor: saving ? 'wait' : 'pointer',
+                      opacity: saving ? 0.7 : 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <Plus size={15} /> {saving ? 'A criar…' : 'Adicionar'}
+                  </button>
+                </div>
+              </form>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ============== INVESTMENTS LIST ============== */}
+      {investments.length > 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {investments.map((inv) => (
+            <InvestmentItem
+              key={inv._id}
+              inv={inv}
+              isPremium={isPremium}
+              expandedId={expandedId}
+              setExpandedId={setExpandedId}
+              editingId={editingId}
+              setEditingId={setEditingId}
+              editForm={editForm}
+              setEditForm={setEditForm}
+              deleteConfirmId={deleteConfirmId}
+              setDeleteConfirmId={setDeleteConfirmId}
+              deleting={deleting}
+              saving={saving}
+              onEdit={handleEdit}
+              onSaveEdit={handleSaveEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      ) : (
+        !loading && (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: 'clamp(40px, 8vw, 64px) 20px',
+              border: '1px dashed var(--border, rgba(255,255,255,0.1))',
+              borderRadius: 16,
+              background: 'rgba(255,255,255,0.015)',
+            }}
+          >
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.04)',
+                color: 'var(--text-muted, #6B7280)',
+                margin: '0 auto 16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <BarChart3 size={28} />
+            </div>
+            <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text, #fff)' }}>
+              Sem investimentos ainda
+            </p>
+            <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text-secondary, #9CA3AF)' }}>
+              Acompanha ações, ETFs, PPR, crypto e muito mais.
+            </p>
+          </div>
+        )
+      )}
+    </Shell>
+  );
+}
+
+/* ============================================================ */
+/* Sub-components                                               */
+/* ============================================================ */
+
+function SummaryStat({ label, value, color, large = false }) {
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          color: 'var(--text-muted, #6B7280)',
+          marginBottom: 4,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: large ? 'clamp(18px, 4vw, 22px)' : 'clamp(15px, 3.5vw, 18px)',
+          fontWeight: 800,
+          color,
+          fontVariantNumeric: 'tabular-nums',
+          wordBreak: 'break-word',
+          lineHeight: 1.2,
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function InvestmentItem({
+  inv, isPremium, expandedId, setExpandedId,
+  editingId, setEditingId, editForm, setEditForm,
+  deleteConfirmId, setDeleteConfirmId, deleting, saving,
+  onEdit, onSaveEdit, onDelete,
+}) {
+  const typeCfg = TYPES[inv.type] || TYPES.other;
+  const TypeIcon = typeCfg.icon;
+  const totalDividends = (inv.dividendPerShare || 0) * inv.quantity;
+  const isExpanded = expandedId === inv._id;
+  const isDeleteConfirm = deleteConfirmId === inv._id;
+  const isEditing = editingId === inv._id;
+  const isProfit = inv.profitLoss >= 0;
+  const profitColor = isProfit ? '#10B981' : '#EF4444';
+
+  return (
+    <motion.div
+      layout
+      style={{
+        background: 'var(--card, #1a1a1a)',
+        border: '1px solid var(--border, rgba(255,255,255,0.08))',
+        borderLeft: `4px solid ${profitColor}`,
+        borderRadius: 14,
+        overflow: 'hidden',
+        minWidth: 0,
+      }}
+    >
+      {/* ===== HEADER (clickable) ===== */}
+      <div
+        onClick={() => {
+          if (isEditing) return;
+          setExpandedId(isExpanded ? null : inv._id);
+          setDeleteConfirmId(null);
+        }}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: 'clamp(14px, 2.5vw, 18px)',
+          cursor: isEditing ? 'default' : 'pointer',
+          minWidth: 0,
+        }}
+      >
+        {/* Type icon */}
+        <div
+          style={{
+            width: 42, height: 42,
+            borderRadius: 12,
+            background: hexToRgba(typeCfg.color, 0.18),
+            color: typeCfg.color,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <TypeIcon size={20} />
+        </div>
+
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              minWidth: 0,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 14,
+                fontWeight: 800,
+                color: 'var(--text, #fff)',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%',
+              }}
+            >
+              {inv.name}
+            </span>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                padding: '2px 8px',
+                borderRadius: 999,
+                background: hexToRgba(typeCfg.color, 0.15),
+                color: typeCfg.color,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              {typeCfg.label}
+            </span>
+          </div>
+          <div
+            style={{
+              marginTop: 3,
+              fontSize: 11,
+              color: 'var(--text-secondary, #9CA3AF)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {inv.quantity} × {formatCurrency(inv.avgPrice)}
+            {inv.platform && ` · ${inv.platform}`}
+          </div>
+        </div>
+
+        {/* Values */}
+        <div
+          style={{
+            textAlign: 'right',
+            flexShrink: 0,
+            minWidth: 90,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 14,
+              fontWeight: 800,
+              color: 'var(--text, #fff)',
+              fontVariantNumeric: 'tabular-nums',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {formatCurrency(inv.currentValue)}
+          </div>
+          <div
+            style={{
+              marginTop: 3,
+              fontSize: 12,
+              fontWeight: 700,
+              color: profitColor,
+              fontVariantNumeric: 'tabular-nums',
+              whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 3,
+            }}
+          >
+            {isProfit ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+            {isProfit ? '+' : ''}{formatCurrency(inv.profitLoss)}
+          </div>
+        </div>
+
+        {/* Chevron */}
+        <div style={{ flexShrink: 0, color: 'var(--text-muted, #6B7280)' }}>
+          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </div>
+      </div>
+
+      {/* ===== PROFIT BAR ===== */}
+      {inv.avgPrice > 0 && (
+        <div style={{ padding: '0 clamp(14px, 2.5vw, 18px) 14px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: 11,
+              marginBottom: 6,
+              gap: 8,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span style={{ color: profitColor, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+              {isProfit ? '+' : ''}{(inv.profitLossPercent ?? 0).toFixed(1)}%
+            </span>
+            <span style={{ color: 'var(--text-muted, #6B7280)', fontVariantNumeric: 'tabular-nums' }}>
+              {formatCurrency(inv.avgPrice)} → {formatCurrency(inv.currentPrice)}
+            </span>
+          </div>
+          <div
+            style={{
+              width: '100%',
+              height: 6,
+              borderRadius: 999,
+              background: 'rgba(255,255,255,0.06)',
+              overflow: 'hidden',
+            }}
+          >
+            <motion.div
+              animate={{
+                width: `${Math.min(100, Math.max(5, 50 + (inv.profitLossPercent || 0) * 0.5))}%`,
+              }}
+              transition={{ duration: 0.5 }}
+              style={{
+                height: '100%',
+                background: profitColor,
+                borderRadius: 999,
+              }}
+            />
+          </div>
         </div>
       )}
 
-      {/* Add Investment Button */}
-      <button onClick={() => { if (isPremium) setShowForm(!showForm); }}
-        className="w-full py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+      {/* ===== EXPANDED CONTENT ===== */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            style={{
+              overflow: 'hidden',
+              borderTop: '1px solid var(--border, rgba(255,255,255,0.08))',
+            }}
+          >
+            <div style={{ padding: 'clamp(14px, 2.5vw, 18px)' }}>
+              {!isEditing ? (
+                <ViewMode
+                  inv={inv}
+                  totalDividends={totalDividends}
+                  isPremium={isPremium}
+                  isDeleteConfirm={isDeleteConfirm}
+                  deleting={deleting}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  setDeleteConfirmId={setDeleteConfirmId}
+                />
+              ) : (
+                <EditMode
+                  inv={inv}
+                  editForm={editForm}
+                  setEditForm={setEditForm}
+                  saving={saving}
+                  onSaveEdit={onSaveEdit}
+                  setEditingId={setEditingId}
+                />
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function ViewMode({ inv, totalDividends, isPremium, isDeleteConfirm, deleting, onEdit, onDelete, setDeleteConfirmId }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* Stats grid */}
+      <div
         style={{
-          background: isPremium ? 'rgba(16,185,129,0.1)' : 'rgba(100,116,139,0.1)',
-          color: isPremium ? '#10B981' : 'var(--text-muted)',
-          border: isPremium ? '1px solid rgba(16,185,129,0.3)' : '1px solid var(--border)'
-        }}>
-        {isPremium ? <Plus size={14} /> : <Lock size={14} />}
-        {isPremium ? 'Adicionar Investimento' : 'Premium necessario'}
-      </button>
-
-      {/* Add Investment Form */}
-      {showForm && isPremium && (
-        <form onSubmit={handleCreate} className="glass-card p-5 sm:p-6 space-y-4 animate-fade-in">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-              Novo Investimento
-            </h3>
-            <button type="button" onClick={() => setShowForm(false)}>
-              <X size={16} style={{ color: 'var(--text-muted)' }} />
-            </button>
-          </div>
-
-          <input type="text" placeholder="Nome do ativo (ex: VWCE ETF)" value={form.name}
-            onChange={e => setForm({...form, name: e.target.value})} required
-            className="w-full input-field" />
-
-          {/* Type selector with PPR label */}
-          <div>
-            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
-              Tipo de ativo
-            </label>
-            <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
-              {Object.entries(typeLabels).map(([key, label]) => {
-                const Icon = typeIcons[key];
-                return (
-                  <button key={key} type="button" onClick={() => setForm({...form, type: key})}
-                    className="py-2.5 rounded-xl text-xs font-medium flex flex-col items-center gap-1 relative"
-                    style={{
-                      background: form.type === key ? `${typeColors[key]}15` : 'var(--bg-secondary)',
-                      color: form.type === key ? typeColors[key] : 'var(--text-muted)',
-                      border: form.type === key ? `1px solid ${typeColors[key]}` : '1px solid var(--border)'
-                    }}>
-                    <Icon size={14} />
-                    <span className="text-[11px] sm:text-xs">{label}</span>
-                    {key === 'ppr' && (
-                      <span className="text-[11px] sm:text-xs leading-none" style={{ color: typeColors[key] }}>
-                        Poupanca Reforma
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Quantidade</label>
-              <input type="number" placeholder="0" value={form.quantity}
-                onChange={e => setForm({...form, quantity: e.target.value})} required min="0.01" step="0.01"
-                className="w-full input-field" />
-            </div>
-            <div>
-              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco medio</label>
-              <input type="number" placeholder="0.00 EUR" value={form.avgPrice}
-                onChange={e => setForm({...form, avgPrice: e.target.value})} required min="0.01" step="0.01"
-                className="w-full input-field" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco atual</label>
-              <input type="number" placeholder="0.00 EUR" value={form.currentPrice}
-                onChange={e => setForm({...form, currentPrice: e.target.value})} min="0.01" step="0.01"
-                className="w-full input-field" />
-            </div>
-            <div>
-              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Dividendo/acao</label>
-              <input type="number" placeholder="0.00 EUR" value={form.dividendPerShare}
-                onChange={e => setForm({...form, dividendPerShare: e.target.value})} min="0" step="0.01"
-                className="w-full input-field" />
-            </div>
-          </div>
-
-          <input type="text" placeholder="Plataforma (ex: Degiro, Interactive Brokers)" value={form.platform}
-            onChange={e => setForm({...form, platform: e.target.value})}
-            className="w-full input-field" />
-
-          <div className="flex gap-2">
-            <button type="button" onClick={() => setShowForm(false)}
-              className="flex-1 py-2.5 rounded-xl text-sm"
-              style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-              Cancelar
-            </button>
-            <button type="submit" className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white gold-gradient">
-              Adicionar
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Investments List */}
-      <div className="space-y-3">
-        {investments.map(inv => {
-          const TypeIcon = typeIcons[inv.type] || Building2;
-          const typeColor = typeColors[inv.type] || '#64748B';
-          const totalDividends = (inv.dividendPerShare || 0) * inv.quantity;
-          const isExpanded = expandedId === inv._id;
-          const isDeleteConfirm = deleteConfirmId === inv._id;
-          const isEditing = editingId === inv._id;
-
-          return (
-            <div key={inv._id} className="glass-card p-5 sm:p-6"
-              style={{ borderLeft: `3px solid ${inv.profitLoss >= 0 ? '#10B981' : '#EF4444'}` }}>
-              <div className="flex items-center gap-3"
-                onClick={() => { if (!isEditing) { setExpandedId(isExpanded ? null : inv._id); setDeleteConfirmId(null); } }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: `${typeColor}15` }}>
-                  <TypeIcon size={18} style={{ color: typeColor }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                      {inv.name}
-                    </p>
-                    <span className="text-xs sm:text-xs px-1.5 py-0.5 rounded-full shrink-0"
-                      style={{ background: `${typeColor}15`, color: typeColor }}>
-                      {typeLabels[inv.type] || inv.type}
-                    </span>
-                  </div>
-                  <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    {inv.quantity} x {formatCurrency(inv.avgPrice)} {inv.platform ? `- ${inv.platform}` : ''}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {formatCurrency(inv.currentValue)}
-                  </p>
-                  <p className="text-xs font-semibold"
-                    style={{ color: inv.profitLoss >= 0 ? '#10B981' : '#EF4444' }}>
-                    {inv.profitLoss >= 0 ? '+' : ''}{formatCurrency(inv.profitLoss)}
-                  </p>
-                </div>
-                {isExpanded
-                  ? <ChevronUp size={14} style={{ color: 'var(--text-muted)' }} />
-                  : <ChevronDown size={14} style={{ color: 'var(--text-muted)' }} />
-                }
-              </div>
-
-              {/* Profit/Loss bar */}
-              {inv.avgPrice > 0 && (
-                <div className="mt-3">
-                  <div className="flex justify-between text-xs sm:text-xs mb-1">
-                    <span style={{ color: 'var(--text-secondary)' }}>
-                      {inv.profitLossPercent >= 0 ? '+' : ''}{inv.profitLossPercent?.toFixed(1) || 0}%
-                    </span>
-                    <span style={{ color: 'var(--text-muted)' }}>
-                      {formatCurrency(inv.avgPrice)} {'→'} {formatCurrency(inv.currentPrice)}
-                    </span>
-                  </div>
-                  <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border)' }}>
-                    <div className="h-1.5 rounded-full transition-all"
-                      style={{
-                        width: `${Math.min(100, Math.max(5, 50 + (inv.profitLossPercent || 0) * 0.5))}%`,
-                        background: inv.profitLoss >= 0 ? '#10B981' : '#EF4444'
-                      }} />
-                  </div>
-                </div>
-              )}
-
-              {/* Expanded Details - Edit or View */}
-              {isExpanded && !isEditing && (
-                <div className="mt-3 pt-3 space-y-3 animate-fade-in" style={{ borderTop: '1px solid var(--border)' }}>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                      <span className="text-xs sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Investido</span>
-                      <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        {formatCurrency(inv.quantity * inv.avgPrice)}
-                      </p>
-                    </div>
-                    <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                      <span className="text-xs sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Valor atual</span>
-                      <p className="text-xs font-semibold" style={{ color: '#10B981' }}>
-                        {formatCurrency(inv.currentValue)}
-                      </p>
-                    </div>
-                    {totalDividends > 0 && (
-                      <div className="p-2 rounded-xl" style={{ background: 'rgba(255,215,0,0.1)' }}>
-                        <span className="text-xs sm:text-xs block" style={{ color: 'var(--gold)' }}>
-                          <Percent size={8} className="inline mr-0.5" />Dividendos
-                        </span>
-                        <p className="text-xs font-semibold" style={{ color: 'var(--gold)' }}>
-                          {formatCurrency(totalDividends)}
-                        </p>
-                        <span className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
-                          {formatCurrency(inv.dividendPerShare)}/acao
-                        </span>
-                      </div>
-                    )}
-                    {inv.platform && (
-                      <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                        <span className="text-xs sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Plataforma</span>
-                        <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{inv.platform}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Edit / Delete */}
-                  {isPremium && (
-                    <div className="flex gap-2">
-                      <button onClick={() => handleEdit(inv)}
-                        className="flex-1 py-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1"
-                        style={{ background: 'rgba(59,130,246,0.1)', color: '#3B82F6', border: '1px solid rgba(59,130,246,0.3)' }}>
-                        <Edit3 size={12} /> Editar
-                      </button>
-                      {isDeleteConfirm ? (
-                        <div className="flex gap-1.5 flex-1">
-                          <button onClick={() => setDeleteConfirmId(null)}
-                            className="flex-1 py-2 rounded-xl text-xs"
-                            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-                            Cancelar
-                          </button>
-                          <button onClick={() => handleDelete(inv._id)} disabled={deleting}
-                            className="flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1"
-                            style={{ background: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.4)' }}>
-                            <Trash2 size={12} /> {deleting ? '...' : 'Confirmar'}
-                          </button>
-                        </div>
-                      ) : (
-                        <button onClick={() => setDeleteConfirmId(inv._id)}
-                          className="flex-1 py-2 rounded-xl text-xs flex items-center justify-center gap-1"
-                          style={{ color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
-                          <Trash2 size={12} /> Eliminar
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Edit Form */}
-              {isExpanded && isEditing && (
-                <div className="mt-3 pt-3 space-y-3 animate-fade-in" style={{ borderTop: '1px solid var(--border)' }}>
-                  <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})}
-                    className="w-full input-field" placeholder="Nome" />
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <input type="number" value={editForm.quantity} onChange={e => setEditForm({...editForm, quantity: e.target.value})}
-                      className="w-full input-field" placeholder="Quantidade" min="0.01" step="0.01" />
-                    <input type="number" value={editForm.avgPrice} onChange={e => setEditForm({...editForm, avgPrice: e.target.value})}
-                      className="w-full input-field" placeholder="Preco medio" min="0.01" step="0.01" />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <input type="number" value={editForm.currentPrice} onChange={e => setEditForm({...editForm, currentPrice: e.target.value})}
-                      className="w-full input-field" placeholder="Preco atual" min="0.01" step="0.01" />
-                    <input type="number" value={editForm.dividendPerShare} onChange={e => setEditForm({...editForm, dividendPerShare: e.target.value})}
-                      className="w-full input-field" placeholder="Dividendo/acao" min="0" step="0.01" />
-                  </div>
-
-                  <input type="text" value={editForm.platform} onChange={e => setEditForm({...editForm, platform: e.target.value})}
-                    className="w-full input-field" placeholder="Plataforma" />
-
-                  <div className="flex gap-2">
-                    <button onClick={() => setEditingId(null)}
-                      className="flex-1 py-2.5 rounded-xl text-sm"
-                      style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-                      Cancelar
-                    </button>
-                    <button onClick={() => handleSaveEdit(inv._id)} disabled={saving}
-                      className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white gold-gradient disabled:opacity-50 flex items-center justify-center gap-1">
-                      <Save size={12} /> {saving ? 'A guardar...' : 'Guardar'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+          gap: 10,
+        }}
+      >
+        <MiniStat
+          label="Investido"
+          value={formatCurrency(inv.quantity * inv.avgPrice)}
+          color="var(--text, #fff)"
+        />
+        <MiniStat
+          label="Valor atual"
+          value={formatCurrency(inv.currentValue)}
+          color="#10B981"
+        />
+        {totalDividends > 0 && (
+          <MiniStat
+            label="Dividendos"
+            value={formatCurrency(totalDividends)}
+            color="#D4AF37"
+            background="rgba(212,175,55,0.08)"
+            icon={<Percent size={10} />}
+            hint={`${formatCurrency(inv.dividendPerShare)}/ação`}
+          />
+        )}
+        {inv.platform && (
+          <MiniStat
+            label="Plataforma"
+            value={inv.platform}
+            color="var(--text, #fff)"
+          />
+        )}
       </div>
 
-      {/* Empty State */}
-      {investments.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <BarChart3 size={48} className="mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-            Adiciona o teu primeiro investimento!
-          </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-            Acompanha acoes, ETFs, PPR, crypto e muito mais
-          </p>
+      {/* Actions */}
+      {isPremium && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => onEdit(inv)}
+            style={{
+              flex: '1 1 120px',
+              minHeight: 42,
+              padding: '8px 14px',
+              borderRadius: 10,
+              background: 'rgba(59,130,246,0.12)',
+              color: '#3B82F6',
+              border: '1px solid rgba(59,130,246,0.3)',
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+            }}
+          >
+            <Edit3 size={13} /> Editar
+          </button>
+
+          {isDeleteConfirm ? (
+            <div style={{ display: 'flex', gap: 6, flex: '1 1 200px' }}>
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmId(null)}
+                style={{
+                  flex: 1,
+                  minHeight: 42,
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  background: 'transparent',
+                  color: 'var(--text, #fff)',
+                  border: '1px solid var(--border, rgba(255,255,255,0.1))',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(inv._id)}
+                disabled={deleting}
+                style={{
+                  flex: 1,
+                  minHeight: 42,
+                  padding: '8px 12px',
+                  borderRadius: 10,
+                  background: 'linear-gradient(135deg, #EF4444, #DC2626)',
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: deleting ? 'wait' : 'pointer',
+                  opacity: deleting ? 0.7 : 1,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                }}
+              >
+                <Trash2 size={13} /> {deleting ? '…' : 'Confirmar'}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setDeleteConfirmId(inv._id)}
+              style={{
+                flex: '1 1 120px',
+                minHeight: 42,
+                padding: '8px 14px',
+                borderRadius: 10,
+                background: 'transparent',
+                color: 'var(--text-muted, #6B7280)',
+                border: '1px solid var(--border, rgba(255,255,255,0.1))',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+              }}
+            >
+              <Trash2 size={13} /> Eliminar
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function EditMode({ inv, editForm, setEditForm, saving, onSaveEdit, setEditingId }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div>
+        <FieldLabel>Nome</FieldLabel>
+        <input
+          type="text"
+          value={editForm.name}
+          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+          style={inputBase}
+          placeholder="Nome do ativo"
+        />
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: 10,
+        }}
+      >
+        <div>
+          <FieldLabel>Quantidade</FieldLabel>
+          <input
+            type="number"
+            value={editForm.quantity}
+            onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })}
+            style={inputBase}
+            min="0.01"
+            step="0.01"
+            inputMode="decimal"
+          />
+        </div>
+        <div>
+          <FieldLabel>Preço médio</FieldLabel>
+          <input
+            type="number"
+            value={editForm.avgPrice}
+            onChange={(e) => setEditForm({ ...editForm, avgPrice: e.target.value })}
+            style={inputBase}
+            min="0.01"
+            step="0.01"
+            inputMode="decimal"
+          />
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: 10,
+        }}
+      >
+        <div>
+          <FieldLabel>Preço atual</FieldLabel>
+          <input
+            type="number"
+            value={editForm.currentPrice}
+            onChange={(e) => setEditForm({ ...editForm, currentPrice: e.target.value })}
+            style={inputBase}
+            min="0.01"
+            step="0.01"
+            inputMode="decimal"
+          />
+        </div>
+        <div>
+          <FieldLabel>Dividendo/ação</FieldLabel>
+          <input
+            type="number"
+            value={editForm.dividendPerShare}
+            onChange={(e) => setEditForm({ ...editForm, dividendPerShare: e.target.value })}
+            style={inputBase}
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+          />
+        </div>
+      </div>
+
+      <div>
+        <FieldLabel>Plataforma</FieldLabel>
+        <input
+          type="text"
+          value={editForm.platform}
+          onChange={(e) => setEditForm({ ...editForm, platform: e.target.value })}
+          style={inputBase}
+          placeholder="Plataforma"
+        />
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+        <button
+          type="button"
+          onClick={() => setEditingId(null)}
+          style={{
+            flex: '1 1 120px',
+            minHeight: 44,
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: 'transparent',
+            color: 'var(--text, #fff)',
+            border: '1px solid var(--border, rgba(255,255,255,0.1))',
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          onClick={() => onSaveEdit(inv._id)}
+          disabled={saving}
+          style={{
+            flex: '1 1 120px',
+            minHeight: 44,
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+            color: '#0B0B0B',
+            border: 'none',
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: saving ? 'wait' : 'pointer',
+            opacity: saving ? 0.7 : 1,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+          }}
+        >
+          <Save size={13} /> {saving ? 'A guardar…' : 'Guardar'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MiniStat({ label, value, color, background, icon, hint }) {
+  return (
+    <div
+      style={{
+        padding: 10,
+        borderRadius: 10,
+        background: background || 'rgba(255,255,255,0.04)',
+        border: '1px solid var(--border, rgba(255,255,255,0.06))',
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          color: 'var(--text-muted, #6B7280)',
+          marginBottom: 4,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+        }}
+      >
+        {icon} {label}
+      </div>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 800,
+          color,
+          fontVariantNumeric: 'tabular-nums',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {value}
+      </div>
+      {hint && (
+        <div
+          style={{
+            marginTop: 2,
+            fontSize: 10,
+            color: 'var(--text-muted, #6B7280)',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {hint}
         </div>
       )}
     </div>

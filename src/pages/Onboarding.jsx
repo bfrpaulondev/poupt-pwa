@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
 import { themes } from '../themes';
 import { api } from '../services/api';
+import { ArrowLeft, Check } from 'lucide-react';
 
 const avatars = ['👩', '👨', '🧑', '👩‍🦰', '👨‍🦱', '👩‍🦳', '🧔', '👱‍♀️'];
 
@@ -19,370 +20,993 @@ export default function Onboarding() {
   } = useStore();
 
   const theme = themes[currentTheme] || themes.darkGold;
-  const [saving, setSaving] = React.useState(false);
+  const [saving, setSaving] = useState(false);
 
   const steps = 4;
   const progress = ((onboardingStep + 1) / steps) * 100;
+  const isLastStep = onboardingStep === steps - 1;
 
   const handleNext = async () => {
     if (onboardingStep < steps - 1) {
       setOnboardingStep(onboardingStep + 1);
-    } else {
-      // Complete onboarding via API
-      setSaving(true);
-      try {
-        // Note: coachMode 'sargento'/'amigavel' maps to coachPersonality 'disciplinado'/'amigavel' used throughout the app
-        const coachName = onboardingData.coachMode === 'sargento' ? 'Sargento' : 'Amigo';
-        const coachPersonality = onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel';
-        const defaultJars = useStore.getState().defaultJarPercentages;
-        const onboardingPayload = {
-          name: onboardingData.name,
-          income: onboardingData.income,
-          hasDebts: onboardingData.hasDebts,
-          coachName,
-          coachPersonality,
-          coachGender: 'm',
-          avatar: onboardingData.avatar,
-          jarPercentages: defaultJars,
-          financialMode: onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade',
-          onboardingComplete: true
-        };
-        const res = await api.completeOnboarding(onboardingPayload);
-        // Use the API response user data for consistency
-        const apiUser = res.data?.user;
-        const updatedData = {
-          onboardingComplete: true,
-          name: apiUser?.name || onboardingData.name,
-          income: apiUser?.income || onboardingData.income,
-          coachName: apiUser?.coachName || coachName,
-          coachPersonality: apiUser?.coachPersonality || coachPersonality,
-          jarPercentages: apiUser?.jarPercentages || defaultJars,
-          financialMode: apiUser?.financialMode || (onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade'),
-          avatar: apiUser?.avatar || onboardingData.avatar,
-          currency: apiUser?.currency || 'EUR',
-          theme: apiUser?.theme || 'darkGold'
-        };
-        updateUser(updatedData);
-      } catch (err) {
-        console.error('Onboarding save error:', err);
-        // Still proceed - data saved locally
-        updateUser({ onboardingComplete: true, name: onboardingData.name });
-      } finally {
-        setSaving(false);
-      }
-      setOnboardingComplete(true);
-      setScreen('dashboard');
+      return;
     }
+
+    setSaving(true);
+    try {
+      const coachName = onboardingData.coachMode === 'sargento' ? 'Sargento' : 'Amigo';
+      const coachPersonality = onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel';
+      const defaultJars = useStore.getState().defaultJarPercentages;
+
+      const onboardingPayload = {
+        name: onboardingData.name,
+        income: onboardingData.income,
+        hasDebts: onboardingData.hasDebts,
+        coachName,
+        coachPersonality,
+        coachGender: 'm',
+        avatar: onboardingData.avatar,
+        jarPercentages: defaultJars,
+        financialMode: onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade',
+        onboardingComplete: true,
+      };
+
+      const res = await api.completeOnboarding(onboardingPayload);
+      const apiUser = res.data?.user;
+
+      updateUser({
+        onboardingComplete: true,
+        name: apiUser?.name || onboardingData.name,
+        income: apiUser?.income || onboardingData.income,
+        coachName: apiUser?.coachName || coachName,
+        coachPersonality: apiUser?.coachPersonality || coachPersonality,
+        jarPercentages: apiUser?.jarPercentages || defaultJars,
+        financialMode:
+          apiUser?.financialMode ||
+          (onboardingData.hasDebts ? 'sobrevivencia' : 'estabilidade'),
+        avatar: apiUser?.avatar || onboardingData.avatar,
+        currency: apiUser?.currency || 'EUR',
+        theme: apiUser?.theme || 'darkGold',
+      });
+    } catch (err) {
+      console.error('Onboarding save error:', err);
+      updateUser({ onboardingComplete: true, name: onboardingData.name });
+    } finally {
+      setSaving(false);
+    }
+
+    setOnboardingComplete(true);
+    setScreen('dashboard');
   };
 
   const handlePrev = () => {
-    if (onboardingStep > 0) {
-      setOnboardingStep(onboardingStep - 1);
-    }
+    if (onboardingStep > 0) setOnboardingStep(onboardingStep - 1);
+  };
+
+  // Validação por passo
+  const canProceed = () => {
+    if (saving) return false;
+    if (onboardingStep === 0) return onboardingData.name?.trim().length > 0;
+    if (onboardingStep === 1) return onboardingData.income > 0;
+    if (onboardingStep === 2) return typeof onboardingData.hasDebts === 'boolean';
+    if (onboardingStep === 3) return !!onboardingData.coachMode;
+    return true;
   };
 
   return (
     <div
-      className="flex flex-col min-h-screen px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8"
-      style={{ background: theme.background }}
+      style={{
+        width: '100%',
+        minHeight: '100dvh',
+        background: theme.background,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+      }}
     >
-      {/* Progress bar */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium" style={{ color: theme.textMuted }}>
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 560,
+          minHeight: '100dvh',
+          margin: '0 auto',
+          padding: '20px 20px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        {/* Header: voltar + step */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            marginBottom: 18,
+          }}
+        >
+          {onboardingStep > 0 ? (
+            <button
+              type="button"
+              onClick={handlePrev}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: 13,
+                fontWeight: 700,
+                color: theme.primary,
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '8px 4px',
+                minHeight: 44,
+              }}
+            >
+              <ArrowLeft size={16} />
+              Anterior
+            </button>
+          ) : (
+            <span style={{ minHeight: 44 }} />
+          )}
+
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: theme.textMuted,
+              padding: '6px 12px',
+              borderRadius: 999,
+              background: theme.surface,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
             Passo {onboardingStep + 1} de {steps}
           </span>
-          {onboardingStep > 0 && (
-            <button
-              onClick={handlePrev}
-              className="text-xs font-medium"
-              style={{ color: theme.primary }}
-            >
-              ← Anterior
-            </button>
-          )}
         </div>
+
+        {/* Progress bar */}
         <div
-          className="w-full h-2 rounded-full overflow-hidden"
-          style={{ background: theme.surface }}
+          style={{
+            width: '100%',
+            height: 8,
+            borderRadius: 999,
+            background: theme.surface,
+            overflow: 'hidden',
+            marginBottom: 28,
+          }}
         >
           <motion.div
-            className="h-full rounded-full"
             style={{
+              height: '100%',
+              borderRadius: 999,
               background: `linear-gradient(90deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+              boxShadow: `0 0 12px ${theme.primary}50`,
             }}
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
           />
         </div>
-      </div>
 
-      {/* Steps */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={onboardingStep}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -30 }}
-          transition={{ duration: 0.25 }}
-          className="flex-1"
-        >
-          {onboardingStep === 0 && <Step1Name theme={theme} />}
-          {onboardingStep === 1 && <Step2Income theme={theme} />}
-          {onboardingStep === 2 && <Step2Debts theme={theme} />}
-          {onboardingStep === 3 && <Step4Coach theme={theme} />}
-        </motion.div>
-      </AnimatePresence>
+        {/* Steps */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={onboardingStep}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+            >
+              {onboardingStep === 0 && <Step1Name theme={theme} />}
+              {onboardingStep === 1 && <Step2Income theme={theme} />}
+              {onboardingStep === 2 && <Step3Debts theme={theme} />}
+              {onboardingStep === 3 && <Step4Coach theme={theme} />}
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
-      {/* Next button */}
-      <div className="mt-8">
-        <button
-          onClick={handleNext}
-          disabled={saving || (onboardingStep === 0 && !onboardingData.name.trim())}
-          className="w-full py-5 sm:py-6 rounded-2xl font-bold text-base sm:text-lg transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-          style={{
-            background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-            color: theme.textInverse,
-            boxShadow: `0 8px 24px ${theme.primary}40`,
-          }}
-        >
-          {saving ? 'A guardar...' : onboardingStep === steps - 1 ? '🎉 Comecar!' : 'Proximo →'}
-        </button>
+        {/* Next button */}
+        <div style={{ marginTop: 28 }}>
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={!canProceed()}
+            style={{
+              width: '100%',
+              minHeight: 58,
+              borderRadius: 16,
+              fontWeight: 800,
+              fontSize: 15,
+              border: 'none',
+              cursor: canProceed() ? 'pointer' : 'not-allowed',
+              opacity: canProceed() ? 1 : 0.5,
+              background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+              color: theme.textInverse,
+              boxShadow: `0 10px 28px ${theme.primary}45`,
+              transition: 'transform 0.15s, filter 0.15s',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+            }}
+            onMouseDown={(e) => {
+              if (canProceed()) e.currentTarget.style.transform = 'scale(0.98)';
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            {saving
+              ? 'A guardar...'
+              : isLastStep
+              ? '🎉 Começar a poupar'
+              : 'Próximo →'}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
+/* ============================================================
+   STEP 1 — Nome + Avatar
+   ============================================================ */
 function Step1Name({ theme }) {
   const { onboardingData, setOnboardingData } = useStore();
 
   return (
-    <div className="flex flex-col items-center pt-10 sm:pt-12">
-      <div className="text-5xl mb-4">👋</div>
-      <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-center" style={{ color: theme.text }}>
-        Como te chamas?
-      </h2>
-      <p className="text-sm sm:text-base mb-6 text-center" style={{ color: theme.textMuted }}>
-        Vamos personalizar a tua experiencia
-      </p>
+    <div style={{ paddingTop: 'clamp(16px, 4vw, 32px)' }}>
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ fontSize: 'clamp(44px, 11vw, 56px)', lineHeight: 1, marginBottom: 10 }}>
+          👋
+        </div>
+        <h2
+          style={{
+            fontSize: 'clamp(22px, 5.5vw, 28px)',
+            fontWeight: 800,
+            color: theme.text,
+            margin: '0 0 8px',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Como te chamas?
+        </h2>
+        <p style={{ fontSize: 14, color: theme.textMuted, margin: 0 }}>
+          Vamos personalizar a tua experiência
+        </p>
+      </div>
 
       {/* Avatar picker */}
-      <div className="flex flex-wrap gap-3 sm:gap-4 mb-6 justify-center">
-        {avatars.map((a) => (
-          <button
-            key={a}
-            onClick={() => setOnboardingData({ avatar: a })}
-            className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center text-2xl transition-all duration-200"
-            style={{
-              background: onboardingData.avatar === a ? `${theme.primary}30` : theme.surface,
-              border: onboardingData.avatar === a ? `2px solid ${theme.primary}` : `2px solid ${theme.border}`,
-              transform: onboardingData.avatar === a ? 'scale(1.1)' : 'scale(1)',
-            }}
-          >
-            {a}
-          </button>
-        ))}
+      <div style={{ marginBottom: 24 }}>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: theme.textMuted,
+            margin: '0 0 12px',
+            textAlign: 'center',
+          }}
+        >
+          Escolhe um avatar
+        </p>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(56px, 1fr))',
+            gap: 10,
+            maxWidth: 420,
+            margin: '0 auto',
+          }}
+        >
+          {avatars.map((a) => {
+            const active = onboardingData.avatar === a;
+            return (
+              <button
+                key={a}
+                type="button"
+                onClick={() => setOnboardingData({ avatar: a })}
+                style={{
+                  aspectRatio: '1 / 1',
+                  minHeight: 56,
+                  borderRadius: 14,
+                  fontSize: 26,
+                  display: 'grid',
+                  placeItems: 'center',
+                  cursor: 'pointer',
+                  background: active ? `${theme.primary}25` : theme.surface,
+                  border: `2px solid ${active ? theme.primary : theme.border}`,
+                  transform: active ? 'scale(1.05)' : 'scale(1)',
+                  transition: 'all 0.18s ease',
+                  position: 'relative',
+                }}
+              >
+                {a}
+                {active && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: -4,
+                      right: -4,
+                      width: 18,
+                      height: 18,
+                      borderRadius: 999,
+                      background: theme.primary,
+                      color: theme.textInverse,
+                      display: 'grid',
+                      placeItems: 'center',
+                      border: `2px solid ${theme.background}`,
+                    }}
+                  >
+                    <Check size={10} strokeWidth={3} />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Name input */}
-      <input
-        type="text"
-        value={onboardingData.name}
-        onChange={(e) => setOnboardingData({ name: e.target.value })}
-        placeholder="O teu nome..."
-        className="w-full px-4 py-3 sm:py-4 rounded-xl text-base font-medium outline-none transition-all duration-200"
-        style={{
-          background: theme.surface,
-          color: theme.text,
-          border: `1.5px solid ${theme.border}`,
-        }}
-        autoFocus
-      />
+      <div>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: theme.textMuted,
+            margin: '0 0 8px',
+          }}
+        >
+          O teu nome
+        </p>
+        <input
+          type="text"
+          value={onboardingData.name || ''}
+          onChange={(e) => setOnboardingData({ name: e.target.value })}
+          placeholder="Ex: Maria"
+          autoComplete="given-name"
+          style={{
+            width: '100%',
+            minHeight: 56,
+            padding: '0 16px',
+            borderRadius: 14,
+            fontSize: 16,
+            fontWeight: 600,
+            outline: 'none',
+            background: theme.surface,
+            color: theme.text,
+            border: `1.5px solid ${theme.border}`,
+            transition: 'border-color 0.15s, box-shadow 0.15s',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = theme.primary;
+            e.currentTarget.style.boxShadow = `0 0 0 3px ${theme.primary}25`;
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = theme.border;
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        />
+      </div>
     </div>
   );
 }
 
+/* ============================================================
+   STEP 2 — Rendimento
+   ============================================================ */
 function Step2Income({ theme }) {
   const { onboardingData, setOnboardingData } = useStore();
+  const income = Number(onboardingData.income) || 0;
+
+  const quickValues = [800, 1200, 1800, 2500, 3500, 5000];
 
   return (
-    <div className="flex flex-col items-center pt-10 sm:pt-12">
-      <div className="text-5xl mb-4">💰</div>
-      <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-center" style={{ color: theme.text }}>
-        Qual o teu rendimento?
-      </h2>
-      <p className="text-sm sm:text-base mb-6 text-center" style={{ color: theme.textMuted }}>
-        Mensal, apos impostos
-      </p>
+    <div style={{ paddingTop: 'clamp(16px, 4vw, 32px)' }}>
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ fontSize: 'clamp(44px, 11vw, 56px)', lineHeight: 1, marginBottom: 10 }}>
+          💰
+        </div>
+        <h2
+          style={{
+            fontSize: 'clamp(22px, 5.5vw, 28px)',
+            fontWeight: 800,
+            color: theme.text,
+            margin: '0 0 8px',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Qual o teu rendimento?
+        </h2>
+        <p style={{ fontSize: 14, color: theme.textMuted, margin: 0 }}>
+          Mensal, após impostos
+        </p>
+      </div>
 
+      {/* Display value */}
       <div
-        className="text-4xl sm:text-5xl font-extrabold mb-6"
-        style={{ color: theme.primary }}
-      >
-        €{onboardingData.income}
-      </div>
-
-      <input
-        type="range"
-        min={500}
-        max={10000}
-        step={50}
-        value={onboardingData.income}
-        onChange={(e) => setOnboardingData({ income: parseInt(e.target.value) })}
-        className="w-full mb-4"
-        style={{ accentColor: theme.primary }}
-      />
-
-      <div className="flex justify-between w-full text-xs" style={{ color: theme.textMuted }}>
-        <span>€500</span>
-        <span>€10.000</span>
-      </div>
-
-      <input
-        type="number"
-        min={0}
-        max={100000}
-        value={onboardingData.income}
-        onChange={(e) => setOnboardingData({ income: Math.max(0, parseInt(e.target.value) || 0) })}
-        className="w-full px-4 py-3 rounded-xl text-base font-medium outline-none mt-4"
         style={{
-          background: theme.surface,
-          color: theme.text,
-          border: `1.5px solid ${theme.border}`,
+          textAlign: 'center',
+          padding: '24px 16px',
+          borderRadius: 20,
+          background: `linear-gradient(135deg, ${theme.primary}18, ${theme.primary}06)`,
+          border: `1.5px solid ${theme.primary}33`,
+          marginBottom: 24,
         }}
-      />
+      >
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: theme.textMuted,
+            margin: '0 0 6px',
+          }}
+        >
+          Rendimento mensal
+        </p>
+        <div
+          style={{
+            fontSize: 'clamp(36px, 9vw, 52px)',
+            fontWeight: 800,
+            color: theme.primary,
+            letterSpacing: '-0.04em',
+            lineHeight: 1,
+            wordBreak: 'break-word',
+          }}
+        >
+          €{income.toLocaleString('pt-PT')}
+        </div>
+      </div>
+
+      {/* Slider */}
+      <div style={{ marginBottom: 20 }}>
+        <input
+          type="range"
+          min={0}
+          max={10000}
+          step={50}
+          value={income}
+          onChange={(e) =>
+            setOnboardingData({ income: parseInt(e.target.value, 10) })
+          }
+          style={{
+            width: '100%',
+            accentColor: theme.primary,
+            cursor: 'pointer',
+            height: 32,
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            fontSize: 11,
+            fontWeight: 600,
+            color: theme.textMuted,
+            marginTop: 4,
+          }}
+        >
+          <span>€0</span>
+          <span>€10.000</span>
+        </div>
+      </div>
+
+      {/* Quick chips */}
+      <div style={{ marginBottom: 20 }}>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: theme.textMuted,
+            margin: '0 0 10px',
+          }}
+        >
+          Valores rápidos
+        </p>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+            gap: 8,
+          }}
+        >
+          {quickValues.map((v) => {
+            const active = income === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setOnboardingData({ income: v })}
+                style={{
+                  minHeight: 44,
+                  padding: '8px 12px',
+                  borderRadius: 12,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  background: active ? `${theme.primary}25` : theme.surface,
+                  color: active ? theme.primary : theme.text,
+                  border: `1.5px solid ${active ? theme.primary : theme.border}`,
+                  transition: 'all 0.15s',
+                }}
+              >
+                €{v.toLocaleString('pt-PT')}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Manual input */}
+      <div>
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: theme.textMuted,
+            margin: '0 0 8px',
+          }}
+        >
+          Ou introduz manualmente
+        </p>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '0 16px',
+            minHeight: 56,
+            borderRadius: 14,
+            background: theme.surface,
+            border: `1.5px solid ${theme.border}`,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: theme.primary,
+            }}
+          >
+            €
+          </span>
+          <input
+            type="number"
+            min={0}
+            max={100000}
+            value={income || ''}
+            onChange={(e) =>
+              setOnboardingData({
+                income: Math.max(0, parseInt(e.target.value, 10) || 0),
+              })
+            }
+            placeholder="0"
+            inputMode="numeric"
+            style={{
+              flex: 1,
+              minWidth: 0,
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              fontSize: 16,
+              fontWeight: 700,
+              color: theme.text,
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
-function Step2Debts({ theme }) {
+/* ============================================================
+   STEP 3 — Dívidas
+   ============================================================ */
+function Step3Debts({ theme }) {
   const { onboardingData, setOnboardingData } = useStore();
+  const hasDebts = onboardingData.hasDebts;
 
   return (
-    <div className="flex flex-col items-center pt-10 sm:pt-12">
-      <div className="text-5xl mb-4">💳</div>
-      <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-center" style={{ color: theme.text }}>
-        Tens dividas?
-      </h2>
-      <p className="text-sm sm:text-base mb-6 text-center" style={{ color: theme.textMuted }}>
-        Sem julgamentos. Vamos resolver isso.
-      </p>
-
-      <div className="flex gap-4 sm:gap-6 mb-6">
-        <button
-          onClick={() => setOnboardingData({ hasDebts: true })}
-          className="px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-200"
+    <div style={{ paddingTop: 'clamp(16px, 4vw, 32px)' }}>
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ fontSize: 'clamp(44px, 11vw, 56px)', lineHeight: 1, marginBottom: 10 }}>
+          💳
+        </div>
+        <h2
           style={{
-            background: onboardingData.hasDebts ? `${theme.primary}30` : theme.surface,
-            color: onboardingData.hasDebts ? theme.primary : theme.textMuted,
-            border: `1.5px solid ${onboardingData.hasDebts ? theme.primary : theme.border}`,
+            fontSize: 'clamp(22px, 5.5vw, 28px)',
+            fontWeight: 800,
+            color: theme.text,
+            margin: '0 0 8px',
+            letterSpacing: '-0.02em',
           }}
         >
-          😔 Sim
-        </button>
-        <button
-          onClick={() => setOnboardingData({ hasDebts: false })}
-          className="px-8 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base transition-all duration-200"
+          Tens dívidas?
+        </h2>
+        <p
           style={{
-            background: !onboardingData.hasDebts ? `${theme.primary}30` : theme.surface,
-            color: !onboardingData.hasDebts ? theme.primary : theme.textMuted,
-            border: `1.5px solid ${!onboardingData.hasDebts ? theme.primary : theme.border}`,
+            fontSize: 14,
+            color: theme.textMuted,
+            margin: 0,
+            maxWidth: 360,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            lineHeight: 1.5,
           }}
         >
-          😊 Nao
-        </button>
+          Sem julgamentos. Vamos resolver isso juntos.
+        </p>
       </div>
 
-      {onboardingData.hasDebts && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full glass rounded-xl p-5 sm:p-6"
-        >
-          <p className="text-xs font-medium mb-3" style={{ color: theme.textMuted }}>
-            Nao te preocupes - o PoupPT vai ajudar-te a eliminar cada uma delas com o metodo Snowball.
-          </p>
-          <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: `${theme.primary}15` }}>
-            <span>❄️</span>
-            <span className="text-xs sm:text-sm font-medium" style={{ color: theme.primary }}>
-              Metodo Snowball: pagar a menor divida primeiro
-            </span>
-          </div>
-        </motion.div>
-      )}
+      {/* Opções */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: 12,
+          marginBottom: 20,
+        }}
+      >
+        <DebtOption
+          theme={theme}
+          active={hasDebts === true}
+          icon="😔"
+          label="Sim, tenho"
+          color="#EF4444"
+          onClick={() => setOnboardingData({ hasDebts: true })}
+        />
+        <DebtOption
+          theme={theme}
+          active={hasDebts === false}
+          icon="😊"
+          label="Não tenho"
+          color="#10B981"
+          onClick={() => setOnboardingData({ hasDebts: false })}
+        />
+      </div>
+
+      {/* Info card */}
+      <AnimatePresence mode="wait">
+        {hasDebts === true && (
+          <motion.div
+            key="snowball"
+            initial={{ opacity: 0, y: 10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              style={{
+                padding: 18,
+                borderRadius: 16,
+                background: theme.surface,
+                border: `1.5px solid ${theme.border}`,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 13,
+                  color: theme.textMuted,
+                  margin: '0 0 12px',
+                  lineHeight: 1.55,
+                }}
+              >
+                Não te preocupes — o PoupPT vai ajudar-te a eliminar cada uma com o método Snowball.
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 12px',
+                  borderRadius: 12,
+                  background: `${theme.primary}15`,
+                  border: `1px solid ${theme.primary}30`,
+                }}
+              >
+                <span style={{ fontSize: 18 }}>❄️</span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: theme.primary,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Snowball: pagar a menor dívida primeiro
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {hasDebts === false && (
+          <motion.div
+            key="celebrate"
+            initial={{ opacity: 0, y: 10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div
+              style={{
+                padding: 18,
+                borderRadius: 16,
+                background: theme.surface,
+                border: `1.5px solid ${theme.border}`,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 12px',
+                  borderRadius: 12,
+                  background: 'rgba(16, 185, 129, 0.12)',
+                  border: '1px solid rgba(16, 185, 129, 0.28)',
+                }}
+              >
+                <span style={{ fontSize: 18 }}>🎯</span>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#10B981',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Excelente! Vamos focar em poupança e investimento.
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
+function DebtOption({ theme, active, icon, label, color, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: '20px 12px',
+        minHeight: 110,
+        borderRadius: 18,
+        cursor: 'pointer',
+        background: active ? `${color}15` : theme.surface,
+        border: `2px solid ${active ? color : theme.border}`,
+        transition: 'all 0.18s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        transform: active ? 'scale(1.02)' : 'scale(1)',
+      }}
+    >
+      <span style={{ fontSize: 32, lineHeight: 1 }}>{icon}</span>
+      <span
+        style={{
+          fontSize: 14,
+          fontWeight: 800,
+          color: active ? color : theme.text,
+        }}
+      >
+        {label}
+      </span>
+    </button>
+  );
+}
+
+/* ============================================================
+   STEP 4 — Coach
+   ============================================================ */
 function Step4Coach({ theme }) {
   const { onboardingData, setOnboardingData } = useStore();
+  const mode = onboardingData.coachMode;
 
   return (
-    <div className="flex flex-col items-center pt-10 sm:pt-12">
-      <div className="text-5xl mb-4">🤖</div>
-      <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-center" style={{ color: theme.text }}>
-        Escolhe o teu treinador
-      </h2>
-      <p className="text-sm sm:text-base mb-6 text-center" style={{ color: theme.textMuted }}>
-        Podes mudar a qualquer momento
-      </p>
+    <div style={{ paddingTop: 'clamp(16px, 4vw, 32px)' }}>
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <div style={{ fontSize: 'clamp(44px, 11vw, 56px)', lineHeight: 1, marginBottom: 10 }}>
+          🤖
+        </div>
+        <h2
+          style={{
+            fontSize: 'clamp(22px, 5.5vw, 28px)',
+            fontWeight: 800,
+            color: theme.text,
+            margin: '0 0 8px',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Escolhe o teu treinador
+        </h2>
+        <p style={{ fontSize: 14, color: theme.textMuted, margin: 0 }}>
+          Podes mudar a qualquer momento
+        </p>
+      </div>
 
-      <div className="flex gap-3 sm:gap-4 w-full">
-        <button
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+          gap: 12,
+          marginBottom: 24,
+        }}
+      >
+        <CoachCard
+          theme={theme}
+          active={mode === 'sargento'}
+          icon="💪"
+          name="Sargento"
+          description="Disciplina e resultados sem desculpas."
+          badge="Militar"
+          color="#EF4444"
           onClick={() => setOnboardingData({ coachMode: 'sargento' })}
-          className="flex-1 p-6 sm:p-7 rounded-2xl transition-all duration-200"
-          style={{
-            background: onboardingData.coachMode === 'sargento' ? '#FF444420' : theme.surface,
-            border: `2px solid ${onboardingData.coachMode === 'sargento' ? '#FF4444' : theme.border}`,
-          }}
-        >
-          <div className="text-4xl mb-2">💪</div>
-          <h3 className="font-bold text-base mb-1" style={{ color: '#FF6B6B' }}>
-            Sargento
-          </h3>
-          <p className="text-xs sm:text-sm" style={{ color: theme.textMuted }}>
-            Disciplina e resultados!
-          </p>
-          <div className="mt-2 text-xs sm:text-sm px-2 sm:px-2.5 py-1 rounded-full inline-block" style={{ background: '#FF444420', color: '#FF6B6B' }}>
-            Militar
-          </div>
-        </button>
-
-        <button
+        />
+        <CoachCard
+          theme={theme}
+          active={mode === 'amigavel'}
+          icon="🤗"
+          name="Amigável"
+          description="Apoio, compreensão e motivação."
+          badge="Amigo"
+          color="#10B981"
           onClick={() => setOnboardingData({ coachMode: 'amigavel' })}
-          className="flex-1 p-6 sm:p-7 rounded-2xl transition-all duration-200"
-          style={{
-            background: onboardingData.coachMode === 'amigavel' ? '#4CAF5020' : theme.surface,
-            border: `2px solid ${onboardingData.coachMode === 'amigavel' ? '#4CAF50' : theme.border}`,
-          }}
-        >
-          <div className="text-4xl mb-2">🤗</div>
-          <h3 className="font-bold text-base mb-1" style={{ color: '#4CAF50' }}>
-            Amigavel
-          </h3>
-          <p className="text-xs sm:text-sm" style={{ color: theme.textMuted }}>
-            Apoio e compreensao!
-          </p>
-          <div className="mt-2 text-xs sm:text-sm px-2 sm:px-2.5 py-1 rounded-full inline-block" style={{ background: '#4CAF5020', color: '#4CAF50' }}>
-            Amigo
-          </div>
-        </button>
+        />
       </div>
 
       {/* Welcome preview */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="w-full mt-8 glass rounded-xl p-6 sm:p-7"
-      >
-        <p className="text-xs sm:text-sm" style={{ color: theme.textMuted }}>
-          {onboardingData.coachMode === 'sargento'
-            ? '💬 "Bem-vindo(a), recruta! A partir de hoje, as tuas financas sao a tua missao. Sem desculpas!"'
-            : '💬 "Ola! Estou aqui para te ajudar. Vamos juntos construir um futuro financeiro melhor!"'}
-        </p>
-      </motion.div>
+      <AnimatePresence mode="wait">
+        {mode && (
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+          >
+            <div
+              style={{
+                padding: 18,
+                borderRadius: 16,
+                background: theme.surface,
+                border: `1.5px solid ${theme.border}`,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: theme.textMuted,
+                  margin: '0 0 8px',
+                }}
+              >
+                Mensagem de boas-vindas
+              </p>
+              <p
+                style={{
+                  fontSize: 13,
+                  color: theme.text,
+                  margin: 0,
+                  lineHeight: 1.6,
+                  fontStyle: 'italic',
+                }}
+              >
+                {mode === 'sargento'
+                  ? '💬 "Bem-vindo(a), recruta! A partir de hoje, as tuas finanças são a tua missão. Sem desculpas!"'
+                  : '💬 "Olá! Estou aqui para te ajudar. Vamos juntos construir um futuro financeiro melhor!"'}
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function CoachCard({ theme, active, icon, name, description, badge, color, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: '20px 16px',
+        minHeight: 180,
+        borderRadius: 20,
+        cursor: 'pointer',
+        background: active ? `${color}12` : theme.surface,
+        border: `2px solid ${active ? color : theme.border}`,
+        transition: 'all 0.18s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        gap: 8,
+        transform: active ? 'scale(1.02)' : 'scale(1)',
+        position: 'relative',
+      }}
+    >
+      {active && (
+        <span
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            width: 22,
+            height: 22,
+            borderRadius: 999,
+            background: color,
+            color: 'white',
+            display: 'grid',
+            placeItems: 'center',
+          }}
+        >
+          <Check size={12} strokeWidth={3} />
+        </span>
+      )}
+      <span style={{ fontSize: 38, lineHeight: 1 }}>{icon}</span>
+      <h3
+        style={{
+          fontSize: 16,
+          fontWeight: 800,
+          color: active ? color : theme.text,
+          margin: 0,
+        }}
+      >
+        {name}
+      </h3>
+      <p
+        style={{
+          fontSize: 12,
+          color: theme.textMuted,
+          margin: 0,
+          lineHeight: 1.45,
+          maxWidth: 200,
+        }}
+      >
+        {description}
+      </p>
+      <span
+        style={{
+          marginTop: 4,
+          fontSize: 11,
+          fontWeight: 800,
+          padding: '4px 10px',
+          borderRadius: 999,
+          background: `${color}22`,
+          color,
+        }}
+      >
+        {badge}
+      </span>
+    </button>
   );
 }

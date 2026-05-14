@@ -7,24 +7,9 @@ import { setCurrencyGlobal } from './utils/helpers';
 import ErrorBoundary from './components/ErrorBoundary';
 import OfflineIndicator from './components/OfflineIndicator';
 import {
-  Home,
-  FlaskConical,
-  Bot,
-  CreditCard,
-  User,
-  Menu,
-  X,
-  Target,
-  BarChart3,
-  Bell,
-  Building2,
-  Shield,
-  Coins,
-  Settings,
-  ChevronRight,
-  Plus,
-  Sparkles,
-  PiggyBank,
+  Home, FlaskConical, Bot, CreditCard, User, Menu, X, Target,
+  BarChart3, Bell, Building2, Shield, Coins, Settings,
+  ChevronRight, Plus, PiggyBank,
 } from 'lucide-react';
 
 import Landing from './pages/Landing';
@@ -46,23 +31,11 @@ import Notifications from './pages/Notifications';
 import Reports from './pages/Reports';
 
 const screenComponents = {
-  landing: Landing,
-  login: Login,
-  register: Register,
-  onboarding: Onboarding,
-  dashboard: Dashboard,
-  jars: Jars,
-  coach: Coach,
-  debts: Debts,
-  goals: Goals,
-  profile: Profile,
-  settings: SettingsPage,
-  addTransaction: AddTransaction,
-  poupMoedas: MoedasStore,
-  investments: Investments,
-  survival: SurvivalMode,
-  alerts: Notifications,
-  reports: Reports,
+  landing: Landing, login: Login, register: Register, onboarding: Onboarding,
+  dashboard: Dashboard, jars: Jars, coach: Coach, debts: Debts, goals: Goals,
+  profile: Profile, settings: SettingsPage, addTransaction: AddTransaction,
+  poupMoedas: MoedasStore, investments: Investments, survival: SurvivalMode,
+  alerts: Notifications, reports: Reports,
 };
 
 const primaryNav = [
@@ -86,16 +59,13 @@ const secondaryNav = [
 const fullscreenScreens = ['landing', 'login', 'register', 'onboarding'];
 const allNavItems = [...primaryNav, ...secondaryNav, { id: 'addTransaction', label: 'Adicionar', icon: Plus }];
 
-function Logo({ theme }) {
+function Logo() {
   return (
     <div className="app-logo">
-      <div
-        className="app-logo-mark"
-        style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}
-      >
-        <PiggyBank size={19} />
+      <div className="app-logo-mark" style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold-light))' }}>
+        <PiggyBank size={20} />
       </div>
-      <div className="min-w-0">
+      <div style={{ minWidth: 0 }}>
         <p className="app-logo-title">PoupPT</p>
         <p className="app-logo-subtitle">Gestão financeira</p>
       </div>
@@ -103,55 +73,39 @@ function Logo({ theme }) {
   );
 }
 
-function NavButton({ item, isActive, onNavigate, compact = false }) {
+function NavButton({ item, isActive, onNavigate }) {
   const Icon = item.icon;
-
   return (
     <button
       type="button"
       onClick={() => onNavigate(item.id)}
-      className={`app-nav-button ${isActive ? 'is-active' : ''} ${compact ? 'is-compact' : ''}`}
+      className={`app-nav-button ${isActive ? 'is-active' : ''}`}
       title={item.label}
     >
-      <Icon size={19} />
-      {!compact && <span>{item.label}</span>}
+      <Icon size={18} />
+      <span>{item.label}</span>
     </button>
   );
 }
 
-function DesktopSidebar({ theme, currentScreen, onNavigate, user }) {
+function DesktopSidebar({ currentScreen, onNavigate, user }) {
   return (
     <aside className="app-sidebar">
-      <div className="app-sidebar-header">
-        <Logo theme={theme} />
-      </div>
-
+      <div className="app-sidebar-header"><Logo /></div>
       <nav className="app-sidebar-nav poupt-scroll">
         <div className="app-nav-group">
           <p className="app-nav-label">Principal</p>
           {primaryNav.map((item) => (
-            <NavButton
-              key={item.id}
-              item={item}
-              isActive={currentScreen === item.id}
-              onNavigate={onNavigate}
-            />
+            <NavButton key={item.id} item={item} isActive={currentScreen === item.id} onNavigate={onNavigate} />
           ))}
         </div>
-
         <div className="app-nav-group">
           <p className="app-nav-label">Ferramentas</p>
           {secondaryNav.map((item) => (
-            <NavButton
-              key={item.id}
-              item={item}
-              isActive={currentScreen === item.id}
-              onNavigate={onNavigate}
-            />
+            <NavButton key={item.id} item={item} isActive={currentScreen === item.id} onNavigate={onNavigate} />
           ))}
         </div>
       </nav>
-
       <div className="app-sidebar-footer">
         <div className="app-balance-card">
           <span>PoupMoedas</span>
@@ -162,7 +116,7 @@ function DesktopSidebar({ theme, currentScreen, onNavigate, user }) {
   );
 }
 
-function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user }) {
+function MobileDrawer({ isOpen, currentScreen, onClose, onNavigate, user }) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -174,21 +128,19 @@ function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user 
             className="app-drawer-backdrop"
             onClick={onClose}
           />
-
           <motion.aside
-            initial={{ x: -320 }}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: -320 }}
-            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
             className="app-drawer"
           >
             <div className="app-drawer-header">
-              <Logo theme={theme} />
-              <button type="button" onClick={onClose} className="app-icon-button">
+              <Logo />
+              <button type="button" onClick={onClose} className="app-icon-button" aria-label="Fechar menu">
                 <X size={20} />
               </button>
             </div>
-
             <div className="app-drawer-user">
               <div>
                 <span>{user?.name || 'Utilizador'}</span>
@@ -199,20 +151,15 @@ function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user 
                 {user?.poupMoedas || 0}
               </div>
             </div>
-
             <nav className="app-drawer-nav poupt-scroll">
               {allNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentScreen === item.id;
-
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => {
-                      onNavigate(item.id);
-                      onClose();
-                    }}
+                    onClick={() => { onNavigate(item.id); onClose(); }}
                     className={`app-drawer-link ${isActive ? 'is-active' : ''}`}
                   >
                     <Icon size={18} />
@@ -231,11 +178,10 @@ function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user 
 
 function MobileBottomNav({ currentScreen, onNavigate }) {
   return (
-    <nav className="app-bottom-nav safe-area-bottom">
+    <nav className="app-bottom-nav">
       {primaryNav.map((item) => {
         const Icon = item.icon;
         const isActive = currentScreen === item.id;
-
         return (
           <button
             key={item.id}
@@ -243,7 +189,7 @@ function MobileBottomNav({ currentScreen, onNavigate }) {
             onClick={() => onNavigate(item.id)}
             className={`app-bottom-button ${isActive ? 'is-active' : ''}`}
           >
-            <Icon size={20} strokeWidth={isActive ? 2.6 : 1.9} />
+            <Icon size={20} strokeWidth={isActive ? 2.4 : 1.9} />
             <span>{item.label}</span>
           </button>
         );
@@ -252,37 +198,33 @@ function MobileBottomNav({ currentScreen, onNavigate }) {
   );
 }
 
-function Topbar({ theme, title, currentScreen, onMenu, onNavigate, user, unreadCount }) {
+function Topbar({ title, onMenu, onNavigate, user, unreadCount }) {
   return (
     <header className="app-topbar">
       <div className="app-topbar-left">
-        <button type="button" onClick={onMenu} className="app-icon-button app-mobile-only">
-          <Menu size={22} />
+        <button type="button" onClick={onMenu} className="app-icon-button app-mobile-only" aria-label="Abrir menu">
+          <Menu size={20} />
         </button>
         <div>
           <p className="app-eyebrow">PoupPT</p>
           <h1>{title}</h1>
         </div>
       </div>
-
       <div className="app-topbar-actions">
         <button type="button" onClick={() => onNavigate('poupMoedas')} className="app-coin-pill">
-          <Coins size={15} />
+          <Coins size={14} />
           <span>{user?.poupMoedas || 0}</span>
         </button>
-
         <button type="button" onClick={() => onNavigate('addTransaction')} className="app-action-button app-desktop-only">
           <Plus size={16} />
           <span>Adicionar</span>
         </button>
-
-        <button type="button" onClick={() => onNavigate('alerts')} className="app-icon-button app-alert-button">
-          <Bell size={19} />
+        <button type="button" onClick={() => onNavigate('alerts')} className="app-icon-button app-alert-button" aria-label="Notificações">
+          <Bell size={18} />
           {unreadCount > 0 && <span>{unreadCount > 9 ? '9+' : unreadCount}</span>}
         </button>
-
-        <button type="button" onClick={() => onNavigate('settings')} className="app-icon-button app-desktop-only">
-          <Settings size={19} />
+        <button type="button" onClick={() => onNavigate('settings')} className="app-icon-button app-desktop-only" aria-label="Configurações">
+          <Settings size={18} />
         </button>
       </div>
     </header>
@@ -292,10 +234,7 @@ function Topbar({ theme, title, currentScreen, onMenu, onNavigate, user, unreadC
 function LoadingScreen({ theme }) {
   return (
     <div className="app-loading" style={{ background: theme.background }}>
-      <div
-        className="app-loading-mark"
-        style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}
-      >
+      <div className="app-loading-mark" style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}>
         <PiggyBank size={32} />
       </div>
       <p>A carregar...</p>
@@ -305,15 +244,8 @@ function LoadingScreen({ theme }) {
 
 function App() {
   const {
-    currentScreen,
-    setScreen,
-    currentTheme,
-    menuOpen,
-    setMenuOpen,
-    restoreSession,
-    user,
-    logout,
-    notifications,
+    currentScreen, setScreen, currentTheme, menuOpen, setMenuOpen,
+    restoreSession, user, logout, notifications,
   } = useStore();
 
   const [ready, setReady] = useState(false);
@@ -333,9 +265,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (user?.currency) {
-      setCurrencyGlobal(user.currency);
-    }
+    if (user?.currency) setCurrencyGlobal(user.currency);
   }, [user?.currency]);
 
   useEffect(() => {
@@ -351,6 +281,7 @@ function App() {
     root.style.setProperty('--bg-primary', theme.background);
     root.style.setProperty('--bg-secondary', theme.surface);
     root.style.setProperty('--bg-surface-hover', theme.surfaceHover);
+    root.style.setProperty('--card', theme.surface);
     root.style.setProperty('--border', theme.border);
     root.style.setProperty('--shadow', theme.shadow);
     root.style.setProperty('--gradient-start', theme.gradient[0]);
@@ -363,21 +294,15 @@ function App() {
   useEffect(() => {
     const init = async () => {
       restoreSession();
-
       const savedUser = JSON.parse(localStorage.getItem('poupt_user') || 'null');
-      if (savedUser?.currency) {
-        setCurrencyGlobal(savedUser.currency);
-      }
-
+      if (savedUser?.currency) setCurrencyGlobal(savedUser.currency);
       setReady(true);
 
       const token = localStorage.getItem('poupt_token');
       if (token && token !== 'mock-token-123') {
         try {
           const res = await api.getMe();
-          if (res.data?.user) {
-            useStore.getState().updateUser(res.data.user);
-          }
+          if (res.data?.user) useStore.getState().updateUser(res.data.user);
         } catch (err) {
           const msg = (err.message || '').toLowerCase();
           if (msg.includes('401') || msg.includes('unauthorized') || msg.includes('invalid token') || msg.includes('jwt')) {
@@ -391,13 +316,26 @@ function App() {
         setScreen(hash);
       }
     };
-
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!ready) {
-    return <LoadingScreen theme={theme} />;
-  }
+  // Fechar drawer ao redimensionar para desktop
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 1024 && menuOpen) setMenuOpen(false);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [menuOpen, setMenuOpen]);
+
+  // Bloquear scroll quando drawer aberto
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
+
+  if (!ready) return <LoadingScreen theme={theme} />;
 
   if (isFullscreen) {
     return (
@@ -414,13 +352,11 @@ function App() {
 
   return (
     <div className="app-shell" style={{ background: theme.background }}>
-      <DesktopSidebar theme={theme} currentScreen={currentScreen} onNavigate={navigate} user={user} />
+      <DesktopSidebar currentScreen={currentScreen} onNavigate={navigate} user={user} />
 
       <div className="app-main">
         <Topbar
-          theme={theme}
           title={pageTitle}
-          currentScreen={currentScreen}
           onMenu={() => setMenuOpen(true)}
           onNavigate={navigate}
           user={user}
@@ -450,7 +386,6 @@ function App() {
       <MobileBottomNav currentScreen={currentScreen} onNavigate={navigate} />
 
       <MobileDrawer
-        theme={theme}
         isOpen={menuOpen}
         currentScreen={currentScreen}
         onClose={() => setMenuOpen(false)}

@@ -27,9 +27,13 @@ export default function Login() {
     try {
       const res = await api.login(email, password);
 
-      // Robust token/user extraction from various API response shapes
-      const token = res.token || res.data?.token || res.data?.accessToken || null;
-      const user = res.data?.user || (res.data && !res.data.token ? res.data : null) || res.user || null;
+      const token =
+        res.token || res.data?.token || res.data?.accessToken || null;
+      const user =
+        res.data?.user ||
+        (res.data && !res.data.token ? res.data : null) ||
+        res.user ||
+        null;
 
       if (!token || !user) {
         setError('Erro ao processar login. Tenta novamente.');
@@ -38,7 +42,7 @@ export default function Login() {
 
       login(user, token);
     } catch (err) {
-      const msg = err.message || 'Erro ao entrar';
+      const msg = (err.message || '').toLowerCase();
 
       if (
         msg.includes('invalid') ||
@@ -65,76 +69,127 @@ export default function Login() {
         minHeight: '100dvh',
         background: theme.background,
         overflowY: 'auto',
+        overflowX: 'hidden',
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)',
       }}
     >
       <div
-        className="flex flex-col min-h-screen px-5 xs:px-6 py-6"
         style={{
           width: '100%',
-          maxWidth: 430,
+          maxWidth: 460,
+          minHeight: '100dvh',
           margin: '0 auto',
+          padding: '24px 20px 32px',
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
+        {/* Voltar */}
         <button
+          type="button"
           onClick={() => setScreen('landing')}
-          className="flex items-center gap-1 mb-8 text-sm font-semibold"
-          style={{ color: theme.primary }}
+          className="flex items-center gap-1.5 text-sm font-semibold transition-opacity active:opacity-70"
+          style={{
+            color: theme.primary,
+            alignSelf: 'flex-start',
+            marginBottom: 24,
+            minHeight: 44,
+            padding: '8px 4px',
+          }}
         >
           <ArrowLeft size={18} />
           Voltar
         </button>
 
+        {/* Logo header */}
         <motion.div
           initial={{ opacity: 0, y: -14 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-7"
+          style={{ textAlign: 'center', marginBottom: 28 }}
         >
-          <div className="text-6xl mb-3">🐷</div>
+          <div style={{ fontSize: 'clamp(48px, 12vw, 64px)', lineHeight: 1, marginBottom: 12 }}>
+            🐷
+          </div>
 
           <h1
-            className="text-4xl font-extrabold gradient-text"
+            className="gradient-text"
             style={{
+              fontSize: 'clamp(28px, 7vw, 38px)',
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              margin: 0,
               backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
             }}
           >
             PoupPT
           </h1>
 
-          <p className="text-sm mt-2" style={{ color: theme.textMuted }}>
+          <p
+            style={{
+              fontSize: 14,
+              marginTop: 8,
+              color: theme.textMuted,
+            }}
+          >
             Bem-vindo(a) de volta
           </p>
         </motion.div>
 
+        {/* Card form */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.12 }}
-          className="glass rounded-2xl p-6"
+          style={{
+            background: theme.surface,
+            border: `1px solid ${theme.border}`,
+            borderRadius: 20,
+            padding: 'clamp(20px, 5vw, 28px)',
+            boxShadow: `0 10px 30px ${theme.shadow}`,
+          }}
         >
           <h2
-            className="text-2xl font-extrabold text-center mb-2"
-            style={{ color: theme.text }}
+            style={{
+              fontSize: 'clamp(20px, 5vw, 24px)',
+              fontWeight: 800,
+              textAlign: 'center',
+              color: theme.text,
+              margin: '0 0 8px',
+            }}
           >
             Entrar na conta
           </h2>
 
           <p
-            className="text-sm text-center mb-6"
-            style={{ color: theme.textMuted }}
+            style={{
+              fontSize: 13,
+              textAlign: 'center',
+              color: theme.textMuted,
+              margin: '0 0 24px',
+            }}
           >
             Continua o teu controlo financeiro
           </p>
 
-          <div className="flex flex-col gap-5">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Email */}
             <div
-              className="flex items-center gap-3 px-4 h-[54px] rounded-2xl"
               style={{
-                background: theme.surface,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '0 14px',
+                minHeight: 54,
+                borderRadius: 14,
+                background: theme.background,
                 border: `1.5px solid ${theme.border}`,
+                transition: 'border-color 0.15s',
               }}
             >
-              <Mail size={18} style={{ color: theme.textMuted }} />
-
+              <Mail size={18} style={{ color: theme.textMuted, flexShrink: 0 }} />
               <input
                 type="email"
                 value={email}
@@ -142,20 +197,34 @@ export default function Login() {
                 onKeyDown={handleKeyDown}
                 placeholder="Email"
                 autoComplete="email"
-                className="flex-1 bg-transparent outline-none text-sm font-semibold"
-                style={{ color: theme.text }}
+                inputMode="email"
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: theme.text,
+                }}
               />
             </div>
 
+            {/* Password */}
             <div
-              className="flex items-center gap-3 px-4 h-[54px] rounded-2xl"
               style={{
-                background: theme.surface,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '0 6px 0 14px',
+                minHeight: 54,
+                borderRadius: 14,
+                background: theme.background,
                 border: `1.5px solid ${theme.border}`,
               }}
             >
-              <Lock size={18} style={{ color: theme.textMuted }} />
-
+              <Lock size={18} style={{ color: theme.textMuted, flexShrink: 0 }} />
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -163,38 +232,85 @@ export default function Login() {
                 onKeyDown={handleKeyDown}
                 placeholder="Palavra-passe"
                 autoComplete="current-password"
-                className="flex-1 bg-transparent outline-none text-sm font-semibold"
-                style={{ color: theme.text }}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: theme.text,
+                }}
               />
-
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                style={{ color: theme.textMuted }}
+                aria-label={showPassword ? 'Esconder palavra-passe' : 'Mostrar palavra-passe'}
+                style={{
+                  minWidth: 44,
+                  minHeight: 44,
+                  display: 'grid',
+                  placeItems: 'center',
+                  color: theme.textMuted,
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  borderRadius: 10,
+                  flexShrink: 0,
+                }}
               >
-                {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
 
+            {/* Erro */}
             {error && (
-              <p
-                className="text-xs text-center font-semibold"
-                style={{ color: '#FF6B6B' }}
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  fontSize: 12,
+                  textAlign: 'center',
+                  fontWeight: 700,
+                  color: '#FF6B6B',
+                  margin: 0,
+                  padding: '8px 12px',
+                  background: 'rgba(255, 107, 107, 0.08)',
+                  borderRadius: 10,
+                }}
               >
                 {error}
-              </p>
+              </motion.p>
             )}
 
+            {/* Submit */}
             <button
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className="w-full h-[58px] rounded-2xl font-extrabold text-base transition-transform duration-200 active:scale-[0.98] disabled:opacity-50"
               style={{
+                width: '100%',
+                minHeight: 56,
+                borderRadius: 14,
+                fontWeight: 800,
+                fontSize: 15,
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.6 : 1,
                 background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
                 color: theme.textInverse,
-                boxShadow: `0 8px 24px ${theme.primary}35`,
+                boxShadow: `0 8px 24px ${theme.primary}40`,
+                transition: 'transform 0.15s, filter 0.15s',
+              }}
+              onMouseDown={(e) => {
+                if (!loading) e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
               }}
             >
               {loading ? 'A entrar...' : 'Entrar'}
@@ -202,24 +318,46 @@ export default function Login() {
           </div>
         </motion.div>
 
-        <div className="mt-6 text-center">
+        {/* Criar conta */}
+        <div style={{ textAlign: 'center', marginTop: 22 }}>
           <button
             type="button"
             onClick={() => setScreen('register')}
-            className="text-sm font-bold"
-            style={{ color: theme.primary }}
+            style={{
+              fontSize: 14,
+              fontWeight: 700,
+              color: theme.primary,
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '10px 16px',
+              minHeight: 44,
+            }}
           >
             Criar conta grátis
           </button>
         </div>
 
-        <div className="mt-auto pt-8 flex items-center justify-center gap-5">
-          <span className="text-xs" style={{ color: theme.textMuted }}>
+        {/* Footer */}
+        <div
+          style={{
+            marginTop: 'auto',
+            paddingTop: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 20,
+            flexWrap: 'wrap',
+          }}
+        >
+          <span style={{ fontSize: 12, color: theme.textMuted, fontWeight: 600 }}>
             ✓ Gratuito
           </span>
-
-          <span className="text-xs" style={{ color: theme.textMuted }}>
+          <span style={{ fontSize: 12, color: theme.textMuted, fontWeight: 600 }}>
             ✓ Sem cartão
+          </span>
+          <span style={{ fontSize: 12, color: theme.textMuted, fontWeight: 600 }}>
+            ✓ Seguro
           </span>
         </div>
       </div>

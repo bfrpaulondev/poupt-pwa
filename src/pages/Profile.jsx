@@ -1,567 +1,1039 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
-import { formatCurrency, modeLabels, modeColors, modeDescriptions, calculateLevel, personalityLabels, genderLabels } from '../utils/helpers';
+import { formatCurrency } from '../utils/helpers';
 import {
-  User, Trophy, Flame, Target, Coins, Settings, ChevronRight, Award,
-  Star, Shield, CreditCard, Sparkles, Crown, TrendingUp, MessageCircle,
-  Save, Zap, Calendar, Mail, Clock, AlertCircle, Check,
-  Edit3, Lock, Trash2
+  User, Edit2, Save, X, Trophy, Coins, Settings as SettingsIcon,
+  LogOut, Crown, TrendingUp, Target, Award, ChevronRight,
+  Shield, Heart, Brain, Smile, Star, Sparkles, Calendar,
+  Mail, AlertTriangle, Trash2, BarChart3, Wallet, Flame,
 } from 'lucide-react';
-import { CardSkeleton } from '../components/SkeletonLoader';
+
+const personalityIcons = {
+  sargento: { icon: Shield, color: '#EF4444', label: 'Sargento' },
+  amigavel: { icon: Heart, color: '#10B981', label: 'Amigável' },
+  analitico: { icon: Brain, color: '#3B82F6', label: 'Analítico' },
+  zen: { icon: Smile, color: '#8B5CF6', label: 'Zen' },
+};
+
+const modeMeta = {
+  sobrevivencia: { label: 'Sobrevivência', color: '#EF4444', icon: AlertTriangle },
+  recuperacao: { label: 'Recuperação', color: '#F59E0B', icon: TrendingUp },
+  estabilidade: { label: 'Estabilidade', color: '#10B981', icon: Target },
+  liberdade: { label: 'Liberdade', color: '#D4AF37', icon: Crown },
+};
 
 export default function Profile() {
-  const { user, setScreen, updateUser, transactions, goals, debts, logout } = useStore();
-  const levelInfo = calculateLevel(user?.xp || 0);
-  const [editingCoach, setEditingCoach] = useState(false);
-  const [coachName, setCoachName] = useState(user?.coachName || '');
-  const [coachPersonality, setCoachPersonality] = useState(user?.coachPersonality || 'disciplinado');
-  const [coachGender, setCoachGender] = useState(user?.coachGender || 'masculino');
-  const [savingCoach, setSavingCoach] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState(null);
-  const [detecting, setDetecting] = useState(false);
-  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
-  const [deletingAccount, setDeletingAccount] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const { user, updateUser, logout, setScreen, currentTheme } = useStore();
 
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [editingCoach, setEditingCoach] = useState(false);
+  const [coachName, setCoachName] = useState(user?.coachName || 'Coach');
+  const [saving, setSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+
+  // --- Load stats ---
   useEffect(() => {
-    loadStats();
+    let alive = true;
+    (async () => {
+      try {
+        const res = await api.getUserStats?.();
+        if (alive) setStats(res?.data || res || null);
+      } catch (e) {
+        console.warn('stats error', e);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
   }, []);
 
-  const loadStats = async () => {
-    setLoading(true);
-    try {
-      const res = await api.getReportSummary();
-      setStats(res.data);
-    } catch (err) {
-      console.error(err);
-      setErrorMsg('Erro ao carregar estatisticas.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // --- Derived ---
+  const currentMode = user?.financialMode || 'estabilidade';
+  const mode = modeMeta[currentMode] || modeMeta.estabilidade;
+  const personality = personalityIcons[user?.coachPersonality || 'amigavel'];
+  const PersonalityIcon = personality.icon;
+  const ModeIcon = mode.icon;
 
+  const level = useMemo(() => {
+    const coins = user?.poupMoedas || 0;
+    return Math.max(1, Math.floor(coins / 100) + 1);
+  }, [user?.poupMoedas]);
+
+  const nextLevelCoins = level * 100;
+  const currentLevelProgress = ((user?.poupMoedas || 0) % 100);
+
+  // --- Handlers ---
   const handleSaveCoach = async () => {
-    setSavingCoach(true);
+    if (!coachName.trim()) return;
+    setSaving(true);
     try {
-      await api.updateCoach({ coachName, coachPersonality, coachGender });
-      updateUser({ coachName, coachPersonality, coachGender });
+      await api.updateUser?.({ coachName: coachName.trim() });
+      updateUser({ coachName: coachName.trim() });
       setEditingCoach(false);
-    } catch (err) {
-      console.error(err);
-      setErrorMsg('Erro ao guardar coach.');
+    } catch (e) {
+      console.error(e);
     } finally {
-      setSavingCoach(false);
+      setSaving(false);
     }
   };
 
-  const handleDetectMode = async () => {
-    setDetecting(true);
-    try {
-      const res = await api.detectMode();
-      if (res.data?.financialMode) {
-        updateUser({ financialMode: res.data.financialMode });
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDetecting(false);
-    }
+  const handleLogout = () => {
+    if (window.confirm('Tens a certeza que queres sair?')) logout();
   };
 
-  const handleDeleteAccount = async () => {
-    setDeletingAccount(true);
+  const confirmDelete = async () => {
+    if (deleteConfirmText !== 'ELIMINAR') return;
     try {
-      await api.deleteAccount();
+      await api.deleteAccount?.();
       logout();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDeletingAccount(false);
+    } catch (e) {
+      alert(e?.message || 'Não foi possível eliminar a conta.');
     }
   };
-
-  const modeColor = modeColors[user?.financialMode] || modeColors.sobrevivencia;
-  const modeLabel = modeLabels[user?.financialMode] || 'Sobrevivencia';
-  const currentMode = user?.financialMode || 'sobrevivencia';
-
-  const modeOrder = ['sobrevivencia', 'recuperacao', 'estabilidade', 'crescimento', 'prosperidade'];
-  const currentModeIdx = modeOrder.indexOf(currentMode);
-  const nextMode = currentModeIdx < modeOrder.length - 1 ? modeOrder[currentModeIdx + 1] : null;
-
-
 
   if (loading) {
     return (
-      <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-5">
-        <CardSkeleton />
-        <CardSkeleton />
-        <CardSkeleton />
+      <div
+        style={{
+          minHeight: '60vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <motion.div
+          animate={{ scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 1.4, repeat: Infinity }}
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+          }}
+        />
       </div>
     );
   }
 
+  // --- Stats Cards data ---
+  const statCards = [
+    {
+      icon: Wallet,
+      label: 'Poupado',
+      value: formatCurrency(stats?.totalSaved || 0),
+      color: '#10B981',
+    },
+    {
+      icon: BarChart3,
+      label: 'Transações',
+      value: stats?.totalTransactions || 0,
+      color: '#3B82F6',
+    },
+    {
+      icon: Flame,
+      label: 'Streak',
+      value: `${stats?.streak || 0}d`,
+      color: '#F59E0B',
+    },
+    {
+      icon: Trophy,
+      label: 'Troféus',
+      value: stats?.trophies || 0,
+      color: '#D4AF37',
+    },
+  ];
+
   return (
-    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
-      {/* Avatar & Identity Card */}
-      <div className="glass-card p-7 sm:p-9 text-center">
-        <div className="relative inline-block mb-3">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full flex items-center justify-center text-3xl sm:text-4xl font-bold"
-            style={{ background: `${modeColor}20`, color: modeColor }}>
-            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-          </div>
-          <button className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--gold)', color: '#fff' }}
-            onClick={() => {
-              const newName = prompt('Nome de exibicao:', user?.name || '');
-              if (newName && newName.trim()) {
-                api.updateMe({ name: newName.trim() }).then(() => {
-                  updateUser({ name: newName.trim() });
-                }).catch(() => {});
-              }
-            }}>
-            <Edit3 size={12} />
-          </button>
-        </div>
-        <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-          {user?.name || 'Utilizador'}
-        </h2>
-        <p className="text-xs mt-0.5 flex items-center justify-center gap-1" style={{ color: 'var(--text-secondary)' }}>
-          <Mail size={10} /> {user?.email || ''}
-        </p>
-        <div className="flex items-center justify-center gap-2 mt-3">
-          <span className="mode-badge" style={{ background: `${modeColor}20`, color: modeColor }}>
-            {modeLabel}
-          </span>
-          <span className="text-xs px-2 py-1 rounded-full font-medium"
+    <div
+      style={{
+        width: '100%',
+        maxWidth: 1280,
+        margin: '0 auto',
+        padding: 'clamp(16px, 3vw, 28px)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'clamp(16px, 3vw, 24px)',
+        minWidth: 0,
+      }}
+    >
+      {/* ========= Header / Avatar ========= */}
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          position: 'relative',
+          background: 'linear-gradient(135deg, rgba(212,175,55,0.18), rgba(184,148,31,0.08))',
+          border: '1px solid rgba(212,175,55,0.25)',
+          borderRadius: 22,
+          padding: 'clamp(20px, 4vw, 32px)',
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 'clamp(16px, 3vw, 24px)',
+            alignItems: 'center',
+            minWidth: 0,
+          }}
+        >
+          {/* Avatar */}
+          <div
             style={{
-              background: user?.plan === 'premium' ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
-              color: user?.plan === 'premium' ? 'var(--gold)' : 'var(--text-muted)',
-              border: user?.plan === 'premium' ? '1px solid var(--gold)' : '1px solid var(--border)'
-            }}>
-            {user?.plan === 'premium' ? '✨ Premium' : 'Gratuito'}
-          </span>
-        </div>
-      </div>
-
-      {/* Gamification Stats */}
-      <div className="glass-card p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Award size={16} style={{ color: 'var(--gold)' }} />
-            <span className="text-sm font-semibold" style={{ color: 'var(--gold)' }}>
-              Nivel {levelInfo.level}
-            </span>
-          </div>
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            {levelInfo.currentLevelXp}/{levelInfo.xpForNext} XP
-          </span>
-        </div>
-        <div className="w-full rounded-full h-3" style={{ background: 'var(--border)' }}>
-          <div className="h-3 rounded-full transition-all gold-gradient relative"
-            style={{ width: `${levelInfo.progress}%` }}>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow-lg" />
-          </div>
-        </div>
-        <p className="text-xs mt-1 text-right" style={{ color: 'var(--text-muted)' }}>
-          {levelInfo.xpForNext - levelInfo.currentLevelXp} XP para o proximo nivel
-        </p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 xs:grid-cols-4 gap-3 sm:gap-4">
-        <div className="glass-card p-4 sm:p-5 text-center">
-          <Flame size={16} className="mx-auto mb-1" style={{ color: '#F97316' }} />
-          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.streak || 0}</p>
-          <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Streak</p>
-        </div>
-        <div className="glass-card p-4 sm:p-5 text-center">
-          <Zap size={16} className="mx-auto mb-1" style={{ color: '#3B82F6' }} />
-          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.xp || 0}</p>
-          <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>XP</p>
-        </div>
-        <div className="glass-card p-4 sm:p-5 text-center">
-          <Coins size={16} className="mx-auto mb-1" style={{ color: 'var(--gold)' }} />
-          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.poupMoedas || 0}</p>
-          <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Moedas</p>
-        </div>
-        <div className="glass-card p-4 sm:p-5 text-center">
-          <Trophy size={16} className="mx-auto mb-1" style={{ color: '#F59E0B' }} />
-          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.trophies?.length || 0}</p>
-          <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Trofeus</p>
-        </div>
-      </div>
-
-      {/* Financial Mode */}
-      <div className="glass-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Shield size={16} style={{ color: modeColor }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Modo de Vida</h3>
-          </div>
-          <button onClick={() => setScreen('settings')}
-            className="text-xs font-medium flex items-center gap-1" style={{ color: 'var(--gold)' }}>
-            Alterar <ChevronRight size={12} />
-          </button>
-        </div>
-        <div className="flex items-center gap-2 mb-3">
-          {modeOrder.map((mode, idx) => (
-            <div key={mode} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full h-2 rounded-full" style={{
-                background: idx <= currentModeIdx ? modeColors[mode] : 'var(--border)'
-              }} />
-              <span className="text-[11px] font-medium" style={{
-                color: idx <= currentModeIdx ? modeColors[mode] : 'var(--text-muted)'
-              }}>
-                {modeLabels[mode].substring(0, 3)}
-              </span>
-            </div>
-          ))}
-        </div>
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-          {modeDescriptions[currentMode]}
-        </p>
-        {nextMode && (
-          <div className="mt-3 p-3 rounded-xl flex items-center gap-3"
-            style={{ background: `${modeColors[nextMode]}10`, border: `1px solid ${modeColors[nextMode]}30` }}>
-            <TrendingUp size={16} style={{ color: modeColors[nextMode] }} />
-            <div className="flex-1">
-              <p className="text-xs font-semibold" style={{ color: modeColors[nextMode] }}>
-                Proximo: {modeLabels[nextMode]}
-              </p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                {modeDescriptions[nextMode]}
-              </p>
-            </div>
-            <ChevronRight size={14} style={{ color: modeColors[nextMode] }} />
-          </div>
-        )}
-      </div>
-
-      {/* Change Mode Section */}
-      <div className="glass-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-            <Edit3 size={14} style={{ color: 'var(--gold)' }} /> Alterar Modo
-          </h3>
-          <button onClick={handleDetectMode} disabled={detecting}
-            className="text-xs sm:text-xs font-medium px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg"
-            style={{ background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
-            {detecting ? 'A detectar...' : 'Auto-detectar'}
-          </button>
-        </div>
-        <div className="grid grid-cols-3 xs:grid-cols-5 gap-1.5 sm:gap-2">
-          {modeOrder.map((mode) => (
-            <button key={mode} onClick={async () => {
-              try {
-                await api.updateMode(mode);
-                updateUser({ financialMode: mode });
-              } catch (err) { console.error(err); }
+              position: 'relative',
+              width: 'clamp(80px, 18vw, 110px)',
+              height: 'clamp(80px, 18vw, 110px)',
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 'clamp(32px, 7vw, 48px)',
+              flexShrink: 0,
+              boxShadow: '0 12px 32px rgba(212,175,55,0.35)',
             }}
-              className="py-2 sm:py-2.5 rounded-xl text-center transition-all"
+          >
+            {user?.avatar || '🦊'}
+            {/* Level badge */}
+            <div
               style={{
-                background: currentMode === mode ? `${modeColors[mode]}20` : 'var(--bg-secondary)',
-                border: currentMode === mode ? `1px solid ${modeColors[mode]}` : '1px solid var(--border)'
-              }}>
-              <div className="w-3 h-3 rounded-full mx-auto mb-1" style={{ background: modeColors[mode] }} />
-              <span className="text-[11px] font-medium" style={{
-                color: currentMode === mode ? modeColors[mode] : 'var(--text-muted)'
-              }}>
-                {modeLabels[mode].substring(0, 4)}
+                position: 'absolute',
+                bottom: -4,
+                right: -4,
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                background: '#0B0B0B',
+                border: '3px solid var(--card, #1a1a1a)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#D4AF37',
+                fontWeight: 800,
+                fontSize: 14,
+              }}
+            >
+              {level}
+            </div>
+          </div>
+
+          {/* Info */}
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 'clamp(22px, 5vw, 32px)',
+                fontWeight: 800,
+                letterSpacing: '-0.02em',
+                wordBreak: 'break-word',
+              }}
+            >
+              {user?.name || 'Utilizador'}
+            </h1>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                marginTop: 6,
+                color: 'var(--text-secondary, #9CA3AF)',
+                fontSize: 14,
+                minWidth: 0,
+              }}
+            >
+              <Mail size={14} style={{ flexShrink: 0 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user?.email}
               </span>
-            </button>
-          ))}
+            </div>
+
+            {/* Level progress */}
+            <div style={{ marginTop: 14, maxWidth: 320 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 12,
+                  color: 'var(--text-secondary, #9CA3AF)',
+                  marginBottom: 6,
+                  fontWeight: 600,
+                }}
+              >
+                <span>Nível {level}</span>
+                <span>{currentLevelProgress}/100</span>
+              </div>
+              <div
+                style={{
+                  height: 8,
+                  background: 'rgba(255,255,255,0.08)',
+                  borderRadius: 999,
+                  overflow: 'hidden',
+                }}
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${currentLevelProgress}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  style={{
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #D4AF37, #FFD700)',
+                    borderRadius: 999,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* PoupMoedas pill */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'rgba(212,175,55,0.18)',
+              border: '1px solid rgba(212,175,55,0.35)',
+              padding: '10px 16px',
+              borderRadius: 999,
+              fontWeight: 800,
+              color: '#D4AF37',
+              fontSize: 15,
+              flexShrink: 0,
+            }}
+          >
+            <Coins size={18} />
+            {user?.poupMoedas || 0}
+          </div>
         </div>
+      </motion.section>
+
+      {/* ========= Stats Grid ========= */}
+      <section
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: 'clamp(10px, 2vw, 16px)',
+        }}
+      >
+        {statCards.map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              style={{
+                background: 'var(--card, #1a1a1a)',
+                border: '1px solid var(--border, rgba(255,255,255,0.08))',
+                borderRadius: 16,
+                padding: 'clamp(14px, 2.5vw, 18px)',
+                minWidth: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  background: `${s.color}22`,
+                  color: s.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 10,
+                }}
+              >
+                <Icon size={18} />
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: 'var(--text-secondary, #9CA3AF)',
+                  fontWeight: 700,
+                }}
+              >
+                {s.label}
+              </div>
+              <div
+                style={{
+                  fontSize: 'clamp(18px, 3.5vw, 22px)',
+                  fontWeight: 800,
+                  marginTop: 4,
+                  fontVariantNumeric: 'tabular-nums',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {s.value}
+              </div>
+            </motion.div>
+          );
+        })}
+      </section>
+
+      {/* ========= Mode bar ========= */}
+      <section
+        style={{
+          background: 'var(--card, #1a1a1a)',
+          border: '1px solid var(--border, rgba(255,255,255,0.08))',
+          borderRadius: 16,
+          padding: 'clamp(14px, 2.5vw, 18px)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 14,
+          flexWrap: 'wrap',
+          minWidth: 0,
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: `${mode.color}22`,
+            color: mode.color,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <ModeIcon size={22} />
+        </div>
+        <div style={{ flex: 1, minWidth: 160 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary, #9CA3AF)', fontWeight: 600 }}>
+            Modo financeiro atual
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: mode.color }}>{mode.label}</div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setScreen('settings')}
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid var(--border, rgba(255,255,255,0.08))',
+            color: 'var(--text, #fff)',
+            padding: '10px 16px',
+            borderRadius: 10,
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: 13,
+            minHeight: 40,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          Alterar
+          <ChevronRight size={16} />
+        </button>
+      </section>
+
+      {/* ========= Two-column layout ========= */}
+      <div
+        className="profile-grid"
+        style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 'clamp(16px, 3vw, 20px)' }}
+      >
+        {/* Coach Settings */}
+        <section
+          style={{
+            background: 'var(--card, #1a1a1a)',
+            border: '1px solid var(--border, rgba(255,255,255,0.08))',
+            borderRadius: 16,
+            padding: 'clamp(16px, 3vw, 22px)',
+            minWidth: 0,
+          }}
+        >
+          <header
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              marginBottom: 16,
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: `${personality.color}22`,
+                color: personality.color,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <PersonalityIcon size={18} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>O Teu Coach</h3>
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary, #9CA3AF)' }}>
+                Personalidade: {personality.label}
+              </p>
+            </div>
+          </header>
+
+          {editingCoach ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <input
+                value={coachName}
+                onChange={(e) => setCoachName(e.target.value)}
+                placeholder="Nome do coach"
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 10,
+                  border: '1px solid var(--border, rgba(255,255,255,0.08))',
+                  background: 'rgba(255,255,255,0.04)',
+                  color: 'var(--text, #fff)',
+                  fontSize: 16,
+                  outline: 'none',
+                  minWidth: 0,
+                  boxSizing: 'border-box',
+                }}
+              />
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleSaveCoach}
+                  disabled={saving}
+                  style={{
+                    flex: 1,
+                    minWidth: 120,
+                    minHeight: 44,
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+                    color: '#0B0B0B',
+                    fontWeight: 700,
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Save size={16} /> {saving ? 'A guardar…' : 'Guardar'}
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingCoach(false);
+                    setCoachName(user?.coachName || 'Coach');
+                  }}
+                  style={{
+                    minWidth: 100,
+                    minHeight: 44,
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    border: '1px solid var(--border, rgba(255,255,255,0.08))',
+                    background: 'transparent',
+                    color: 'var(--text, #fff)',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <X size={16} /> Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '12px 14px',
+                background: 'rgba(255,255,255,0.04)',
+                borderRadius: 10,
+                minWidth: 0,
+              }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary, #9CA3AF)' }}>Nome</div>
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {user?.coachName || 'Coach'}
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingCoach(true)}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid var(--border, rgba(255,255,255,0.08))',
+                  borderRadius: 10,
+                  padding: 10,
+                  cursor: 'pointer',
+                  color: 'var(--text, #fff)',
+                  minWidth: 44,
+                  minHeight: 44,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+                aria-label="Editar nome do coach"
+              >
+                <Edit2 size={16} />
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* Trophies */}
+        <section
+          style={{
+            background: 'var(--card, #1a1a1a)',
+            border: '1px solid var(--border, rgba(255,255,255,0.08))',
+            borderRadius: 16,
+            padding: 'clamp(16px, 3vw, 22px)',
+            minWidth: 0,
+          }}
+        >
+          <header
+            style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: 'rgba(212,175,55,0.18)',
+                color: '#D4AF37',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Trophy size={18} />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Troféus</h3>
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary, #9CA3AF)' }}>
+                {stats?.trophies || 0} conquistas
+              </p>
+            </div>
+          </header>
+
+          {stats?.trophyList?.length ? (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                gap: 10,
+              }}
+            >
+              {stats.trophyList.slice(0, 6).map((t, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: 'rgba(212,175,55,0.08)',
+                    border: '1px solid rgba(212,175,55,0.2)',
+                    borderRadius: 12,
+                    padding: 12,
+                    textAlign: 'center',
+                    minWidth: 0,
+                  }}
+                >
+                  <div style={{ fontSize: 28 }}>{t.icon || '🏆'}</div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      marginTop: 4,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div
+              style={{
+                padding: 24,
+                textAlign: 'center',
+                color: 'var(--text-secondary, #9CA3AF)',
+                border: '1px dashed var(--border, rgba(255,255,255,0.1))',
+                borderRadius: 12,
+              }}
+            >
+              <Award size={32} style={{ opacity: 0.5, marginBottom: 8 }} />
+              <p style={{ margin: 0, fontSize: 13 }}>Continua para desbloquear troféus!</p>
+            </div>
+          )}
+        </section>
       </div>
 
-      {/* Coach Settings */}
-      <div className="glass-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <MessageCircle size={16} style={{ color: 'var(--gold)' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>AI Coach</h3>
+      {/* ========= Premium CTA ========= */}
+      {!user?.isPremium && (
+        <motion.section
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+            borderRadius: 18,
+            padding: 'clamp(18px, 3vw, 24px)',
+            color: '#0B0B0B',
+            display: 'flex',
+            gap: 16,
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            minWidth: 0,
+          }}
+        >
+          <div
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 14,
+              background: 'rgba(0,0,0,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Crown size={26} />
           </div>
-          <button onClick={() => setEditingCoach(!editingCoach)}
-            className="text-xs font-medium" style={{ color: 'var(--gold)' }}>
-            {editingCoach ? 'Fechar' : 'Editar'}
+          <div style={{ flex: 1, minWidth: 180 }}>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Vai Premium</h3>
+            <p style={{ margin: '4px 0 0', fontSize: 13, opacity: 0.85 }}>
+              Desbloqueia temas exclusivos, relatórios avançados e mais.
+            </p>
+          </div>
+          <button
+            onClick={() => setScreen('premium')}
+            style={{
+              background: '#0B0B0B',
+              color: '#D4AF37',
+              border: 'none',
+              padding: '12px 20px',
+              borderRadius: 12,
+              fontWeight: 800,
+              cursor: 'pointer',
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <Sparkles size={16} /> Saber mais
           </button>
-        </div>
-        {!editingCoach ? (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'rgba(255,215,0,0.15)' }}>
-              <Star size={18} style={{ color: 'var(--gold)' }} />
-            </div>
-            <div>
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                {user?.coachName || 'Coach'}
-              </p>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                {personalityLabels[user?.coachPersonality] || 'Disciplinado'} • {genderLabels[user?.coachGender] || 'Masculino'}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
-                Nome do Coach
-              </label>
-              <input type="text" value={coachName} onChange={e => setCoachName(e.target.value)}
-                placeholder="Da um nome ao teu coach"
-                className="w-full input-field" />
-            </div>
-            <div>
-              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
-                Genero
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {Object.entries(genderLabels).map(([key, label]) => (
-                  <button key={key} onClick={() => setCoachGender(key)}
-                    className="py-2 sm:py-2.5 rounded-xl text-xs font-medium"
-                    style={{
-                      background: coachGender === key ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
-                      color: coachGender === key ? 'var(--gold)' : 'var(--text-secondary)',
-                      border: coachGender === key ? '1px solid var(--gold)' : '1px solid var(--border)'
-                    }}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-secondary)' }}>
-                Personalidade
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(personalityLabels).map(([key, label]) => (
-                  <button key={key} onClick={() => setCoachPersonality(key)}
-                    className="py-2 sm:py-2.5 rounded-xl text-xs font-medium"
-                    style={{
-                      background: coachPersonality === key ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
-                      color: coachPersonality === key ? 'var(--gold)' : 'var(--text-secondary)',
-                      border: coachPersonality === key ? '1px solid var(--gold)' : '1px solid var(--border)'
-                    }}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button onClick={handleSaveCoach} disabled={savingCoach}
-              className="btn-gold w-full py-2.5 disabled:opacity-50 flex items-center justify-center gap-2">
-              <Save size={14} /> {savingCoach ? 'A guardar...' : 'Guardar Coach'}
-            </button>
-          </div>
-        )}
-      </div>
+        </motion.section>
+      )}
 
-      {/* Trophies */}
-      {user?.trophies?.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold mb-2 uppercase" style={{ color: 'var(--text-muted)' }}>
-            <Trophy size={12} className="inline mr-1" /> Trofeus
+      {/* ========= Account info ========= */}
+      <section
+        style={{
+          background: 'var(--card, #1a1a1a)',
+          border: '1px solid var(--border, rgba(255,255,255,0.08))',
+          borderRadius: 16,
+          padding: 'clamp(16px, 3vw, 22px)',
+          minWidth: 0,
+        }}
+      >
+        <h3 style={{ margin: '0 0 14px', fontSize: 16, fontWeight: 700 }}>Informações da conta</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[
+            { icon: Mail, label: 'Email', value: user?.email },
+            {
+              icon: Calendar,
+              label: 'Membro desde',
+              value: user?.createdAt
+                ? new Date(user.createdAt).toLocaleDateString('pt-PT')
+                : '—',
+            },
+            { icon: Star, label: 'Plano', value: user?.isPremium ? 'Premium' : 'Gratuito' },
+          ].map((row, i) => {
+            const Icon = row.icon;
+            return (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '10px 0',
+                  borderBottom:
+                    i < 2 ? '1px solid var(--border, rgba(255,255,255,0.06))' : 'none',
+                  minWidth: 0,
+                }}
+              >
+                <Icon size={16} color="var(--text-secondary, #9CA3AF)" style={{ flexShrink: 0 }} />
+                <div style={{ fontSize: 13, color: 'var(--text-secondary, #9CA3AF)', minWidth: 90 }}>
+                  {row.label}
+                </div>
+                <div
+                  style={{
+                    flex: 1,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    textAlign: 'right',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    minWidth: 0,
+                  }}
+                >
+                  {row.value}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ========= Action buttons ========= */}
+      <section
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 12,
+        }}
+      >
+        <button
+          onClick={() => setScreen('settings')}
+          style={{
+            background: 'var(--card, #1a1a1a)',
+            border: '1px solid var(--border, rgba(255,255,255,0.08))',
+            color: 'var(--text, #fff)',
+            padding: '14px 18px',
+            borderRadius: 12,
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: 14,
+            minHeight: 48,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <SettingsIcon size={18} /> Definições
+        </button>
+        <button
+          onClick={handleLogout}
+          style={{
+            background: 'rgba(239,68,68,0.1)',
+            border: '1px solid rgba(239,68,68,0.3)',
+            color: '#F87171',
+            padding: '14px 18px',
+            borderRadius: 12,
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: 14,
+            minHeight: 48,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <LogOut size={18} /> Terminar sessão
+        </button>
+      </section>
+
+      {/* ========= Danger zone ========= */}
+      <section
+        style={{
+          background: 'rgba(239,68,68,0.04)',
+          border: '1px solid rgba(239,68,68,0.25)',
+          borderRadius: 16,
+          padding: 'clamp(16px, 3vw, 22px)',
+          minWidth: 0,
+        }}
+      >
+        <header style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <AlertTriangle size={18} color="#EF4444" />
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#F87171' }}>
+            Zona de perigo
           </h3>
-          <div className="grid grid-cols-2 gap-2">
-            {user.trophies.map((trophy, i) => (
-              <div key={i} className="glass-card p-3 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: 'rgba(245,158,11,0.15)' }}>
-                  <Trophy size={14} style={{ color: '#F59E0B' }} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-                    {trophy.name}
-                  </p>
-                  {trophy.description && (
-                    <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                      {trophy.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* PoupMoedas */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Coins size={16} style={{ color: 'var(--gold)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>PoupMoedas</h3>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xl xs:text-2xl font-bold truncate" style={{ color: 'var(--gold)' }}>{user?.poupMoedas || 0}</p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Saldo actual</p>
-          </div>
-          <button type="button" onClick={() => setScreen('poupMoedas')}
-            className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 cursor-pointer"
-            style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
-            <Sparkles size={14} /> Loja
-          </button>
-        </div>
-      </div>
-
-      {/* Account Info */}
-      <div className="glass-card p-4">
-        <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>
-          Informacoes da Conta
-        </h3>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <Mail size={14} style={{ color: 'var(--text-muted)' }} />
-            <div className="flex-1">
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Email</p>
-              <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{user?.email || '-'}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Crown size={14} style={{ color: user?.plan === 'premium' ? 'var(--gold)' : 'var(--text-muted)' }} />
-            <div className="flex-1">
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Plano</p>
-              <p className="text-sm" style={{ color: user?.plan === 'premium' ? 'var(--gold)' : 'var(--text-primary)' }}>
-                {user?.plan === 'premium' ? 'Premium' : 'Gratuito'}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Calendar size={14} style={{ color: 'var(--text-muted)' }} />
-            <div className="flex-1">
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Membro desde</p>
-              <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
-                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' }) : '-'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Premium CTA */}
-      {user?.plan !== 'premium' && (
-        <div className="p-4 rounded-2xl"
-          style={{ background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05))', border: '1px solid rgba(255,215,0,0.3)' }}>
-          <div className="flex items-center gap-3">
-            <Crown size={24} style={{ color: 'var(--gold)' }} />
-            <div className="flex-1">
-              <p className="text-sm font-bold" style={{ color: 'var(--gold)' }}>Upgrade para Premium</p>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                Coach ilimitado, relatorios avancados, temas exclusivos
-              </p>
-            </div>
-            <ChevronRight size={16} style={{ color: 'var(--gold)' }} />
-          </div>
-        </div>
-      )}
-
-      {/* Quick Summary */}
-      <div className="glass-card p-4">
-        <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>
-          Resumo Rapido
-        </h3>
-        <div className="grid grid-cols-3 gap-3 sm:gap-4">
-          <div className="text-center">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1"
-              style={{ background: 'rgba(16,185,129,0.1)' }}>
-              <TrendingUp size={14} style={{ color: '#10B981' }} />
-            </div>
-            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-              {transactions?.length || stats?.totalTransactions || 0}
-            </p>
-            <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Transacoes</p>
-          </div>
-          <div className="text-center">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1"
-              style={{ background: 'rgba(59,130,246,0.1)' }}>
-              <Target size={14} style={{ color: '#3B82F6' }} />
-            </div>
-            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-              {goals?.length || 0}
-            </p>
-            <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Metas</p>
-          </div>
-          <div className="text-center">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1"
-              style={{ background: 'rgba(239,68,68,0.1)' }}>
-              <CreditCard size={14} style={{ color: '#EF4444' }} />
-            </div>
-            <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
-              {debts?.length || 0}
-            </p>
-            <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Dividas</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Navigation */}
-      <div className="space-y-2">
-        <button type="button" onClick={() => setScreen('settings')}
-          className="w-full glass-card p-5 sm:p-6 flex items-center gap-3 text-left cursor-pointer"
-          style={{ minHeight: '52px' }}>
-          <Settings size={18} style={{ color: 'var(--text-secondary)' }} />
-          <div className="flex-1">
-            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Configuracoes</span>
-          </div>
-          <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
-        </button>
-        <button type="button" onClick={() => setScreen('coach')}
-          className="w-full glass-card p-5 sm:p-6 flex items-center gap-3 text-left cursor-pointer"
-          style={{ minHeight: '52px' }}>
-          <MessageCircle size={18} style={{ color: 'var(--gold)' }} />
-          <div className="flex-1">
-            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Falar com Coach</span>
-          </div>
-          <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
-        </button>
-        <button type="button" onClick={() => setScreen('reports')}
-          className="w-full glass-card p-5 sm:p-6 flex items-center gap-3 text-left cursor-pointer"
-          style={{ minHeight: '52px' }}>
-          <TrendingUp size={18} style={{ color: '#3B82F6' }} />
-          <div className="flex-1">
-            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Ver Relatorios</span>
-          </div>
-          <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
-        </button>
-      </div>
-
-      {/* Danger Zone */}
-      <div className="glass-card p-4">
-        <h3 className="text-xs font-semibold mb-3 uppercase flex items-center gap-1" style={{ color: '#EF4444' }}>
-          <AlertCircle size={12} /> Zona de Perigo
-        </h3>
-        {!showDeleteAccount ? (
-          <button onClick={() => setShowDeleteAccount(true)}
-            className="w-full py-2.5 rounded-xl text-xs font-medium flex items-center justify-center gap-2"
-            style={{ color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
-            <Trash2 size={12} /> Eliminar conta
-          </button>
-        ) : (
-          <div className="space-y-2 animate-fade-in">
-            <p className="text-xs" style={{ color: '#EF4444' }}>
-              Tens a certeza? Esta accao e irreversivel e todos os teus dados serao eliminados permanentemente.
-            </p>
-            <div className="flex gap-2">
-              <button onClick={() => setShowDeleteAccount(false)}
-                className="flex-1 py-2 rounded-xl text-xs"
-                style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-                Cancelar
-              </button>
-              <button onClick={handleDeleteAccount} disabled={deletingAccount}
-                className="flex-1 py-2 rounded-xl text-xs font-bold"
-                style={{ background: 'rgba(239,68,68,0.1)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                {deletingAccount ? 'A eliminar...' : 'Eliminar permanentemente'}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {user?.createdAt && (
-        <p className="text-center text-xs pb-4" style={{ color: 'var(--text-muted)' }}>
-          Membro desde {new Date(user.createdAt).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' })}
+        </header>
+        <p style={{ margin: '0 0 14px', fontSize: 13, color: 'var(--text-secondary, #9CA3AF)' }}>
+          Eliminar a tua conta é uma ação permanente. Todos os dados serão perdidos.
         </p>
-      )}
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          style={{
+            background: 'transparent',
+            border: '1px solid rgba(239,68,68,0.4)',
+            color: '#F87171',
+            padding: '12px 18px',
+            borderRadius: 10,
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: 13,
+            minHeight: 44,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <Trash2 size={16} /> Eliminar conta
+        </button>
+      </section>
+
+      {/* ========= Delete modal ========= */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteModal(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0,0,0,0.7)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 16,
+              zIndex: 1000,
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: 'var(--card, #1a1a1a)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: 18,
+                padding: 'clamp(20px, 4vw, 28px)',
+                maxWidth: 440,
+                width: '100%',
+                minWidth: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 14,
+                  background: 'rgba(239,68,68,0.15)',
+                  color: '#EF4444',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px',
+                }}
+              >
+                <AlertTriangle size={28} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, textAlign: 'center' }}>
+                Eliminar conta?
+              </h3>
+              <p
+                style={{
+                  margin: '8px 0 16px',
+                  fontSize: 14,
+                  color: 'var(--text-secondary, #9CA3AF)',
+                  textAlign: 'center',
+                }}
+              >
+                Esta ação é irreversível. Escreve <strong style={{ color: '#F87171' }}>ELIMINAR</strong> para confirmar.
+              </p>
+              <input
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="ELIMINAR"
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 10,
+                  border: '1px solid var(--border, rgba(255,255,255,0.1))',
+                  background: 'rgba(255,255,255,0.04)',
+                  color: 'var(--text, #fff)',
+                  fontSize: 16,
+                  outline: 'none',
+                  marginBottom: 16,
+                  boxSizing: 'border-box',
+                  textAlign: 'center',
+                  letterSpacing: '0.1em',
+                  fontWeight: 700,
+                }}
+              />
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteConfirmText('');
+                  }}
+                  style={{
+                    flex: 1,
+                    minWidth: 120,
+                    minHeight: 48,
+                    padding: '12px 16px',
+                    borderRadius: 12,
+                    border: '1px solid var(--border, rgba(255,255,255,0.1))',
+                    background: 'transparent',
+                    color: 'var(--text, #fff)',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deleteConfirmText !== 'ELIMINAR'}
+                  style={{
+                    flex: 1,
+                    minWidth: 120,
+                    minHeight: 48,
+                    padding: '12px 16px',
+                    borderRadius: 12,
+                    border: 'none',
+                    background:
+                      deleteConfirmText === 'ELIMINAR'
+                        ? 'linear-gradient(135deg, #EF4444, #DC2626)'
+                        : 'rgba(239,68,68,0.3)',
+                    color: '#fff',
+                    cursor: deleteConfirmText === 'ELIMINAR' ? 'pointer' : 'not-allowed',
+                    fontWeight: 800,
+                  }}
+                >
+                  Eliminar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Two-column at desktop */}
+      <style>{`
+        @media (min-width: 1024px) {
+          .profile-grid {
+            grid-template-columns: 1fr 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

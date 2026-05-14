@@ -13,85 +13,805 @@ import {
   ChevronRight,
   Coins,
   CreditCard,
+  Eye,
+  EyeOff,
+  Flame,
   Plus,
   RefreshCw,
   Shield,
+  Sparkles,
   Target,
+  TrendingUp,
   Wallet,
 } from 'lucide-react';
 
+/* ============================================================
+   CONFIG
+   ============================================================ */
 const jarDefinitions = [
-  { key: 'necessities', label: 'Necessidades', shortLabel: 'Necess.', icon: '🏠', color: '#3B82F6' },
-  { key: 'freedom', label: 'Liberdade financeira', shortLabel: 'Livre', icon: '🏦', color: '#10B981' },
-  { key: 'savings', label: 'Poupança longo prazo', shortLabel: 'Poup.', icon: '🏛️', color: '#F59E0B' },
-  { key: 'education', label: 'Educação', shortLabel: 'Edu.', icon: '📚', color: '#8B5CF6' },
-  { key: 'play', label: 'Lazer', shortLabel: 'Lazer', icon: '🎮', color: '#EF4444' },
-  { key: 'give', label: 'Doar', shortLabel: 'Doar', icon: '💝', color: '#EC4899' },
+  { key: 'necessities', label: 'Necessidades', icon: '🏠', color: '#3B82F6' },
+  { key: 'freedom', label: 'Liberdade', icon: '🏦', color: '#10B981' },
+  { key: 'savings', label: 'Poupança', icon: '🏛️', color: '#F59E0B' },
+  { key: 'education', label: 'Educação', icon: '📚', color: '#8B5CF6' },
+  { key: 'play', label: 'Lazer', icon: '🎮', color: '#EF4444' },
+  { key: 'give', label: 'Doar', icon: '💝', color: '#EC4899' },
 ];
 
 const quickActions = [
-  { icon: Plus, label: 'Adicionar', description: 'Nova transação', screen: 'addTransaction' },
-  { icon: BarChart3, label: 'Relatórios', description: 'Analisar mês', screen: 'reports' },
-  { icon: Target, label: 'Metas', description: 'Planear objetivos', screen: 'goals' },
-  { icon: Camera, label: 'Scanner', description: 'Usar moedas', screen: 'poupMoedas' },
+  { icon: Plus, label: 'Adicionar', description: 'Nova transação', screen: 'addTransaction', color: 'var(--gold)' },
+  { icon: BarChart3, label: 'Relatórios', description: 'Analisar mês', screen: 'reports', color: '#8B5CF6' },
+  { icon: Target, label: 'Metas', description: 'Planear objetivos', screen: 'goals', color: '#10B981' },
+  { icon: Camera, label: 'Scanner', description: 'Usar moedas', screen: 'poupMoedas', color: '#F59E0B' },
 ];
 
+/* ============================================================
+   HELPERS
+   ============================================================ */
 const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Bom dia';
-  if (hour < 18) return 'Boa tarde';
+  const h = new Date().getHours();
+  if (h < 12) return 'Bom dia';
+  if (h < 18) return 'Boa tarde';
   return 'Boa noite';
 };
 
-const isIncomeTransaction = (transaction) => {
-  return transaction?.type === 'income' || transaction?.type === 'receita';
+const isIncomeTransaction = (t) =>
+  t?.type === 'income' || t?.type === 'receita';
+
+const getReadableName = (name) => {
+  if (!name) return 'amigo';
+  const s = String(name).trim();
+  if (!s) return 'amigo';
+  const first = s.split(' ')[0];
+  if (first.includes('@')) return first.split('@')[0];
+  return first;
 };
 
-function LoadingState() {
+const getSpentStatus = (pct) => {
+  if (pct >= 90) {
+    return {
+      label: 'Crítico',
+      color: '#EF4444',
+      message: 'Reduz gastos variáveis e prioriza pagamentos obrigatórios.',
+    };
+  }
+  if (pct >= 70) {
+    return {
+      label: 'Atenção',
+      color: '#F59E0B',
+      message: 'O mês está a ficar apertado. Mantém margem para fixos.',
+    };
+  }
+  return {
+    label: 'Controlado',
+    color: '#10B981',
+    message: 'O teu ritmo de gastos está dentro de uma zona saudável.',
+  };
+};
+
+const formatTime = (date) =>
+  date
+    ? date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })
+    : '--:--';
+
+/* ============================================================
+   SHELL
+   ============================================================ */
+function DashboardShell({ children }) {
   return (
-    <div className="min-h-[360px] w-full flex items-center justify-center px-6">
-      <div className="text-center space-y-4">
-        <div className="w-12 h-12 mx-auto rounded-2xl gold-gradient gold-shimmer" />
-        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-          A carregar painel financeiro...
-        </p>
-      </div>
+    <div
+      style={{
+        width: '100%',
+        maxWidth: 1480,
+        margin: '0 auto',
+        padding: 'clamp(16px, 3vw, 32px)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'clamp(16px, 2.4vw, 24px)',
+        minWidth: 0,
+      }}
+    >
+      {children}
     </div>
   );
 }
 
-function StatCard({ icon: Icon, label, value, tone = 'default', footer }) {
-  const toneColor = {
-    success: '#10B981',
-    danger: '#EF4444',
-    warning: '#F59E0B',
-    default: 'var(--gold)',
-  }[tone];
-
+/* ============================================================
+   LOADING
+   ============================================================ */
+function LoadingState() {
   return (
-    <div className="rounded-3xl p-4 sm:p-5 lg:p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-            {label}
+    <DashboardShell>
+      <div
+        style={{
+          minHeight: 360,
+          borderRadius: 24,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          background: 'var(--card)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              margin: '0 auto 16px',
+              borderRadius: 18,
+              background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
+              animation: 'pulse-soft 1.6s ease-in-out infinite',
+            }}
+          />
+          <p
+            style={{
+              fontSize: 15,
+              fontWeight: 800,
+              color: 'var(--text-primary)',
+              margin: 0,
+            }}
+          >
+            A carregar painel financeiro
           </p>
-          <p className="mt-2 text-xl sm:text-2xl lg:text-3xl font-black tracking-tight break-words" style={{ color: toneColor }}>
-            {value}
+          <p
+            style={{
+              marginTop: 6,
+              fontSize: 13,
+              color: 'var(--text-muted)',
+            }}
+          >
+            A preparar resumo, frascos e transações.
           </p>
-        </div>
-        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${toneColor}18` }}>
-          <Icon size={20} style={{ color: toneColor }} />
         </div>
       </div>
-      {footer && (
-        <p className="mt-3 text-[11px] sm:text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-          {footer}
-        </p>
+    </DashboardShell>
+  );
+}
+
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+function SectionHeader({ title, description, actionLabel, onAction, icon: Icon }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        gap: 12,
+        marginBottom: 16,
+        flexWrap: 'wrap',
+      }}
+    >
+      <div style={{ minWidth: 0, flex: '1 1 220px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {Icon && (
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 10,
+                display: 'grid',
+                placeItems: 'center',
+                background: 'rgba(212,168,67,0.12)',
+                color: 'var(--gold)',
+                flexShrink: 0,
+              }}
+            >
+              <Icon size={16} />
+            </div>
+          )}
+          <h2
+            style={{
+              fontSize: 'clamp(17px, 2.2vw, 21px)',
+              fontWeight: 800,
+              color: 'var(--text-primary)',
+              margin: 0,
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+            }}
+          >
+            {title}
+          </h2>
+        </div>
+        {description && (
+          <p
+            style={{
+              marginTop: 6,
+              maxWidth: '60ch',
+              fontSize: 13,
+              color: 'var(--text-muted)',
+              lineHeight: 1.55,
+            }}
+          >
+            {description}
+          </p>
+        )}
+      </div>
+      {actionLabel && onAction && (
+        <button
+          type="button"
+          onClick={onAction}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '8px 14px',
+            borderRadius: 12,
+            fontSize: 13,
+            fontWeight: 700,
+            background: 'rgba(212,168,67,0.12)',
+            color: 'var(--gold)',
+            border: '1px solid rgba(212,168,67,0.22)',
+            cursor: 'pointer',
+            minHeight: 40,
+            flexShrink: 0,
+          }}
+        >
+          {actionLabel}
+          <ChevronRight size={14} />
+        </button>
       )}
     </div>
   );
 }
 
+/* ============================================================
+   HERO — Saldo + saudação
+   ============================================================ */
+function HeroPanel({ user, available, modeLabel, modeColor, onRefresh, lastUpdated }) {
+  const [hidden, setHidden] = useState(false);
+  const userName = getReadableName(user?.name || user?.email);
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      style={{
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 'clamp(20px, 2.4vw, 28px)',
+        background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+        minWidth: 0,
+      }}
+    >
+      {/* Decoração de fundo */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.4,
+          background:
+            'radial-gradient(circle at 85% 15%, rgba(255,255,255,0.35) 0%, transparent 35%), radial-gradient(circle at 15% 85%, rgba(0,0,0,0.12) 0%, transparent 40%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div
+        style={{
+          position: 'relative',
+          padding: 'clamp(20px, 3.5vw, 32px)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 24,
+        }}
+      >
+        {/* Topo: badge + ações */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: 12,
+            flexWrap: 'wrap',
+          }}
+        >
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 999,
+                fontSize: 11,
+                fontWeight: 800,
+                color: 'rgba(0,0,0,0.85)',
+                background: 'rgba(255,255,255,0.35)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <Shield size={12} />
+              {modeLabel}
+            </span>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '6px 12px',
+                borderRadius: 999,
+                fontSize: 11,
+                fontWeight: 800,
+                color: 'rgba(0,0,0,0.65)',
+                background: 'rgba(0,0,0,0.08)',
+              }}
+            >
+              <Sparkles size={11} />
+              PoupPT
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => setHidden((v) => !v)}
+              aria-label={hidden ? 'Mostrar saldo' : 'Esconder saldo'}
+              style={{
+                width: 40,
+                height: 40,
+                display: 'grid',
+                placeItems: 'center',
+                borderRadius: 12,
+                background: 'rgba(255,255,255,0.3)',
+                color: 'rgba(0,0,0,0.75)',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {hidden ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+            <button
+              type="button"
+              onClick={onRefresh}
+              aria-label="Atualizar"
+              style={{
+                width: 40,
+                height: 40,
+                display: 'grid',
+                placeItems: 'center',
+                borderRadius: 12,
+                background: 'rgba(255,255,255,0.3)',
+                color: 'rgba(0,0,0,0.75)',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <RefreshCw size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Saudação */}
+        <div style={{ minWidth: 0 }}>
+          <p
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: 'rgba(0,0,0,0.65)',
+              margin: '0 0 6px',
+            }}
+          >
+            {getGreeting()},
+          </p>
+          <h1
+            style={{
+              fontSize: 'clamp(26px, 5.5vw, 42px)',
+              fontWeight: 800,
+              color: '#000',
+              margin: 0,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.1,
+              wordBreak: 'break-word',
+            }}
+          >
+            {userName} 👋
+          </h1>
+        </div>
+
+        {/* Saldo principal */}
+        <div
+          style={{
+            padding: 'clamp(18px, 2.5vw, 24px)',
+            borderRadius: 20,
+            background: 'rgba(0,0,0,0.18)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: 'rgba(0,0,0,0.65)',
+              margin: '0 0 8px',
+            }}
+          >
+            Saldo disponível
+          </p>
+          <p
+            style={{
+              fontSize: 'clamp(28px, 6vw, 44px)',
+              fontWeight: 800,
+              color: '#000',
+              margin: 0,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.1,
+              wordBreak: 'break-word',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {hidden ? '••••••' : formatCurrency(available)}
+          </p>
+          <p
+            style={{
+              marginTop: 8,
+              fontSize: 12,
+              fontWeight: 600,
+              color: 'rgba(0,0,0,0.6)',
+            }}
+          >
+            Atualizado às {formatTime(lastUpdated)}
+          </p>
+        </div>
+
+        {/* Mini stats: PoupMoedas + Streak */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 10,
+          }}
+        >
+          <MiniStat
+            icon={Coins}
+            label="PoupMoedas"
+            value={user?.poupMoedas || 0}
+          />
+          <MiniStat
+            icon={Flame}
+            label="Streak"
+            value={`${user?.streak || 0} dias`}
+          />
+        </div>
+      </div>
+    </motion.section>
+  );
+}
+
+function MiniStat({ icon: Icon, label, value }) {
+  return (
+    <div
+      style={{
+        padding: '12px 14px',
+        borderRadius: 14,
+        background: 'rgba(255,255,255,0.28)',
+        backdropFilter: 'blur(8px)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: 10,
+          display: 'grid',
+          placeItems: 'center',
+          background: 'rgba(0,0,0,0.12)',
+          color: '#000',
+          flexShrink: 0,
+        }}
+      >
+        <Icon size={16} />
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <p
+          style={{
+            fontSize: 10,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: 'rgba(0,0,0,0.65)',
+            margin: 0,
+            lineHeight: 1,
+          }}
+        >
+          {label}
+        </p>
+        <p
+          style={{
+            fontSize: 15,
+            fontWeight: 800,
+            color: '#000',
+            margin: '4px 0 0',
+            lineHeight: 1,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   SPENDING PANEL
+   ============================================================ */
+function SpendingPanel({ totalIncome, totalExpenses, available }) {
+  const spentPercent = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
+  const savingsRate = totalIncome > 0 ? (available / totalIncome) * 100 : 0;
+  const status = getSpentStatus(spentPercent);
+
+  return (
+    <section
+      style={{
+        padding: 'clamp(18px, 2.5vw, 24px)',
+        borderRadius: 'clamp(20px, 2.4vw, 24px)',
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 12,
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--text-muted)',
+              margin: 0,
+            }}
+          >
+            Gastos do mês
+          </p>
+          <h2
+            style={{
+              marginTop: 8,
+              fontSize: 'clamp(18px, 2.4vw, 22px)',
+              fontWeight: 800,
+              color: 'var(--text-primary)',
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+            }}
+          >
+            {formatCurrency(totalExpenses)}
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                marginLeft: 6,
+              }}
+            >
+              / {formatCurrency(totalIncome)}
+            </span>
+          </h2>
+        </div>
+        <span
+          style={{
+            flexShrink: 0,
+            padding: '6px 12px',
+            borderRadius: 12,
+            fontSize: 13,
+            fontWeight: 800,
+            background: `${status.color}18`,
+            color: status.color,
+          }}
+        >
+          {spentPercent.toFixed(0)}%
+        </span>
+      </div>
+
+      {/* Barra de progresso */}
+      <div style={{ marginTop: 16 }}>
+        <div
+          style={{
+            height: 10,
+            borderRadius: 999,
+            background: 'var(--border)',
+            overflow: 'hidden',
+          }}
+        >
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(spentPercent, 100)}%` }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            style={{
+              height: '100%',
+              borderRadius: 999,
+              background: `linear-gradient(90deg, ${status.color}, ${status.color}cc)`,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Taxa de poupança */}
+      <div
+        style={{
+          marginTop: 16,
+          padding: 14,
+          borderRadius: 14,
+          background: 'var(--bg-primary)',
+          border: '1px solid var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            display: 'grid',
+            placeItems: 'center',
+            background: savingsRate >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
+            color: savingsRate >= 0 ? '#10B981' : '#EF4444',
+            flexShrink: 0,
+          }}
+        >
+          <TrendingUp size={18} />
+        </div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: 'var(--text-muted)',
+              margin: 0,
+            }}
+          >
+            Taxa de poupança
+          </p>
+          <p
+            style={{
+              marginTop: 2,
+              fontSize: 18,
+              fontWeight: 800,
+              color: savingsRate >= 0 ? '#10B981' : '#EF4444',
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {savingsRate.toFixed(1)}%
+          </p>
+        </div>
+      </div>
+
+      {/* Mensagem de status */}
+      <div
+        style={{
+          marginTop: 12,
+          padding: 14,
+          borderRadius: 14,
+          background: `${status.color}0d`,
+          border: `1px solid ${status.color}22`,
+        }}
+      >
+        <p
+          style={{
+            fontSize: 12,
+            lineHeight: 1.55,
+            color: 'var(--text-secondary)',
+            margin: 0,
+          }}
+        >
+          <strong style={{ color: status.color, fontWeight: 800 }}>{status.label}:</strong>{' '}
+          {status.message}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ============================================================
+   STAT CARD (4 cards do meio)
+   ============================================================ */
+function StatCard({ icon: Icon, label, value, footer, color }) {
+  return (
+    <section
+      style={{
+        padding: 'clamp(16px, 2vw, 20px)',
+        borderRadius: 20,
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        transition: 'border-color 0.15s, transform 0.15s',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 10,
+        }}
+      >
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: 'var(--text-muted)',
+            margin: 0,
+            minWidth: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {label}
+        </p>
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            display: 'grid',
+            placeItems: 'center',
+            background: `${color}18`,
+            flexShrink: 0,
+          }}
+        >
+          <Icon size={18} style={{ color }} />
+        </div>
+      </div>
+      <p
+        style={{
+          fontSize: 'clamp(20px, 2.6vw, 24px)',
+          fontWeight: 800,
+          color,
+          margin: 0,
+          letterSpacing: '-0.02em',
+          lineHeight: 1.1,
+          wordBreak: 'break-word',
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </p>
+      <p
+        style={{
+          fontSize: 11,
+          color: 'var(--text-muted)',
+          margin: 0,
+          lineHeight: 1.5,
+        }}
+      >
+        {footer}
+      </p>
+    </section>
+  );
+}
+
+/* ============================================================
+   QUICK ACTION
+   ============================================================ */
 function QuickActionCard({ action, onNavigate }) {
   const Icon = action.icon;
 
@@ -99,78 +819,494 @@ function QuickActionCard({ action, onNavigate }) {
     <motion.button
       type="button"
       whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -2 }}
       onClick={() => onNavigate(action.screen)}
-      className="group rounded-3xl p-4 sm:p-5 text-left transition-all duration-200"
-      style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
+      style={{
+        padding: 'clamp(14px, 2vw, 18px)',
+        borderRadius: 18,
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
+        textAlign: 'left',
+        cursor: 'pointer',
+        minWidth: 0,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        transition: 'border-color 0.18s',
+      }}
     >
-      <div className="flex items-center gap-3 sm:gap-4">
-        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105" style={{ background: 'rgba(255,255,255,0.06)' }}>
-          <Icon size={20} style={{ color: 'var(--gold)' }} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-            {action.label}
-          </p>
-          <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            {action.description}
-          </p>
-        </div>
+      <div
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 12,
+          display: 'grid',
+          placeItems: 'center',
+          background: `${action.color}18`,
+          flexShrink: 0,
+        }}
+      >
+        <Icon size={20} style={{ color: action.color }} />
       </div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <p
+          style={{
+            fontSize: 14,
+            fontWeight: 800,
+            color: 'var(--text-primary)',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {action.label}
+        </p>
+        <p
+          style={{
+            marginTop: 2,
+            fontSize: 12,
+            color: 'var(--text-muted)',
+            lineHeight: 1.4,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {action.description}
+        </p>
+      </div>
+      <ChevronRight
+        size={16}
+        style={{ color: 'var(--text-muted)', flexShrink: 0 }}
+      />
     </motion.button>
   );
 }
 
+/* ============================================================
+   JAR CARD
+   ============================================================ */
 function JarCard({ jar }) {
   return (
-    <div className="rounded-2xl p-3 sm:p-4" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-base shrink-0">{jar.icon}</span>
-          <span className="text-xs sm:text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
-            {jar.shortLabel}
-          </span>
+    <div
+      style={{
+        padding: 14,
+        borderRadius: 16,
+        background: 'var(--bg-primary)',
+        border: '1px solid var(--border)',
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 10,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            minWidth: 0,
+            flex: 1,
+          }}
+        >
+          <div
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              display: 'grid',
+              placeItems: 'center',
+              background: `${jar.color}18`,
+              fontSize: 16,
+              flexShrink: 0,
+            }}
+          >
+            {jar.icon}
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                color: 'var(--text-primary)',
+                margin: 0,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {jar.label}
+            </p>
+            <p
+              style={{
+                marginTop: 2,
+                fontSize: 11,
+                color: 'var(--text-muted)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {formatCurrency(jar.allocated)}
+            </p>
+          </div>
         </div>
-        <span className="text-xs sm:text-sm font-black shrink-0" style={{ color: jar.color }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 800,
+            color: jar.color,
+            flexShrink: 0,
+            fontVariantNumeric: 'tabular-nums',
+          }}
+        >
           {jar.percentage}%
         </span>
       </div>
-      <div className="mt-3 h-2 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
-        <div className="h-full rounded-full" style={{ width: `${Math.min(jar.percentage, 100)}%`, background: jar.color }} />
+      <div
+        style={{
+          height: 6,
+          borderRadius: 999,
+          background: 'var(--border)',
+          overflow: 'hidden',
+        }}
+      >
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(jar.percentage, 100)}%` }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          style={{
+            height: '100%',
+            borderRadius: 999,
+            background: jar.color,
+          }}
+        />
       </div>
-      <p className="mt-2 text-[11px] sm:text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-        {formatCurrency(jar.allocated)}
-      </p>
     </div>
   );
 }
 
+/* ============================================================
+   TRANSACTION ITEM
+   ============================================================ */
 function TransactionItem({ transaction }) {
   const isIncome = isIncomeTransaction(transaction);
   const color = isIncome ? '#10B981' : '#EF4444';
   const Icon = isIncome ? ArrowDownLeft : ArrowUpRight;
 
+  const meta = [
+    transaction.category,
+    transaction.jar,
+    transaction.date && formatDate(transaction.date),
+  ]
+    .filter(Boolean)
+    .join(' • ');
+
   return (
-    <div className="rounded-2xl p-4 flex items-center gap-4" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
-      <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${color}18` }}>
+    <article
+      style={{
+        padding: 14,
+        borderRadius: 14,
+        background: 'var(--bg-primary)',
+        border: '1px solid var(--border)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          display: 'grid',
+          placeItems: 'center',
+          background: `${color}18`,
+          flexShrink: 0,
+        }}
+      >
         <Icon size={18} style={{ color }} />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm sm:text-base font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <p
+          style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: 'var(--text-primary)',
+            margin: 0,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {transaction.description || 'Transação'}
         </p>
-        <p className="mt-1 text-xs leading-relaxed truncate" style={{ color: 'var(--text-muted)' }}>
-          {transaction.category || 'Sem categoria'}
-          {transaction.jar ? ` • ${transaction.jar}` : ''}
-          {transaction.date ? ` • ${formatDate(transaction.date)}` : ''}
+        <p
+          style={{
+            marginTop: 2,
+            fontSize: 11,
+            color: 'var(--text-muted)',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {meta || 'Sem detalhes'}
         </p>
       </div>
-      <p className="text-sm sm:text-base font-black shrink-0" style={{ color }}>
-        {isIncome ? '+' : '-'}{formatCurrency(Math.abs(transaction.amount || 0))}
+      <p
+        style={{
+          fontSize: 14,
+          fontWeight: 800,
+          color,
+          flexShrink: 0,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {isIncome ? '+' : '-'}
+        {formatCurrency(Math.abs(transaction.amount || 0))}
       </p>
+    </article>
+  );
+}
+
+/* ============================================================
+   EMPTY TRANSACTIONS
+   ============================================================ */
+function EmptyTransactions({ onAdd }) {
+  return (
+    <div
+      style={{
+        padding: 'clamp(24px, 4vw, 36px) 20px',
+        borderRadius: 18,
+        background: 'var(--bg-primary)',
+        border: '1px dashed var(--border)',
+        textAlign: 'center',
+      }}
+    >
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: 16,
+          background: 'rgba(212,168,67,0.12)',
+          color: 'var(--gold)',
+          display: 'grid',
+          placeItems: 'center',
+          margin: '0 auto 12px',
+        }}
+      >
+        <Coins size={28} />
+      </div>
+      <p
+        style={{
+          fontSize: 15,
+          fontWeight: 800,
+          color: 'var(--text-primary)',
+          margin: 0,
+        }}
+      >
+        Ainda sem transações
+      </p>
+      <p
+        style={{
+          marginTop: 6,
+          fontSize: 13,
+          color: 'var(--text-muted)',
+          lineHeight: 1.55,
+          maxWidth: 320,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}
+      >
+        Regista a primeira receita ou despesa para ativar o painel.
+      </p>
+      <button
+        type="button"
+        onClick={onAdd}
+        style={{
+          marginTop: 16,
+          padding: '10px 18px',
+          borderRadius: 12,
+          fontSize: 13,
+          fontWeight: 800,
+          color: 'var(--text-inverse)',
+          background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
+          border: 'none',
+          cursor: 'pointer',
+          minHeight: 44,
+          boxShadow: '0 6px 16px rgba(212,168,67,0.28)',
+        }}
+      >
+        + Adicionar transação
+      </button>
     </div>
   );
 }
 
+/* ============================================================
+   SURVIVAL BANNER
+   ============================================================ */
+function SurvivalBanner({ overdueDebts, onOpen }) {
+  if (!overdueDebts) return null;
+
+  return (
+    <motion.button
+      type="button"
+      onClick={onOpen}
+      whileTap={{ scale: 0.99 }}
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        width: '100%',
+        padding: 'clamp(16px, 2.2vw, 20px)',
+        borderRadius: 20,
+        background: 'linear-gradient(135deg, rgba(239,68,68,0.14), rgba(239,68,68,0.06))',
+        border: '1px solid rgba(239,68,68,0.32)',
+        textAlign: 'left',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 12,
+          display: 'grid',
+          placeItems: 'center',
+          background: 'rgba(239,68,68,0.2)',
+          color: '#EF4444',
+          flexShrink: 0,
+        }}
+      >
+        <AlertTriangle size={20} />
+      </div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <p
+          style={{
+            fontSize: 14,
+            fontWeight: 800,
+            color: '#EF4444',
+            margin: 0,
+          }}
+        >
+          Modo sobrevivência ativo
+        </p>
+        <p
+          style={{
+            marginTop: 2,
+            fontSize: 12,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.5,
+          }}
+        >
+          {overdueDebts} dívida{overdueDebts > 1 ? 's' : ''} em atraso. Revê pagamentos.
+        </p>
+      </div>
+      <ChevronRight size={18} style={{ color: '#EF4444', flexShrink: 0 }} />
+    </motion.button>
+  );
+}
+
+/* ============================================================
+   COACH PANEL
+   ============================================================ */
+function CoachPanel({ user, modeColor, onOpen }) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onOpen}
+      whileTap={{ scale: 0.99 }}
+      whileHover={{ y: -2 }}
+      style={{
+        width: '100%',
+        padding: 'clamp(18px, 2.5vw, 24px)',
+        borderRadius: 22,
+        background: 'var(--card)',
+        border: '1px solid var(--border)',
+        textAlign: 'left',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        minWidth: 0,
+        flexWrap: 'wrap',
+      }}
+    >
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          borderRadius: 18,
+          display: 'grid',
+          placeItems: 'center',
+          background: `${modeColor}20`,
+          color: modeColor,
+          flexShrink: 0,
+        }}
+      >
+        <Bot size={26} />
+      </div>
+      <div style={{ minWidth: 0, flex: '1 1 200px' }}>
+        <p
+          style={{
+            fontSize: 'clamp(15px, 2vw, 18px)',
+            fontWeight: 800,
+            color: 'var(--text-primary)',
+            margin: 0,
+          }}
+        >
+          Fala com o {user?.coachName || 'Coach'}
+        </p>
+        <p
+          style={{
+            marginTop: 4,
+            fontSize: 13,
+            color: 'var(--text-muted)',
+            lineHeight: 1.5,
+          }}
+        >
+          Orientação financeira com base nos teus gastos, metas e dívidas.
+        </p>
+      </div>
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '8px 14px',
+          borderRadius: 12,
+          fontSize: 12,
+          fontWeight: 800,
+          background: `${modeColor}18`,
+          color: modeColor,
+          flexShrink: 0,
+        }}
+      >
+        Abrir <ChevronRight size={14} />
+      </span>
+    </motion.button>
+  );
+}
+
+/* ============================================================
+   DASHBOARD PRINCIPAL
+   ============================================================ */
 export default function Dashboard() {
   const { user, setScreen } = useStore();
 
@@ -182,7 +1318,6 @@ export default function Dashboard() {
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
-
     try {
       const [summaryRes, txRes, debtRes] = await Promise.allSettled([
         api.getReportSummary(),
@@ -193,12 +1328,10 @@ export default function Dashboard() {
       if (summaryRes.status === 'fulfilled' && summaryRes.value?.data) {
         setSummary(summaryRes.value.data);
       }
-
       if (txRes.status === 'fulfilled' && txRes.value?.data) {
         const txs = txRes.value.data.transactions || txRes.value.data || [];
         setRecentTransactions(Array.isArray(txs) ? txs.slice(0, 5) : []);
       }
-
       if (debtRes.status === 'fulfilled') {
         setOverdueDebts(debtRes.value?.data?.summary?.overdueCount || 0);
       }
@@ -221,303 +1354,216 @@ export default function Dashboard() {
     return () => window.removeEventListener('poupt-refresh-dashboard', handleRefresh);
   }, [loadDashboardData]);
 
+  const totalIncome = summary?.totalIncome ?? summary?.income ?? 0;
+  const totalExpenses = summary?.totalExpenses ?? summary?.expenses ?? 0;
+  const available = totalIncome - totalExpenses;
+
   const jars = useMemo(() => {
     const defaultJars = useStore.getState().defaultJarPercentages;
     const jarPercentages = user?.jarPercentages || defaultJars;
-    const income = user?.income || summary?.totalIncome || summary?.income || 0;
+    const income = user?.income || totalIncome || 0;
 
     return jarDefinitions.map((jar) => ({
       ...jar,
       percentage: jarPercentages[jar.key] || 0,
       allocated: income * ((jarPercentages[jar.key] || 0) / 100),
     }));
-  }, [summary?.income, summary?.totalIncome, user?.income, user?.jarPercentages]);
-
-  const totalIncome = summary?.totalIncome ?? summary?.income ?? 0;
-  const totalExpenses = summary?.totalExpenses ?? summary?.expenses ?? 0;
-  const available = totalIncome - totalExpenses;
-  const spentPercent = totalIncome > 0 ? (totalExpenses / totalIncome) * 100 : 0;
-  const savingsRate = totalIncome > 0 ? ((available / totalIncome) * 100) : 0;
+  }, [totalIncome, user?.income, user?.jarPercentages]);
 
   const modeColor = modeColors[user?.financialMode] || modeColors.sobrevivencia;
   const modeLabel = modeLabels[user?.financialMode] || 'Sobrevivência';
-  const userName = user?.name ? user.name.split(' ')[0] : 'amigo';
-
-  const progressColor = spentPercent > 85 ? '#EF4444' : spentPercent > 65 ? '#F59E0B' : '#10B981';
 
   if (loading) return <LoadingState />;
 
   return (
-    <main className="w-full px-4 py-5 sm:px-6 sm:py-7 lg:px-8 xl:px-10 2xl:px-12">
-      <div className="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8 lg:space-y-10">
-        <section className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] gap-6 lg:gap-8">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-[32px] p-5 sm:p-7 lg:p-8 min-h-[330px] flex flex-col justify-between"
-            style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold-light))', boxShadow: '0 24px 80px rgba(0,0,0,0.22)' }}
+    <DashboardShell>
+      {/* Banner de alerta (se aplicável) */}
+      <SurvivalBanner
+        overdueDebts={overdueDebts}
+        onOpen={() => setScreen('survival')}
+      />
+
+      {/* HERO + GASTOS */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: 'clamp(16px, 2vw, 20px)',
+        }}
+        className="dashboard-hero-grid"
+      >
+        <HeroPanel
+          user={user}
+          available={available}
+          modeLabel={modeLabel}
+          modeColor={modeColor}
+          onRefresh={loadDashboardData}
+          lastUpdated={lastUpdated}
+        />
+        <SpendingPanel
+          totalIncome={totalIncome}
+          totalExpenses={totalExpenses}
+          available={available}
+        />
+      </div>
+
+      {/* 4 STAT CARDS */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 'clamp(10px, 1.5vw, 14px)',
+        }}
+      >
+        <StatCard
+          icon={ArrowDownLeft}
+          label="Receitas"
+          value={formatCurrency(totalIncome)}
+          color="#10B981"
+          footer="Total recebido no período."
+        />
+        <StatCard
+          icon={ArrowUpRight}
+          label="Despesas"
+          value={formatCurrency(totalExpenses)}
+          color="#EF4444"
+          footer="Total registado como saída."
+        />
+        <StatCard
+          icon={Wallet}
+          label="Saldo"
+          value={formatCurrency(available)}
+          color={available >= 0 ? 'var(--gold)' : '#EF4444'}
+          footer="Receitas menos despesas."
+        />
+        <StatCard
+          icon={CreditCard}
+          label="Dívidas atraso"
+          value={String(overdueDebts)}
+          color={overdueDebts > 0 ? '#EF4444' : '#10B981'}
+          footer="Pagamentos que exigem atenção."
+        />
+      </div>
+
+      {/* AÇÕES RÁPIDAS */}
+      <section>
+        <SectionHeader
+          icon={Sparkles}
+          title="Ações rápidas"
+          description="Operações principais a um toque de distância."
+        />
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 'clamp(10px, 1.5vw, 14px)',
+          }}
+        >
+          {quickActions.map((action) => (
+            <QuickActionCard
+              key={action.screen}
+              action={action}
+              onNavigate={setScreen}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* FRASCOS + TRANSAÇÕES */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr',
+          gap: 'clamp(16px, 2vw, 20px)',
+        }}
+        className="dashboard-split-grid"
+      >
+        {/* FRASCOS */}
+        <section
+          style={{
+            padding: 'clamp(18px, 2.5vw, 24px)',
+            borderRadius: 'clamp(20px, 2.4vw, 24px)',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            minWidth: 0,
+          }}
+        >
+          <SectionHeader
+            title="6 Frascos"
+            description="Distribuição do rendimento."
+            actionLabel="Editar"
+            onAction={() => setScreen('jars')}
+          />
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: 10,
+            }}
           >
-            <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at 18% 20%, white 0%, transparent 32%), radial-gradient(circle at 90% 12%, white 0%, transparent 24%)' }} />
-
-            <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
-              <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black text-black/75" style={{ background: 'rgba(255,255,255,0.28)' }}>
-                  <Shield size={13} />
-                  {modeLabel}
-                </div>
-
-                <h1 className="mt-5 text-2xl sm:text-3xl lg:text-5xl font-black tracking-tight leading-tight text-black">
-                  {getGreeting()}, {userName}
-                </h1>
-
-                <p className="mt-3 max-w-2xl text-sm sm:text-base leading-relaxed text-black/70">
-                  Visão geral do teu mês financeiro. Mantém o controlo entre receitas, despesas, frascos e metas.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={loadDashboardData}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black text-black transition-transform active:scale-95"
-                style={{ background: 'rgba(255,255,255,0.32)' }}
-              >
-                <RefreshCw size={16} />
-                Atualizar
-              </button>
-            </div>
-
-            <div className="relative mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="rounded-3xl p-4 sm:p-5" style={{ background: 'rgba(0,0,0,0.14)' }}>
-                <p className="text-xs font-bold text-black/65">Disponível</p>
-                <p className="mt-2 text-3xl sm:text-4xl font-black text-black tracking-tight">
-                  {formatCurrency(available)}
-                </p>
-              </div>
-
-              <div className="rounded-3xl p-4 sm:p-5" style={{ background: 'rgba(255,255,255,0.22)' }}>
-                <p className="text-xs font-bold text-black/65">PoupMoedas</p>
-                <p className="mt-2 text-3xl sm:text-4xl font-black text-black tracking-tight">
-                  {user?.poupMoedas || 0}
-                </p>
-              </div>
-
-              <div className="rounded-3xl p-4 sm:p-5" style={{ background: 'rgba(255,255,255,0.22)' }}>
-                <p className="text-xs font-bold text-black/65">Streak</p>
-                <p className="mt-2 text-3xl sm:text-4xl font-black text-black tracking-tight">
-                  {user?.streak || 0} dias
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          <aside className="space-y-4 sm:space-y-5 lg:space-y-6">
-            {overdueDebts > 0 && (
-              <motion.button
-                type="button"
-                onClick={() => setScreen('survival')}
-                whileTap={{ scale: 0.98 }}
-                className="w-full rounded-3xl p-5 text-left survival-pulse"
-                style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.32)' }}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'rgba(239,68,68,0.18)' }}>
-                    <AlertTriangle size={22} style={{ color: '#EF4444' }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm sm:text-base font-black" style={{ color: '#EF4444' }}>
-                      Modo sobrevivência ativo
-                    </p>
-                    <p className="mt-1 text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                      {overdueDebts} dívida{overdueDebts > 1 ? 's' : ''} em atraso. Prioriza estes pagamentos.
-                    </p>
-                  </div>
-                  <ChevronRight size={18} style={{ color: '#EF4444' }} />
-                </div>
-              </motion.button>
-            )}
-
-            <div className="rounded-[28px] p-5 sm:p-6" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-              <div className="flex items-center justify-between gap-4 mb-4">
-                <div>
-                  <h2 className="text-base sm:text-lg font-black" style={{ color: 'var(--text-primary)' }}>
-                    Gastos do mês
-                  </h2>
-                  <p className="mt-1 text-xs sm:text-sm" style={{ color: 'var(--text-muted)' }}>
-                    {formatCurrency(totalExpenses)} de {formatCurrency(totalIncome)}
-                  </p>
-                </div>
-                <span className="text-sm font-black" style={{ color: progressColor }}>
-                  {spentPercent.toFixed(0)}%
-                </span>
-              </div>
-
-              <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(spentPercent, 100)}%` }}
-                  transition={{ duration: 0.8 }}
-                  className="h-full rounded-full"
-                  style={{ background: progressColor }}
-                />
-              </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl p-3" style={{ background: 'var(--bg-secondary)' }}>
-                  <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Taxa de poupança</p>
-                  <p className="mt-1 text-lg font-black" style={{ color: savingsRate >= 0 ? '#10B981' : '#EF4444' }}>
-                    {savingsRate.toFixed(1)}%
-                  </p>
-                </div>
-                <div className="rounded-2xl p-3" style={{ background: 'var(--bg-secondary)' }}>
-                  <p className="text-[11px] font-medium" style={{ color: 'var(--text-muted)' }}>Última atualização</p>
-                  <p className="mt-1 text-sm font-black" style={{ color: 'var(--text-primary)' }}>
-                    {lastUpdated ? lastUpdated.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </aside>
-        </section>
-
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
-          <StatCard icon={ArrowDownLeft} label="Receitas" value={formatCurrency(totalIncome)} tone="success" footer="Total recebido no período atual." />
-          <StatCard icon={ArrowUpRight} label="Despesas" value={formatCurrency(totalExpenses)} tone="danger" footer="Total registado como saída." />
-          <StatCard icon={Wallet} label="Saldo disponível" value={formatCurrency(available)} tone={available >= 0 ? 'default' : 'danger'} footer="Receitas menos despesas." />
-          <StatCard icon={CreditCard} label="Dívidas em atraso" value={String(overdueDebts)} tone={overdueDebts > 0 ? 'danger' : 'success'} footer="Pagamentos que exigem atenção." />
-        </section>
-
-        <section>
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4 sm:mb-5">
-            <div>
-              <h2 className="text-lg sm:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
-                Ações rápidas
-              </h2>
-              <p className="mt-1 text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                As operações principais com espaçamento confortável em mobile, tablet e desktop.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
-            {quickActions.map((action) => (
-              <QuickActionCard key={action.screen} action={action} onNavigate={setScreen} />
+            {jars.map((jar) => (
+              <JarCard key={jar.key} jar={jar} />
             ))}
           </div>
         </section>
 
-        <section className="grid grid-cols-1 xl:grid-cols-[minmax(0,0.95fr)_minmax(420px,1.05fr)] gap-6 lg:gap-8">
-          <div className="rounded-[28px] p-5 sm:p-6 lg:p-7" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-            <div className="flex items-center justify-between gap-4 mb-5">
-              <div>
-                <h2 className="text-lg sm:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
-                  6 Frascos
-                </h2>
-                <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Distribuição do rendimento por categoria.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setScreen('jars')}
-                className="hidden sm:inline-flex items-center gap-1 text-sm font-black"
-                style={{ color: 'var(--gold)' }}
-              >
-                Editar <ChevronRight size={16} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
-              {jars.map((jar) => (
-                <JarCard key={jar.key} jar={jar} />
+        {/* TRANSAÇÕES */}
+        <section
+          style={{
+            padding: 'clamp(18px, 2.5vw, 24px)',
+            borderRadius: 'clamp(20px, 2.4vw, 24px)',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
+            minWidth: 0,
+          }}
+        >
+          <SectionHeader
+            title="Transações recentes"
+            description="Últimos movimentos."
+            actionLabel={recentTransactions.length > 0 ? 'Ver tudo' : null}
+            onAction={recentTransactions.length > 0 ? () => setScreen('reports') : null}
+          />
+          {recentTransactions.length > 0 ? (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+              }}
+            >
+              {recentTransactions.map((t) => (
+                <TransactionItem key={t._id || t.id} transaction={t} />
               ))}
             </div>
-
-            <button
-              type="button"
-              onClick={() => setScreen('jars')}
-              className="mt-4 sm:hidden w-full rounded-2xl py-3 text-sm font-black"
-              style={{ background: 'rgba(255,215,0,0.14)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.26)' }}
-            >
-              Editar frascos
-            </button>
-          </div>
-
-          <div className="rounded-[28px] p-5 sm:p-6 lg:p-7" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-            <div className="flex items-center justify-between gap-4 mb-5">
-              <div>
-                <h2 className="text-lg sm:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
-                  Transações recentes
-                </h2>
-                <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Últimos movimentos registados.
-                </p>
-              </div>
-              {recentTransactions.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setScreen('reports')}
-                  className="hidden sm:inline-flex items-center gap-1 text-sm font-black"
-                  style={{ color: 'var(--gold)' }}
-                >
-                  Ver relatórios <ChevronRight size={16} />
-                </button>
-              )}
-            </div>
-
-            {recentTransactions.length > 0 ? (
-              <div className="space-y-3">
-                {recentTransactions.map((transaction) => (
-                  <TransactionItem key={transaction._id || transaction.id} transaction={transaction} />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-3xl p-8 sm:p-10 text-center" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
-                <Coins size={44} className="mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
-                <p className="text-base sm:text-lg font-black" style={{ color: 'var(--text-primary)' }}>
-                  Ainda sem transações
-                </p>
-                <p className="mt-2 text-sm leading-relaxed max-w-md mx-auto" style={{ color: 'var(--text-muted)' }}>
-                  Regista a primeira entrada ou despesa para ativar o painel financeiro.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setScreen('addTransaction')}
-                  className="mt-5 rounded-2xl px-5 py-3 text-sm font-black text-black gold-gradient"
-                >
-                  Adicionar transação
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section>
-          <motion.button
-            type="button"
-            onClick={() => setScreen('coach')}
-            whileTap={{ scale: 0.98 }}
-            className="w-full rounded-[28px] p-5 sm:p-6 lg:p-7 text-left"
-            style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-              <div className="w-14 h-14 rounded-3xl flex items-center justify-center shrink-0" style={{ background: `${modeColor}20` }}>
-                <Bot size={26} style={{ color: modeColor }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-lg sm:text-2xl font-black" style={{ color: 'var(--text-primary)' }}>
-                  Fala com o {user?.coachName || 'Coach'}
-                </p>
-                <p className="mt-2 text-sm sm:text-base leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-                  Recebe orientação financeira com base no teu modo atual, dívidas, metas e comportamento de gastos.
-                </p>
-              </div>
-              <div className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black" style={{ background: `${modeColor}16`, color: modeColor }}>
-                Abrir coach <ChevronRight size={16} />
-              </div>
-            </div>
-          </motion.button>
+          ) : (
+            <EmptyTransactions onAdd={() => setScreen('addTransaction')} />
+          )}
         </section>
       </div>
-    </main>
+
+      {/* COACH */}
+      <CoachPanel
+        user={user}
+        modeColor={modeColor}
+        onOpen={() => setScreen('coach')}
+      />
+
+      {/* Estilos responsivos via tag */}
+      <style>{`
+        @media (min-width: 1024px) {
+          .dashboard-hero-grid {
+            grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr) !important;
+          }
+          .dashboard-split-grid {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+          }
+        }
+        @media (min-width: 1440px) {
+          .dashboard-hero-grid {
+            grid-template-columns: minmax(0, 1.5fr) minmax(360px, 0.9fr) !important;
+          }
+        }
+      `}</style>
+    </DashboardShell>
   );
 }
