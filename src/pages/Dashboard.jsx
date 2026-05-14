@@ -94,7 +94,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-4">
+      <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-4">
         <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
@@ -103,9 +103,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5" style={{ background: theme.background }}>
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5" style={{ background: theme.background }}>
       {/* Greeting row */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-y-1">
         <div>
           <h2 className="text-lg sm:text-xl font-bold" style={{ color: theme.text }}>
             {greeting}, {userName} 🌅
@@ -192,9 +192,9 @@ export default function Dashboard() {
 
         {/* Mini jar icons */}
         {jars.length > 0 && (
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex items-center gap-2 mt-3 overflow-x-auto">
             {jars.map((jar) => (
-              <div key={jar.key} className="flex-1 flex flex-col items-center">
+              <div key={jar.key} className="flex-1 flex flex-col items-center shrink-0">
                 <span className="text-xs">{jar.icon}</span>
                 <span className="text-xs font-medium mt-0.5" style={{ color: jar.color }}>
                   {jar.percentage}%
@@ -206,7 +206,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 xs:grid-cols-4 gap-3 sm:gap-4">
         {[
           { icon: Sparkles, label: 'Moedas', screen: 'poupMoedas' },
           { icon: Plus, label: 'Adicionar', screen: 'addTransaction' },
@@ -217,7 +217,7 @@ export default function Dashboard() {
             key={action.label}
             whileTap={{ scale: 0.9 }}
             onClick={() => setScreen(action.screen)}
-            className="flex flex-col items-center gap-1.5 p-3 sm:p-4 rounded-xl transition-colors duration-150"
+            className="flex flex-col items-center gap-1.5 p-3 sm:p-4 rounded-xl transition-colors duration-150 min-h-[48px]"
             style={{ background: theme.surface }}
           >
             <action.icon size={20} style={{ color: theme.primary }} />
@@ -284,7 +284,7 @@ export default function Dashboard() {
         className="w-full glass rounded-xl p-4 sm:p-5 flex items-center gap-3"
       >
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
+          className="w-11 h-11 rounded-xl flex items-center justify-center text-lg"
           style={{ background: `${theme.primary}20` }}
         >
           <Bot size={20} style={{ color: theme.primary }} />

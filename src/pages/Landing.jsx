@@ -18,7 +18,7 @@ function FeatureItem({ icon, title, description, theme }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <div
         style={{
-          width: 42, height: 42, flexShrink: 0, borderRadius: 13,
+          width: 48, height: 48, flexShrink: 0, borderRadius: 13,
           background: `${theme.primary}20`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
@@ -49,7 +49,7 @@ function StoreBadge({ icon, text, theme }) {
   return (
     <div
       style={{
-        height: 34, padding: '0 15px', borderRadius: 9,
+        height: 44, padding: '0 15px', borderRadius: 9,
         background: theme.surface, color: theme.textMuted,
         border: `1px solid ${theme.border}`,
         display: 'flex', alignItems: 'center', gap: 6,
@@ -99,7 +99,7 @@ export default function Landing() {
           width: 'min(calc(100vw - 32px), 480px)',
           minHeight: '100dvh',
           margin: '0 auto',
-          paddingTop: 40,
+          paddingTop: 32,
           paddingBottom: 20,
           position: 'relative',
           zIndex: 1,
@@ -113,14 +113,14 @@ export default function Landing() {
           transition={{ duration: 0.45 }}
           style={{ textAlign: 'center' }}
         >
-          <div style={{ fontSize: 58, lineHeight: '58px', height: 58, marginBottom: 8 }}>
+          <div style={{ fontSize: 48, lineHeight: '48px', height: 48, marginBottom: 8 }}>
             🐷
           </div>
 
           <h1
             className="gradient-text"
             style={{
-              margin: 0, fontSize: 35, lineHeight: '38px', fontWeight: 900, letterSpacing: '-1px',
+              margin: 0, fontSize: 30, lineHeight: '34px', fontWeight: 900, letterSpacing: '-1px',
               backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
             }}
           >

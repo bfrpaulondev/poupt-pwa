@@ -154,7 +154,7 @@ export default function Debts() {
 
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
         className="flex items-center gap-1 mb-3 text-xs font-medium"
         style={{ color: 'var(--text-secondary)' }}>
@@ -175,7 +175,7 @@ export default function Debts() {
               {summary.totalDebts} divida{summary.totalDebts !== 1 ? 's' : ''}
             </span>
           </div>
-          <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
             <div>
               <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Total em divida</span>
               <p className="text-base font-bold" style={{ color: '#EF4444' }}>{formatCurrency(summary.totalOwed)}</p>
@@ -223,7 +223,7 @@ export default function Debts() {
 
       <div className="flex gap-2">
         <button onClick={() => { setActiveTab('formal'); setShowForm(false); setShowInformalForm(false); }}
-          className="flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-medium transition-all text-center"
+          className="flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-medium transition-all text-center min-h-[44px]"
           style={{
             background: activeTab === 'formal' ? 'rgba(239,68,68,0.15)' : 'var(--bg-secondary)',
             color: activeTab === 'formal' ? '#EF4444' : 'var(--text-secondary)',
@@ -232,7 +232,7 @@ export default function Debts() {
           <CreditCard size={12} className="inline mr-1" /> Formais ({formalDebts.length})
         </button>
         <button onClick={() => { setActiveTab('informal'); setShowForm(false); setShowInformalForm(false); }}
-          className="flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-medium transition-all text-center"
+          className="flex-1 py-2.5 sm:py-3 rounded-xl text-xs font-medium transition-all text-center min-h-[44px]"
           style={{
             background: activeTab === 'informal' ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)',
             color: activeTab === 'informal' ? 'var(--gold)' : 'var(--text-secondary)',
@@ -245,12 +245,12 @@ export default function Debts() {
       {activeTab === 'formal' && (
         <div className="flex gap-2">
           <button onClick={() => { setShowForm(!showForm); setShowInformalForm(false); }}
-            className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+            className="flex-1 py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
             style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' }}>
             <Plus size={14} /> Divida Formal
           </button>
           <button onClick={loadSnowball}
-            className="px-4 py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+            className="px-4 py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
             style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' }}>
             <Snowflake size={14} /> Snowball
           </button>
@@ -259,7 +259,7 @@ export default function Debts() {
 
       {activeTab === 'informal' && (
         <button onClick={() => { setShowInformalForm(!showInformalForm); setShowForm(false); }}
-          className="w-full py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+          className="w-full py-3 sm:py-3.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 min-h-[48px]"
           style={{ background: 'rgba(255,215,0,0.1)', color: 'var(--gold)', border: '1px solid rgba(255,215,0,0.3)' }}>
           <Plus size={14} /> Divida Informal
         </button>
@@ -444,7 +444,7 @@ export default function Debts() {
               <div className="flex items-center justify-between"
                 onClick={() => setExpandedId(expandedId === debt._id ? null : debt._id)}>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center"
                     style={{ background: debt.status === 'pago' ? 'rgba(16,185,129,0.15)' : overdue ? 'rgba(239,68,68,0.15)' : 'rgba(239,68,68,0.1)' }}>
                     {debt.status === 'pago' ? <Check size={18} style={{ color: '#10B981' }} /> :
                       overdue ? <AlertTriangle size={18} style={{ color: '#EF4444' }} /> :
@@ -565,7 +565,7 @@ export default function Debts() {
               <div className="flex items-center justify-between"
                 onClick={() => setExpandedId(expandedId === debt._id ? null : debt._id)}>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center"
                     style={{ background: debt.status === 'pago' ? 'rgba(16,185,129,0.15)' : 'rgba(255,215,0,0.15)' }}>
                     {debt.status === 'pago' ? <Check size={18} style={{ color: '#10B981' }} /> :
                       <User size={18} style={{ color: 'var(--gold)' }} />}

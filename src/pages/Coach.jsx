@@ -92,10 +92,10 @@ export default function Coach() {
   return (
     <div className="flex flex-col h-full">
       {/* Coach Header */}
-      <div className="px-5 sm:px-8 py-3 sm:py-4 flex items-center justify-between"
+      <div className="px-4 xs:px-5 sm:px-8 py-3 sm:py-4 flex items-center justify-between"
         style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center"
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center"
             style={{ background: `${modeColor}20` }}>
             <Bot size={20} style={{ color: modeColor }} />
           </div>
@@ -108,13 +108,13 @@ export default function Coach() {
             </p>
           </div>
         </div>
-        <button onClick={handleClear} className="p-2 rounded-lg hover:bg-white/10">
+        <button onClick={handleClear} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-white/10">
           <Trash2 size={16} style={{ color: 'var(--text-muted)' }} />
         </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-4 sm:py-6 space-y-4 min-h-0">
+      <div className="flex-1 overflow-y-auto px-4 xs:px-5 sm:px-8 py-4 sm:py-6 space-y-4 min-h-0">
         {coachMessages.length === 0 && (
           <div className="text-center py-12 animate-fade-in">
             <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-3xl flex items-center justify-center"
@@ -170,7 +170,7 @@ export default function Coach() {
       </div>
 
       {/* Input */}
-      <div className="px-5 sm:px-8 py-3 sm:py-4" style={{ borderTop: '1px solid var(--border)' }}>
+      <div className="px-4 xs:px-5 sm:px-8 py-3 sm:py-4" style={{ borderTop: '1px solid var(--border)' }}>
         <div className="flex gap-2">
           <input type="text" value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}

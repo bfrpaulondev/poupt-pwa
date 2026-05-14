@@ -44,7 +44,7 @@ export default function Jars() {
   const jarOrder = ['necessities', 'freedom', 'savings', 'education', 'play', 'give'];
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 sm:space-y-6 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 sm:space-y-6 animate-fade-in">
       {/* Donut Chart */}
       <div className="flex justify-center py-4 sm:py-6">
         <JarDonut percentages={percentages} size={220} />

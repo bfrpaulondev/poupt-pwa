@@ -121,7 +121,7 @@ export default function Reports() {
   }
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
         className="flex items-center gap-1 mb-3 text-xs font-medium"
         style={{ color: 'var(--text-secondary)' }}>
@@ -149,7 +149,7 @@ export default function Reports() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+      <div className="grid grid-cols-1 xs:grid-cols-3 gap-2.5 sm:gap-3">
         <div className="glass-card p-4 sm:p-5 text-center">
           <ArrowDownLeft size={14} className="mx-auto mb-1" style={{ color: '#10B981' }} />
           <p className="text-sm font-bold" style={{ color: '#10B981' }}>{formatCurrency(totalIncome)}</p>

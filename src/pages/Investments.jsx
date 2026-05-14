@@ -155,7 +155,7 @@ export default function Investments() {
   }
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
         className="flex items-center gap-1 mb-3 text-xs font-medium"
         style={{ color: 'var(--text-secondary)' }}>
@@ -266,7 +266,7 @@ export default function Investments() {
             <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
               Tipo de ativo
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
               {Object.entries(typeLabels).map(([key, label]) => {
                 const Icon = typeIcons[key];
                 return (

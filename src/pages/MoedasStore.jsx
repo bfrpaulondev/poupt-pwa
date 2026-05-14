@@ -139,7 +139,7 @@ export default function MoedasStore() {
   ];
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
         className="flex items-center gap-1 mb-3 text-xs font-medium"
         style={{ color: 'var(--text-secondary)' }}>
@@ -155,7 +155,7 @@ export default function MoedasStore() {
             <Coins size={32} className="text-white"
               style={{ transform: coinSpin ? 'rotateY(180deg)' : 'rotateY(0deg)', transition: 'transform 0.6s' }} />
           </div>
-          <p className="text-4xl font-bold text-white">
+          <p className="text-3xl xs:text-4xl font-bold text-white">
             <AnimatedCounter target={balance} />
           </p>
           <p className="text-sm text-white/80 mt-1">PoupMoedas</p>
@@ -282,7 +282,7 @@ export default function MoedasStore() {
                 </div>
                 <button onClick={() => handleSpend(item)}
                   disabled={!canAfford || isPurchasing}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1"
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1"
                   style={{
                     background: canAfford ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                     color: canAfford ? 'var(--gold)' : 'var(--text-muted)',

@@ -25,7 +25,7 @@ export default function OfflineIndicator() {
           exit={{ opacity: 0, y: -30 }}
           transition={{ duration: 0.3 }}
           className="fixed left-0 right-0 z-[100] px-4 py-2 text-center text-xs font-medium"
-          style={{ top: '48px', background: '#EF4444', color: 'white' }}
+          style={{ top: 'calc(48px + env(safe-area-inset-top, 0px))', background: '#EF4444', color: 'white' }}
         >
           <WifiOff size={12} className="inline mr-1" />
           Sem ligacao a internet - alteracoes locais serao sincronizadas

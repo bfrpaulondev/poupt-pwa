@@ -157,7 +157,7 @@ export default function SurvivalMode() {
   const motivationIdx = Math.floor(Date.now() / 86400000) % currentMotivation.length;
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
         className="flex items-center gap-1 mb-3 text-xs font-medium"
         style={{ color: 'var(--text-secondary)' }}>

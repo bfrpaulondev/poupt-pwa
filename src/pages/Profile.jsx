@@ -94,7 +94,7 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-4">
+      <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-4">
         <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
@@ -103,7 +103,7 @@ export default function Profile() {
   }
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       {/* Avatar & Identity Card */}
       <div className="glass-card p-6 sm:p-8 text-center">
         <div className="relative inline-block mb-3">
@@ -111,7 +111,7 @@ export default function Profile() {
             style={{ background: `${modeColor}20`, color: modeColor }}>
             {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
-          <button className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
+          <button className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full flex items-center justify-center"
             style={{ background: 'var(--gold)', color: '#fff' }}
             onClick={() => {
               const newName = prompt('Nome de exibicao:', user?.name || '');
@@ -170,7 +170,7 @@ export default function Profile() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 sm:gap-3">
         <div className="glass-card p-3 sm:p-4 text-center">
           <Flame size={16} className="mx-auto mb-1" style={{ color: '#F97316' }} />
           <p className="text-sm sm:text-base font-bold" style={{ color: 'var(--text-primary)' }}>{user?.streak || 0}</p>
@@ -251,7 +251,7 @@ export default function Profile() {
             {detecting ? 'A detectar...' : 'Auto-detectar'}
           </button>
         </div>
-        <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-3 xs:grid-cols-5 gap-1.5 sm:gap-2">
           {modeOrder.map((mode) => (
             <button key={mode} onClick={async () => {
               try {
@@ -393,7 +393,7 @@ export default function Profile() {
         </div>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-2xl font-bold" style={{ color: 'var(--gold)' }}>{user?.poupMoedas || 0}</p>
+            <p className="text-xl xs:text-2xl font-bold truncate" style={{ color: 'var(--gold)' }}>{user?.poupMoedas || 0}</p>
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Saldo actual</p>
           </div>
           <button type="button" onClick={() => setScreen('poupMoedas')}

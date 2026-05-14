@@ -160,7 +160,7 @@ export default function Goals() {
 
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
         className="flex items-center gap-1 mb-3 text-xs font-medium"
         style={{ color: 'var(--text-secondary)' }}>
@@ -199,17 +199,17 @@ export default function Goals() {
 
       {/* Stats Grid */}
       {goals.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="grid grid-cols-1 xs:grid-cols-3 gap-2 sm:gap-3">
           <div className="glass-card p-3 sm:p-4 text-center">
-            <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{activeGoals.length}</p>
+            <p className="text-base xs:text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{activeGoals.length}</p>
             <p className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>Ativas</p>
           </div>
           <div className="glass-card p-3 sm:p-4 text-center">
-            <p className="text-lg font-bold" style={{ color: '#10B981' }}>{completedGoals.length}</p>
+            <p className="text-base xs:text-lg font-bold" style={{ color: '#10B981' }}>{completedGoals.length}</p>
             <p className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>Concluidas</p>
           </div>
           <div className="glass-card p-3 sm:p-4 text-center">
-            <p className="text-lg font-bold" style={{ color: 'var(--gold)' }}>
+            <p className="text-base xs:text-lg font-bold" style={{ color: 'var(--gold)' }}>
               {goals.reduce((sum, g) => sum + (g.currentAmount || 0), 0) > 0
                 ? formatCurrency(goals.reduce((sum, g) => sum + (g.currentAmount || 0), 0))
                 : '0€'}
@@ -268,7 +268,7 @@ export default function Goals() {
             <label className="text-xs font-medium mb-2 block" style={{ color: 'var(--text-secondary)' }}>
               Tipo de meta
             </label>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-2 xs:grid-cols-3 gap-2 sm:gap-3">
               {goalTypes.map(t => {
                 const Icon = t.icon;
                 return (
@@ -315,7 +315,7 @@ export default function Goals() {
             <div className="flex flex-wrap gap-1.5">
               {goalIcons.map(icon => (
                 <button key={icon} type="button" onClick={() => setForm({...form, icon})}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-sm transition-all"
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center text-sm transition-all"
                   style={{
                     background: form.icon === icon ? 'rgba(255,215,0,0.2)' : 'var(--bg-secondary)',
                     border: form.icon === icon ? '1px solid var(--gold)' : '1px solid var(--border)'
@@ -334,7 +334,7 @@ export default function Goals() {
             <div className="flex gap-2">
               {goalColors.map(color => (
                 <button key={color} type="button" onClick={() => setForm({...form, color})}
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full relative transition-all"
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full relative transition-all"
                   style={{
                     background: color,
                     boxShadow: form.color === color ? `0 0 0 2px var(--bg-primary), 0 0 0 4px ${color}` : 'none'
@@ -395,7 +395,7 @@ export default function Goals() {
                 </div>
                 {/* Delete button */}
                 <button onClick={() => handleDelete(goal._id)} disabled={deleting}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-all"
                   style={{
                     background: isConfirmDelete ? 'rgba(239,68,68,0.15)' : 'transparent',
                     color: isConfirmDelete ? '#EF4444' : 'var(--text-muted)'
@@ -472,7 +472,7 @@ export default function Goals() {
                       <div className="flex gap-1.5">
                         {[5, 10, 25, 50].map(amt => (
                           <button key={amt} type="button" onClick={() => setAddAmount(String(amt))}
-                            className="flex-1 py-1.5 sm:py-2 rounded-lg text-xs sm:text-xs font-medium"
+                            className="flex-1 py-2.5 sm:py-3 rounded-lg text-xs sm:text-xs font-medium"
                             style={{
                               background: addAmount === String(amt) ? `${goalColor}20` : 'var(--bg-primary)',
                               color: addAmount === String(amt) ? goalColor : 'var(--text-muted)',

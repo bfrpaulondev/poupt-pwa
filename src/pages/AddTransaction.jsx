@@ -94,7 +94,7 @@ export default function AddTransaction() {
 
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       {moedasEarned && (
         <div className="p-3 rounded-xl text-sm font-medium text-center animate-fade-in flex items-center justify-center gap-2"
           style={{ background: 'rgba(255,215,0,0.15)', color: 'var(--gold)' }}>
@@ -141,7 +141,7 @@ export default function AddTransaction() {
             </span>
             <input type="number" value={form.amount} onChange={e => setForm({...form, amount: e.target.value})}
               placeholder="0.00" required min="0.01" step="0.01"
-              className="text-3xl font-bold w-40 text-center bg-transparent outline-none"
+              className="text-3xl font-bold flex-1 min-w-0 max-w-[160px] text-center bg-transparent outline-none"
               style={{ color: type === 'receita' ? '#10B981' : '#EF4444' }} />
           </div>
           {form.amount && Number(form.amount) > 0 && (
@@ -164,7 +164,7 @@ export default function AddTransaction() {
           <label className="text-xs font-medium mb-2.5 block" style={{ color: 'var(--text-secondary)' }}>
             Categoria
           </label>
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-2 xs:grid-cols-3 gap-2.5 sm:gap-3">
             {categories.map(cat => (
               <button key={cat} type="button" onClick={() => setForm({...form, category: cat})}
                 className="py-3 px-2.5 sm:px-3 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1"
@@ -226,7 +226,7 @@ export default function AddTransaction() {
               <Calendar size={12} className="inline mr-1" /> Transacao recorrente
             </label>
             <button type="button" onClick={() => setForm({...form, isRecurring: !form.isRecurring})}
-              className="w-10 h-6 rounded-full transition-all relative"
+            className="w-12 h-7 rounded-full transition-all relative min-w-[44px] min-h-[44px] flex items-center"
               style={{ background: form.isRecurring ? 'var(--gold)' : 'var(--border)' }}>
               <div className="w-4 h-4 rounded-full bg-white absolute top-1 transition-all"
                 style={{ left: form.isRecurring ? '22px' : '4px' }} />

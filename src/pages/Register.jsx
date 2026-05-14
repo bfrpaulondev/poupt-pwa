@@ -74,9 +74,9 @@ export default function Register() {
       }}
     >
       <div
-        className="flex flex-col min-h-screen py-5"
+        className="flex flex-col min-h-screen px-4 xs:px-5 py-5"
         style={{
-          width: 'calc(100% - 26px)',
+          width: '100%',
           maxWidth: 430,
           margin: '0 auto',
         }}
@@ -197,7 +197,7 @@ export default function Register() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="p-1"
+                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
                 style={{ color: theme.textMuted }}
               >
                 {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}

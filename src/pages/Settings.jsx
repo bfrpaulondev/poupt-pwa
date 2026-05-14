@@ -197,15 +197,15 @@ export default function Settings() {
   ];
 
   const Toggle = ({ isOn, onToggle }) => (
-    <button onClick={onToggle} className="w-12 h-7 rounded-full relative transition-all shrink-0"
+    <button onClick={onToggle} className="w-12 h-7 rounded-full relative transition-all shrink-0 min-h-[44px] min-w-[44px] flex items-center"
       style={{ background: isOn ? 'var(--gold)' : 'var(--border)' }}>
-      <div className="w-5.5 h-5.5 rounded-full bg-white absolute top-0.5 transition-all"
+      <div className="w-5.5 h-5.5 rounded-full bg-white absolute top-0.5 transition-all my-auto"
         style={{ left: isOn ? '22px' : '2px' }} />
     </button>
   );
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-4 xs:px-5 sm:px-8 py-4 xs:py-5 sm:py-6 space-y-5 animate-fade-in">
       <button onClick={() => setScreen('dashboard')}
         className="flex items-center gap-1 mb-3 text-xs font-medium"
         style={{ color: 'var(--text-secondary)' }}>
@@ -227,7 +227,7 @@ export default function Settings() {
             Tema
           </h3>
         </div>
-        <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-3 xs:grid-cols-4 gap-2.5 sm:gap-3">
           {themeList.map(theme => (
             <button key={theme.id} onClick={() => handleThemeChange(theme.id)}
               className="flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl transition-all"
@@ -235,7 +235,7 @@ export default function Settings() {
                 background: selectedTheme === theme.id ? `${theme.color}15` : 'transparent',
                 border: selectedTheme === theme.id ? `1px solid ${theme.color}` : '1px solid transparent'
               }}>
-              <div className="w-8 h-8 rounded-full relative border"
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full relative border"
                 style={{ background: `linear-gradient(135deg, ${theme.color}, ${theme.bg})`,
                   boxShadow: selectedTheme === theme.id ? `0 0 12px ${theme.color}50` : 'none',
                   borderColor: theme.id === 'arcticWhite' ? '#CBD5E1' : 'transparent'

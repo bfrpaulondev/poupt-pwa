@@ -83,7 +83,7 @@ const menuItems = [
 function BottomNav({ theme, currentScreen, onTab }) {
   return (
     <div
-      className="flex items-center justify-around px-1 py-2 border-t safe-area-bottom"
+      className="flex items-center justify-around px-1 py-1.5 border-t safe-area-bottom"
       style={{
         background: theme.surface,
         borderColor: theme.border,
@@ -97,11 +97,10 @@ function BottomNav({ theme, currentScreen, onTab }) {
           <button
             key={tab.id}
             onClick={() => onTab(tab.id)}
-            className="flex flex-1 flex-col items-center gap-0.5 py-2 rounded-xl transition-all duration-200"
+            className="flex flex-1 flex-col items-center gap-0.5 py-1.5 sm:py-2 rounded-xl transition-all duration-200 min-h-[48px]"
             style={{
               color: isActive ? theme.primary : theme.textMuted,
               background: isActive ? `${theme.primary}15` : 'transparent',
-              minHeight: '44px',
             }}
           >
             <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
@@ -132,7 +131,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
             animate={{ x: 0 }}
             exit={{ x: -280 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 left-0 bottom-0 z-50 w-[280px] flex flex-col"
+            className="fixed top-0 left-0 bottom-0 z-50 w-[min(280px,80vw)] flex flex-col"
             style={{ background: theme.surface }}
           >
             <div
@@ -167,7 +166,7 @@ function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
                       onNavigate(item.id);
                       onClose();
                     }}
-                    className="flex items-center gap-3 w-full px-5 py-3.5 text-left transition-colors duration-150 hover:opacity-80"
+                    className="flex items-center gap-3 w-full px-5 py-4 text-left transition-colors duration-150 hover:opacity-80 min-h-[48px]"
                     style={{ color: theme.text }}
                   >
                     <Icon size={18} style={{ color: theme.textMuted }} />
@@ -359,11 +358,11 @@ function App() {
       }}
     >
       {!isFullScreen && (
-        <div className="shrink-0" style={{ background: theme.background }}>
-          <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 sm:px-6 py-2.5">
+        <div className="shrink-0 safe-area-top" style={{ background: theme.background }}>
+          <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 sm:px-6 py-3">
             <button
               onClick={() => setMenuOpen(true)}
-              className="p-2 rounded-xl transition-colors duration-150"
+              className="p-2.5 rounded-xl transition-colors duration-150 min-w-[44px] min-h-[44px] flex items-center justify-center"
               style={{ color: theme.text }}
             >
               <Menu size={22} />
@@ -377,7 +376,7 @@ function App() {
 
             <button
               onClick={() => setScreen('alerts')}
-              className="p-2 rounded-xl relative"
+              className="p-2.5 rounded-xl relative min-w-[44px] min-h-[44px] flex items-center justify-center"
               style={{ color: theme.text }}
             >
               <Bell size={20} />
