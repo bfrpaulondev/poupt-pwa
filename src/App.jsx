@@ -8,7 +8,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import OfflineIndicator from './components/OfflineIndicator';
 import {
   Home,
-  FlaskConical,
   Bot,
   CreditCard,
   User,
@@ -21,6 +20,9 @@ import {
   Shield,
   Coins,
   Settings,
+  Plus,
+  WalletCards,
+  FlaskConical,
   ChevronRight,
 } from 'lucide-react';
 
@@ -62,136 +64,150 @@ const screenComponents = {
   reports: Reports,
 };
 
-const tabs = [
-  { id: 'dashboard', label: 'Inicio', icon: Home },
-  { id: 'jars', label: 'Frascos', icon: FlaskConical },
+const primaryTabs = [
+  { id: 'dashboard', label: 'Início', icon: Home },
+  { id: 'addTransaction', label: 'Adicionar', icon: Plus },
+  { id: 'reports', label: 'Relatórios', icon: BarChart3 },
   { id: 'coach', label: 'Coach', icon: Bot },
-  { id: 'debts', label: 'Dividas', icon: CreditCard },
   { id: 'profile', label: 'Perfil', icon: User },
 ];
 
 const menuItems = [
-  { id: 'goals', label: 'Objetivos', icon: Target },
-  { id: 'reports', label: 'Relatorios', icon: BarChart3 },
-  { id: 'alerts', label: 'Alertas', icon: Bell },
-  { id: 'investments', label: 'Investimentos', icon: Building2 },
-  { id: 'survival', label: 'Modo Sobrevivencia', icon: Shield },
-  { id: 'poupMoedas', label: 'Loja PoupMoedas', icon: Coins },
-  { id: 'settings', label: 'Configuracoes', icon: Settings },
+  { id: 'jars', label: 'Frascos', description: 'Distribuição do rendimento', icon: FlaskConical },
+  { id: 'debts', label: 'Dívidas', description: 'Formais, informais e Snowball', icon: CreditCard },
+  { id: 'goals', label: 'Objetivos', description: 'Metas e poupanças', icon: Target },
+  { id: 'investments', label: 'Investimentos', description: 'Carteira e evolução', icon: Building2 },
+  { id: 'survival', label: 'Modo Sobrevivência', description: 'Plano de emergência', icon: Shield },
+  { id: 'poupMoedas', label: 'PoupMoedas', description: 'Saldo e loja', icon: Coins },
+  { id: 'settings', label: 'Definições', description: 'Conta, tema e privacidade', icon: Settings },
 ];
 
-function BottomNav({ theme, currentScreen, onTab }) {
+function BottomNav({ currentScreen, onTab }) {
   return (
-    <div
-      className="flex items-center justify-around px-1 py-3 border-t safe-area-bottom"
-      style={{
-        background: theme.surface,
-        borderColor: theme.border,
-      }}
-    >
-      {tabs.map((tab) => {
-        const isActive = currentScreen === tab.id;
-        const Icon = tab.icon;
+    <div className="ui-bottom-nav-wrap">
+      <nav className="ui-bottom-nav" aria-label="Navegação principal">
+        {primaryTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = currentScreen === tab.id;
 
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onTab(tab.id)}
-            className="flex flex-1 flex-col items-center gap-1 py-2 sm:py-2.5 rounded-xl transition-all duration-200 min-h-[60px]"
-            style={{
-              color: isActive ? theme.primary : theme.textMuted,
-              background: isActive ? `${theme.primary}15` : 'transparent',
-            }}
-          >
-            <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
-            <span className="text-xs font-medium">{tab.label}</span>
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onTab(tab.id)}
+              className={isActive ? 'active' : ''}
+            >
+              <Icon size={20} strokeWidth={isActive ? 2.4 : 2} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
 
-function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
+function TopBar({ user, hasUnreadNotif, onMenu, onAlerts }) {
+  const firstName = user?.name ? user.name.split(' ')[0] : 'PoupPT';
+
+  return (
+    <header className="ui-app-topbar safe-area-top">
+      <div className="ui-app-topbar-inner">
+        <button type="button" onClick={onMenu} className="ui-icon-button" aria-label="Abrir menu">
+          <Menu size={20} />
+        </button>
+
+        <div className="ui-brand">
+          <div className="ui-brand-mark">P</div>
+          <div>
+            <p className="ui-brand-title">PoupPT</p>
+            <p className="ui-brand-subtitle">Olá, {firstName}</p>
+          </div>
+        </div>
+
+        <button type="button" onClick={onAlerts} className="ui-icon-button" aria-label="Notificações">
+          <Bell size={19} />
+          {hasUnreadNotif && <span className="ui-notification-dot" />}
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function AppMenu({ isOpen, onClose, onNavigate, user }) {
   return (
     <AnimatePresence>
       {isOpen && (
         <>
           <motion.div
+            className="ui-menu-backdrop"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
-            style={{ background: '#000' }}
             onClick={onClose}
           />
 
-          <motion.div
-            initial={{ x: -280 }}
+          <motion.aside
+            className="ui-menu-panel"
+            initial={{ x: 360 }}
             animate={{ x: 0 }}
-            exit={{ x: -280 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 left-0 bottom-0 z-50 w-[min(280px,80vw)] flex flex-col"
-            style={{ background: theme.surface }}
+            exit={{ x: 360 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
           >
-            <div
-              className="flex items-center justify-between p-5 border-b"
-              style={{ borderColor: theme.border }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🐷</span>
-                <span
-                  className="font-bold text-lg gradient-text"
-                  style={{
-                    backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-                  }}
-                >
-                  PoupPT
-                </span>
+            <div className="ui-menu-header safe-area-top">
+              <div className="ui-brand">
+                <div className="ui-brand-mark">P</div>
+                <div>
+                  <p className="ui-brand-title">Menu</p>
+                  <p className="ui-brand-subtitle">{user?.poupMoedas || 0} PoupMoedas</p>
+                </div>
               </div>
-
-              <button onClick={onClose} style={{ color: theme.textMuted }}>
-                <X size={20} />
+              <button type="button" onClick={onClose} className="ui-icon-button" aria-label="Fechar menu">
+                <X size={19} />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto poupt-scroll py-2">
+            <div className="ui-menu-list poupt-scroll">
               {menuItems.map((item) => {
                 const Icon = item.icon;
 
                 return (
                   <button
                     key={item.id}
+                    type="button"
+                    className="ui-menu-item"
                     onClick={() => {
                       onNavigate(item.id);
                       onClose();
                     }}
-                    className="flex items-center gap-4 w-full px-6 py-5 text-left transition-colors duration-150 hover:opacity-80 min-h-[52px]"
-                    style={{ color: theme.text }}
                   >
-                    <Icon size={20} style={{ color: theme.textMuted }} />
-                    <span className="text-sm font-medium flex-1">
-                      {item.label}
+                    <Icon size={19} />
+                    <span className="flex-1 min-w-0">
+                      <span className="block truncate">{item.label}</span>
+                      <span className="block truncate text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                        {item.description}
+                      </span>
                     </span>
-                    <ChevronRight size={14} style={{ color: theme.textMuted }} />
+                    <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
                   </button>
                 );
               })}
             </div>
-
-            <div className="p-5 border-t" style={{ borderColor: theme.border }}>
-              <div
-                className="flex items-center gap-2 text-xs"
-                style={{ color: theme.textMuted }}
-              >
-                <span>🪙</span>
-                <span>PoupMoedas: {user?.poupMoedas || 0}</span>
-              </div>
-            </div>
-          </motion.div>
+          </motion.aside>
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+function LoadingScreen({ theme }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
+      <div className="text-center">
+        <div className="ui-brand-mark mx-auto mb-4">P</div>
+        <p className="text-sm font-semibold" style={{ color: theme.textMuted }}>A carregar...</p>
+      </div>
+    </div>
   );
 }
 
@@ -209,8 +225,8 @@ function App() {
   } = useStore();
 
   const [ready, setReady] = useState(false);
-  const theme = themes[currentTheme] || themes.darkGold;
-  const hasUnreadNotif = useMemo(() => notifications?.some(n => !n.read) || false, [notifications]);
+  const theme = themes[currentTheme] || themes.cleanFinance || themes.darkGold;
+  const hasUnreadNotif = useMemo(() => notifications?.some((n) => !n.read) || false, [notifications]);
 
   useEffect(() => {
     if (user?.currency) {
@@ -227,23 +243,23 @@ function App() {
     root.style.setProperty('--text-primary', theme.text);
     root.style.setProperty('--text-secondary', theme.textMuted);
     root.style.setProperty('--text-muted', theme.textMuted);
+    root.style.setProperty('--text-inverse', theme.textInverse);
     root.style.setProperty('--bg-primary', theme.background);
     root.style.setProperty('--bg-secondary', theme.surface);
     root.style.setProperty('--bg-surface-hover', theme.surfaceHover);
     root.style.setProperty('--border', theme.border);
-    root.style.setProperty('--danger', '#EF4444');
-    root.style.setProperty('--success', '#10B981');
-    root.style.setProperty('--warning', '#F59E0B');
+    root.style.setProperty('--danger', '#DC2626');
+    root.style.setProperty('--success', '#16A34A');
+    root.style.setProperty('--warning', '#D97706');
     root.style.setProperty('--is-dark', theme.isDark ? '1' : '0');
-    root.style.setProperty('--glass-bg', theme.glassBg || 'rgba(255,255,255,0.06)');
-    root.style.setProperty('--glass-border', theme.glassBorder || 'rgba(255,255,255,0.08)');
-    root.style.setProperty('--glass-strong-bg', theme.glassStrongBg || 'rgba(255,255,255,0.1)');
-    root.style.setProperty('--glass-strong-border', theme.glassStrongBorder || 'rgba(255,255,255,0.12)');
+    root.style.setProperty('--glass-bg', theme.glassBg || theme.surface);
+    root.style.setProperty('--glass-border', theme.glassBorder || theme.border);
+    root.style.setProperty('--glass-strong-bg', theme.glassStrongBg || theme.surface);
+    root.style.setProperty('--glass-strong-border', theme.glassStrongBorder || theme.border);
     root.style.setProperty('--gradient-start', theme.gradient[0]);
     root.style.setProperty('--gradient-end', theme.gradient[1]);
     root.style.setProperty('--shadow-color', theme.shadow);
 
-    // Apply jar colors from theme
     const jarKeys = ['necessities', 'freedom', 'savings', 'education', 'play', 'give'];
     const themeJarColors = theme.jarColors || [];
     jarKeys.forEach((key, idx) => {
@@ -252,7 +268,6 @@ function App() {
       }
     });
 
-    // Update meta theme-color for PWA
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', theme.background);
@@ -295,13 +310,11 @@ function App() {
           }
         }
       }
-      // Note: hash-based navigation is already handled by restoreSession in the store
     };
 
     init();
   }, []);
 
-  // Hash navigation back-button listener
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1);
@@ -313,102 +326,60 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [currentScreen, setScreen]);
 
-  // Font Inter is loaded via CSS @import in index.css - no need for JS append
-
   if (!ready) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: theme.background }}
-      >
-        <div className="text-center">
-          <div
-            className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
-            style={{
-              background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-            }}
-          >
-            <span className="text-2xl font-bold text-black">P</span>
-          </div>
+    return <LoadingScreen theme={theme} />;
+  }
 
-          <p className="text-sm" style={{ color: theme.textMuted }}>
-            A carregar...
-          </p>
+  const isFullScreen = ['landing', 'login', 'register', 'onboarding'].includes(currentScreen);
+  const ScreenComponent = screenComponents[currentScreen] || Dashboard;
+
+  if (isFullScreen) {
+    return (
+      <div className="ui-app-shell">
+        <div className="ui-app-content poupt-scroll">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentScreen}
+              initial={{ opacity: 0, x: 18 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -18 }}
+              transition={{ duration: 0.18 }}
+            >
+              <Suspense fallback={<LoadingScreen theme={theme} />}>
+                <ErrorBoundary>
+                  <ScreenComponent />
+                </ErrorBoundary>
+              </Suspense>
+            </motion.div>
+          </AnimatePresence>
         </div>
+        <OfflineIndicator />
       </div>
     );
   }
 
-  const isFullScreen = ['landing', 'login', 'register', 'onboarding'].includes(
-    currentScreen
-  );
-
-  const ScreenComponent = screenComponents[currentScreen] || Dashboard;
-
-  const handleTab = (id) => {
-    setScreen(id);
-  };
-
   return (
-    <div
-      className="relative flex flex-col w-full h-screen max-h-screen overflow-hidden"
-      style={{
-        background: theme.background,
-        transition: 'background-color 0.5s ease',
-      }}
-    >
-      {!isFullScreen && (
-        <div className="shrink-0 safe-area-top" style={{ background: theme.background }}>
-          <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-4 sm:px-6 py-4">
-            <button
-              onClick={() => setMenuOpen(true)}
-              className="p-2.5 rounded-xl transition-colors duration-150 min-w-[44px] min-h-[44px] flex items-center justify-center"
-              style={{ color: theme.text }}
-            >
-              <Menu size={22} />
-            </button>
+    <div className="ui-app-shell">
+      <TopBar
+        user={user}
+        hasUnreadNotif={hasUnreadNotif}
+        onMenu={() => setMenuOpen(true)}
+        onAlerts={() => setScreen('alerts')}
+      />
 
-            <div className="flex items-center gap-2">
-              <span className="text-base font-bold" style={{ color: theme.primary }}>
-                🐷 PoupPT
-              </span>
-            </div>
-
-            <button
-              onClick={() => setScreen('alerts')}
-              className="p-2.5 rounded-xl relative min-w-[44px] min-h-[44px] flex items-center justify-center"
-              style={{ color: theme.text }}
-            >
-              <Bell size={20} />
-              {hasUnreadNotif && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FF4D5E]" />
-              )}
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="flex-1 overflow-y-auto poupt-scroll">
-        <div
-          className="mx-auto w-full"
-          style={{
-            maxWidth: isFullScreen ? 'none' : '42rem',
-          }}
-        >
+      <main className="ui-app-content poupt-scroll">
+        <div className="ui-app-content-inner">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentScreen}
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 18 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
+              exit={{ opacity: 0, x: -18 }}
+              transition={{ duration: 0.18 }}
             >
               <Suspense
                 fallback={
-                  <div
-                    className="flex items-center justify-center h-64"
-                    style={{ color: theme.textMuted }}
-                  >
+                  <div className="flex items-center justify-center h-64" style={{ color: theme.textMuted }}>
                     A carregar...
                   </div>
                 }
@@ -420,23 +391,14 @@ function App() {
             </motion.div>
           </AnimatePresence>
         </div>
-      </div>
+      </main>
 
-      {!isFullScreen && (
-        <div className="mx-auto w-full max-w-2xl shrink-0">
-          <BottomNav
-            theme={theme}
-            currentScreen={currentScreen}
-            onTab={handleTab}
-          />
-        </div>
-      )}
+      <BottomNav currentScreen={currentScreen} onTab={setScreen} />
 
-      <HamburgerMenu
-        theme={theme}
+      <AppMenu
         isOpen={menuOpen}
         onClose={() => setMenuOpen(false)}
-        onNavigate={(id) => setScreen(id)}
+        onNavigate={setScreen}
         user={user}
       />
 
