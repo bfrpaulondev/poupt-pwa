@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from './store/useStore';
 import { themes } from './themes';
@@ -24,23 +24,23 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Onboarding from './pages/Onboarding';
-import Dashboard from './pages/Dashboard';
-import Jars from './pages/Jars';
-import Coach from './pages/Coach';
-import Debts from './pages/Debts';
-import Goals from './pages/Goals';
-import Profile from './pages/Profile';
-import SettingsPage from './pages/Settings';
-import AddTransaction from './pages/AddTransaction';
-import MoedasStore from './pages/MoedasStore';
-import Investments from './pages/Investments';
-import SurvivalMode from './pages/SurvivalMode';
-import Notifications from './pages/Notifications';
-import Reports from './pages/Reports';
+const Landing = lazy(() => import('./pages/Landing'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Jars = lazy(() => import('./pages/Jars'));
+const Coach = lazy(() => import('./pages/Coach'));
+const Debts = lazy(() => import('./pages/Debts'));
+const Goals = lazy(() => import('./pages/Goals'));
+const Profile = lazy(() => import('./pages/Profile'));
+const SettingsPage = lazy(() => import('./pages/Settings'));
+const AddTransaction = lazy(() => import('./pages/AddTransaction'));
+const MoedasStore = lazy(() => import('./pages/MoedasStore'));
+const Investments = lazy(() => import('./pages/Investments'));
+const SurvivalMode = lazy(() => import('./pages/SurvivalMode'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Reports = lazy(() => import('./pages/Reports'));
 
 const screenComponents = {
   landing: Landing,
@@ -105,7 +105,7 @@ function BottomNav({ theme, currentScreen, onTab }) {
             }}
           >
             <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
-            <span className="text-[10px] font-medium">{tab.label}</span>
+            <span className="text-[11px] font-medium">{tab.label}</span>
           </button>
         );
       })}
@@ -210,8 +210,8 @@ function App() {
   } = useStore();
 
   const [ready, setReady] = useState(false);
-  const [hasUnreadNotif, setHasUnreadNotif] = useState(false);
   const theme = themes[currentTheme] || themes.darkGold;
+  const hasUnreadNotif = useMemo(() => notifications?.some(n => !n.read) || false, [notifications]);
 
   useEffect(() => {
     if (user?.currency) {
@@ -302,9 +302,17 @@ function App() {
     init();
   }, []);
 
+  // Hash navigation back-button listener
   useEffect(() => {
-    setHasUnreadNotif(notifications?.some(n => !n.read) || false);
-  }, [notifications]);
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && hash !== currentScreen) {
+        setScreen(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [currentScreen, setScreen]);
 
   // Font Inter is loaded via CSS @import in index.css - no need for JS append
 

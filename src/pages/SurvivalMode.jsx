@@ -158,6 +158,11 @@ export default function SurvivalMode() {
 
   return (
     <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+      <button onClick={() => setScreen('dashboard')}
+        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        style={{ color: 'var(--text-secondary)' }}>
+        ← Voltar
+      </button>
       {/* Emergency Header */}
       <div className="p-5 sm:p-6 rounded-2xl" style={{ background: `linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05))`, border: '1px solid rgba(239,68,68,0.3)' }}>
         <div className="flex items-center gap-3 mb-2">
@@ -184,12 +189,12 @@ export default function SurvivalMode() {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-lg font-bold" style={{ color: scoreColor }}>{emergencyScore}</span>
-              <span className="text-[8px] sm:text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>SCORE</span>
+              <span className="text-[11px] sm:text-xs font-medium" style={{ color: 'var(--text-muted)' }}>SCORE</span>
             </div>
           </div>
           <div className="flex-1 space-y-2">
             <div>
-              <div className="flex justify-between text-[10px] sm:text-xs mb-0.5">
+              <div className="flex justify-between text-xs sm:text-xs mb-0.5">
                 <span style={{ color: 'var(--text-muted)' }}>Divida/Rendimento</span>
                 <span className="font-medium" style={{ color: debtToIncomeRatio > 0.5 ? '#EF4444' : '#10B981' }}>
                   {(debtToIncomeRatio * 100).toFixed(0)}%
@@ -200,13 +205,13 @@ export default function SurvivalMode() {
                   style={{ width: `${Math.min(100, debtToIncomeRatio * 100)}%`, background: debtToIncomeRatio > 0.5 ? '#EF4444' : '#10B981' }} />
               </div>
             </div>
-            <div className="flex justify-between text-[10px] sm:text-xs">
+            <div className="flex justify-between text-xs sm:text-xs">
               <span style={{ color: 'var(--text-muted)' }}>Dividas em atraso</span>
               <span className="font-medium" style={{ color: overdueDebts.length > 0 ? '#EF4444' : '#10B981' }}>
                 {overdueDebts.length}
               </span>
             </div>
-            <div className="flex justify-between text-[10px] sm:text-xs">
+            <div className="flex justify-between text-xs sm:text-xs">
               <span style={{ color: 'var(--text-muted)' }}>Status</span>
               <span className="font-semibold" style={{ color: scoreColor }}>{scoreLabel}</span>
             </div>
@@ -230,7 +235,7 @@ export default function SurvivalMode() {
                   <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                     {d.creditorName} - {formatCurrency(d.remainingAmount || d.amount)}
                   </p>
-                  <p className="text-[10px] sm:text-xs" style={{ color: '#EF4444' }}>
+                  <p className="text-xs sm:text-xs" style={{ color: '#EF4444' }}>
                     Vencida ha {Math.abs(getDaysUntil(d.dueDate))} dia{Math.abs(getDaysUntil(d.dueDate)) !== 1 ? 's' : ''}
                   </p>
                 </div>
@@ -252,7 +257,7 @@ export default function SurvivalMode() {
           <AlertCircle size={16} style={{ color: '#F59E0B' }} />
           <div>
             <p className="text-xs font-medium" style={{ color: '#F59E0B' }}>Saldo negativo</p>
-            <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs sm:text-xs" style={{ color: 'var(--text-secondary)' }}>
               O teu saldo esta negativo. Prioriza despesas essenciais.
             </p>
           </div>
@@ -282,28 +287,28 @@ export default function SurvivalMode() {
                 style={{ background: '#EF4444' }}>
                 <AlertTriangle size={10} className="text-white" />
               </div>
-              <span className="text-[8px] sm:text-[10px]" style={{ color: '#EF4444' }}>Sobrevivencia</span>
+              <span className="text-[11px] sm:text-xs" style={{ color: '#EF4444' }}>Sobrevivencia</span>
             </div>
             <div className="text-center">
               <div className="w-6 h-6 rounded-full mx-auto mb-1 flex items-center justify-center"
                 style={{ background: progressPercent >= 30 ? '#F97316' : 'var(--border)' }}>
                 <Flame size={10} className="text-white" />
               </div>
-              <span className="text-[8px] sm:text-[10px]" style={{ color: progressPercent >= 30 ? '#F97316' : 'var(--text-muted)' }}>Recuperacao</span>
+              <span className="text-[11px] sm:text-xs" style={{ color: progressPercent >= 30 ? '#F97316' : 'var(--text-muted)' }}>Recuperacao</span>
             </div>
             <div className="text-center">
               <div className="w-6 h-6 rounded-full mx-auto mb-1 flex items-center justify-center"
                 style={{ background: progressPercent >= 70 ? '#F59E0B' : 'var(--border)' }}>
                 <Shield size={10} className="text-white" />
               </div>
-              <span className="text-[8px] sm:text-[10px]" style={{ color: progressPercent >= 70 ? '#F59E0B' : 'var(--text-muted)' }}>Estabilidade</span>
+              <span className="text-[11px] sm:text-xs" style={{ color: progressPercent >= 70 ? '#F59E0B' : 'var(--text-muted)' }}>Estabilidade</span>
             </div>
             <div className="text-center">
               <div className="w-6 h-6 rounded-full mx-auto mb-1 flex items-center justify-center"
                 style={{ background: progressPercent >= 100 ? '#10B981' : 'var(--border)' }}>
                 <CheckSquare size={10} className="text-white" />
               </div>
-              <span className="text-[8px] sm:text-[10px]" style={{ color: progressPercent >= 100 ? '#10B981' : 'var(--text-muted)' }}>Liberdade</span>
+              <span className="text-[11px] sm:text-xs" style={{ color: progressPercent >= 100 ? '#10B981' : 'var(--text-muted)' }}>Liberdade</span>
             </div>
           </div>
         </div>
@@ -345,9 +350,9 @@ export default function SurvivalMode() {
                 }}>
                   {label}
                 </p>
-                <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</p>
+                <p className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>{desc}</p>
               </div>
-              <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              <span className="text-[11px] sm:text-xs font-semibold px-1.5 py-0.5 rounded-full"
                 style={{ background: `${priorityColors[priority]}15`, color: priorityColors[priority] }}>
                 {priority}
               </span>
@@ -382,7 +387,7 @@ export default function SurvivalMode() {
                     <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
                       {template.title}
                     </p>
-                    <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
+                    <p className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>
                       {template.type === 'email' ? 'Email' : template.type === 'letter' ? 'Carta' : 'Telefone'}
                     </p>
                   </div>
@@ -393,7 +398,7 @@ export default function SurvivalMode() {
                 </button>
                 {isExpanded && (
                   <div className="p-3 pt-0 animate-fade-in">
-                    <pre className="text-[10px] sm:text-xs whitespace-pre-wrap p-3 rounded-xl mb-2"
+                    <pre className="text-xs sm:text-xs whitespace-pre-wrap p-3 rounded-xl mb-2"
                       style={{ background: 'var(--bg-primary)', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                       {template.content}
                     </pre>
@@ -436,7 +441,7 @@ export default function SurvivalMode() {
               </div>
               <div>
                 <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{title}</p>
-                <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-secondary)' }}>{desc}</p>
+                <p className="text-xs sm:text-xs" style={{ color: 'var(--text-secondary)' }}>{desc}</p>
               </div>
             </button>
           ))}
@@ -505,7 +510,7 @@ export default function SurvivalMode() {
         </div>
         <div className="mt-3 p-2 rounded-xl text-center"
           style={{ background: 'rgba(239,68,68,0.08)' }}>
-          <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>
             Lazer, restaurantes e compras nao essenciais = 0%
           </p>
         </div>
@@ -530,7 +535,7 @@ export default function SurvivalMode() {
                   <p className="text-xs font-mono" style={{ color: 'var(--gold)' }}>{r.phone}</p>
                   {r.url && (
                     <a href={r.url} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] sm:text-xs flex items-center gap-1"
+                      className="text-xs sm:text-xs flex items-center gap-1"
                       style={{ color: 'var(--text-muted)' }}>
                       Website <ExternalLink size={10} />
                     </a>

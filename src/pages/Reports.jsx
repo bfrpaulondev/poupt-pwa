@@ -50,7 +50,7 @@ const PieTooltip = ({ active, payload }) => {
 };
 
 export default function Reports() {
-  const { user } = useStore();
+  const { user, setScreen } = useStore();
   const [activeTab, setActiveTab] = useState('mensal');
   const [monthlyData, setMonthlyData] = useState(null);
   const [debtProgress, setDebtProgress] = useState(null);
@@ -122,6 +122,11 @@ export default function Reports() {
 
   return (
     <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+      <button onClick={() => setScreen('dashboard')}
+        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        style={{ color: 'var(--text-secondary)' }}>
+        ← Voltar
+      </button>
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Relatorios</h2>
@@ -148,19 +153,19 @@ export default function Reports() {
         <div className="glass-card p-4 sm:p-5 text-center">
           <ArrowDownLeft size={14} className="mx-auto mb-1" style={{ color: '#10B981' }} />
           <p className="text-sm font-bold" style={{ color: '#10B981' }}>{formatCurrency(totalIncome)}</p>
-          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Receitas</p>
+          <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Receitas</p>
         </div>
         <div className="glass-card p-4 sm:p-5 text-center">
           <ArrowUpRight size={14} className="mx-auto mb-1" style={{ color: '#EF4444' }} />
           <p className="text-sm font-bold" style={{ color: '#EF4444' }}>{formatCurrency(totalExpenses)}</p>
-          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Despesas</p>
+          <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Despesas</p>
         </div>
         <div className="glass-card p-4 sm:p-5 text-center">
           <TrendingUp size={14} className="mx-auto mb-1" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }} />
           <p className="text-sm font-bold" style={{ color: savingsRate >= 0 ? 'var(--gold)' : '#EF4444' }}>
             {savingsRate.toFixed(1)}%
           </p>
-          <p className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>Poupanca</p>
+          <p className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>Poupanca</p>
         </div>
       </div>
 
@@ -231,10 +236,10 @@ export default function Reports() {
                   <div key={idx} className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 rounded-full shrink-0"
                       style={{ background: jarColorsFallback[j.jar] || chartColors[idx % chartColors.length] }} />
-                    <span className="text-[10px] sm:text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+                    <span className="text-xs sm:text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
                       {j.name || jarLabels[j.jar] || j.jar}
                     </span>
-                    <span className="text-[10px] sm:text-xs font-medium ml-auto" style={{ color: 'var(--text-primary)' }}>
+                    <span className="text-xs sm:text-xs font-medium ml-auto" style={{ color: 'var(--text-primary)' }}>
                       {j.percentage?.toFixed(0) || 0}%
                     </span>
                   </div>
@@ -301,10 +306,10 @@ export default function Reports() {
                     <div key={idx} className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ background: chartColors[idx % chartColors.length] }} />
-                      <span className="text-[10px] sm:text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
+                      <span className="text-xs sm:text-xs truncate flex-1" style={{ color: 'var(--text-secondary)' }}>
                         {categoryLabels[c.category] || c.category}
                       </span>
-                      <span className="text-[10px] sm:text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+                      <span className="text-xs sm:text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                         {formatCurrency(c.total || c.amount || 0)}
                       </span>
                     </div>
@@ -374,13 +379,13 @@ export default function Reports() {
                 {/* Summary */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-4 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Total em divida</span>
+                    <span className="text-xs sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Total em divida</span>
                     <p className="text-sm font-bold" style={{ color: '#EF4444' }}>
                       {formatCurrency(debtProgress.totalRemaining || debtProgress.totalDebt || 0)}
                     </p>
                   </div>
                   <div className="p-4 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                    <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Ja pago</span>
+                    <span className="text-xs sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Ja pago</span>
                     <p className="text-sm font-bold" style={{ color: '#10B981' }}>
                       {formatCurrency(debtProgress.totalPaid || 0)}
                     </p>
@@ -425,7 +430,7 @@ export default function Reports() {
                             <div className="h-2 rounded-full transition-all"
                               style={{ width: `${pct}%`, background: pct >= 100 ? '#10B981' : 'var(--gold)' }} />
                           </div>
-                          <div className="flex justify-between text-[10px] sm:text-xs mt-1">
+                          <div className="flex justify-between text-xs sm:text-xs mt-1">
                             <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(paid)} pago</span>
                             <span style={{ color: 'var(--text-muted)' }}>{formatCurrency(total)} total</span>
                           </div>

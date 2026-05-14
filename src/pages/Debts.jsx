@@ -24,6 +24,7 @@ export default function Debts() {
   const [snowball, setSnowball] = useState(null);
   const [showSnowball, setShowSnowball] = useState(false);
   const [debtProgress, setDebtProgress] = useState(null);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const today = new Date().toISOString().split('T')[0];
   const [form, setForm] = useState({
@@ -44,6 +45,7 @@ export default function Debts() {
       setSummary(res.data.summary);
     } catch (err) {
       console.error(err);
+      setErrorMsg('Erro ao carregar dividas. Tenta novamente.');
     } finally {
       setLoading(false);
     }
@@ -153,6 +155,18 @@ export default function Debts() {
 
   return (
     <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+      <button onClick={() => setScreen('dashboard')}
+        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        style={{ color: 'var(--text-secondary)' }}>
+        ← Voltar
+      </button>
+      {errorMsg && (
+        <div className="p-3 rounded-xl text-xs font-medium"
+          style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          onClick={() => setErrorMsg('')}>
+          {errorMsg} ← to dismiss
+        </div>
+      )}
       {summary && (
         <div className="glass-card p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
@@ -275,12 +289,12 @@ export default function Debts() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] sm:text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Data limite</label>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Data limite</label>
               <input type="date" value={form.dueDate || ''} min={today} onChange={e => setForm({...form, dueDate: e.target.value})}
                 className="w-full input-field" placeholder="Opcional" />
             </div>
             <div>
-              <label className="text-[10px] sm:text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Tipo</label>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Tipo</label>
               <select value={form.relationshipType} onChange={e => setForm({...form, relationshipType: e.target.value})}
                 className="w-full input-field">
                 <option value="banco">Banco</option>
@@ -326,13 +340,13 @@ export default function Debts() {
             className="w-full input-field" />
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] sm:text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Data limite</label>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Data limite</label>
               <input type="date" value={informalForm.dueDate}
                 onChange={e => setInformalForm({...informalForm, dueDate: e.target.value})}
                 className="w-full input-field" />
             </div>
             <div>
-              <label className="text-[10px] sm:text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Relacao</label>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Relacao</label>
               <select value={informalForm.relationshipType}
                 onChange={e => setInformalForm({...informalForm, relationshipType: e.target.value})}
                 className="w-full input-field">
@@ -385,12 +399,12 @@ export default function Debts() {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{debt.creditorName}</p>
-                    <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                       {formatCurrency(remaining)} restante
                     </p>
                   </div>
                   {idx === 0 && (
-                    <span className="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-full"
+                    <span className="text-xs font-medium px-2 py-1 rounded-full"
                       style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981' }}>
                       Prioridade
                     </span>
@@ -448,12 +462,12 @@ export default function Debts() {
                     {formatCurrency(debt.amount)}
                   </p>
                   {overdue && (
-                    <p className="text-[10px] sm:text-xs flex items-center gap-1 justify-end" style={{ color: '#EF4444' }}>
+                    <p className="text-xs flex items-center gap-1 justify-end" style={{ color: '#EF4444' }}>
                       <AlertTriangle size={10} /> {Math.abs(daysLeft)} dias em atraso
                     </p>
                   )}
                   {!overdue && daysLeft !== null && daysLeft >= 0 && debt.status !== 'pago' && (
-                    <p className="text-[10px] sm:text-xs flex items-center gap-1 justify-end" style={{ color: 'var(--text-muted)' }}>
+                    <p className="text-xs flex items-center gap-1 justify-end" style={{ color: 'var(--text-muted)' }}>
                       <Clock size={10} /> {daysLeft} dia{daysLeft !== 1 ? 's' : ''}
                     </p>
                   )}
@@ -466,7 +480,7 @@ export default function Debts() {
                     <div className="h-2 rounded-full transition-all"
                       style={{ width: `${progress}%`, background: progress >= 75 ? '#10B981' : progress >= 40 ? '#F59E0B' : '#EF4444' }} />
                   </div>
-                  <div className="flex justify-between text-[10px] sm:text-xs mt-1">
+                  <div className="flex justify-between text-xs mt-1">
                     <span style={{ color: '#10B981' }}>{formatCurrency(debt.amountPaid || 0)} pago</span>
                     <span style={{ color: 'var(--text-muted)' }}>{progress.toFixed(0)}%</span>
                   </div>
@@ -574,7 +588,7 @@ export default function Debts() {
                     {debt.status === 'pago' ? 'Pago' : debt.status === 'parcial' ? 'Parcial' : 'Por pagar'}
                   </span>
                   {overdue && (
-                    <p className="text-[10px] sm:text-xs mt-1 flex items-center gap-1 justify-end" style={{ color: '#EF4444' }}>
+                    <p className="text-xs mt-1 flex items-center gap-1 justify-end" style={{ color: '#EF4444' }}>
                       <AlertTriangle size={10} /> Em atraso
                     </p>
                   )}
@@ -587,7 +601,7 @@ export default function Debts() {
                     <div className="h-2 rounded-full transition-all"
                       style={{ width: `${progress}%`, background: 'var(--gold)' }} />
                   </div>
-                  <div className="flex justify-between text-[10px] sm:text-xs mt-1">
+                  <div className="flex justify-between text-xs mt-1">
                     <span style={{ color: 'var(--gold)' }}>{formatCurrency(debt.amountPaid || 0)} pago</span>
                     <span style={{ color: 'var(--text-muted)' }}>{progress.toFixed(0)}%</span>
                   </div>

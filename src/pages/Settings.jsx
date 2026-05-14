@@ -206,6 +206,11 @@ export default function Settings() {
 
   return (
     <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+      <button onClick={() => setScreen('dashboard')}
+        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        style={{ color: 'var(--text-secondary)' }}>
+        ← Voltar
+      </button>
       {/* Success Toast */}
       {saveSuccess && (
         <div className="p-3.5 rounded-xl text-xs font-medium text-center animate-fade-in"
@@ -241,7 +246,7 @@ export default function Settings() {
                   </div>
                 )}
               </div>
-              <span className="text-[10px] sm:text-xs font-medium text-center leading-tight"
+              <span className="text-xs sm:text-xs font-medium text-center leading-tight"
                 style={{ color: selectedTheme === theme.id ? theme.color : 'var(--text-muted)' }}>
                 {theme.label}
               </span>
@@ -361,7 +366,7 @@ export default function Settings() {
                     style={{ color: coachPersonality === key ? 'var(--gold)' : 'var(--text-primary)' }}>
                     {label}
                   </p>
-                  <p className="text-[10px] sm:text-xs mt-0.5"
+                  <p className="text-xs sm:text-xs mt-0.5"
                     style={{ color: coachPersonality === key ? 'var(--gold)' : 'var(--text-muted)' }}>
                     {personalityDescriptions[key]}
                   </p>

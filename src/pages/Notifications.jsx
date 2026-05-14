@@ -30,7 +30,7 @@ const priorityConfig = {
 };
 
 export default function Notifications() {
-  const { notifications, setNotifications } = useStore();
+  const { notifications, setNotifications, setScreen } = useStore();
   const [loading, setLoading] = useState(true);
   const [filterPriority, setFilterPriority] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -98,6 +98,11 @@ export default function Notifications() {
 
   return (
     <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+      <button onClick={() => setScreen('dashboard')}
+        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        style={{ color: 'var(--text-secondary)' }}>
+        ← Voltar
+      </button>
       {/* Header with unread count */}
       <div className="glass-card p-5 sm:p-6">
         <div className="flex items-center justify-between">
@@ -105,7 +110,7 @@ export default function Notifications() {
             <div className="relative">
               <Bell size={24} style={{ color: 'var(--gold)' }} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white"
                   style={{ background: '#EF4444' }}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
@@ -219,15 +224,15 @@ export default function Notifications() {
                     {notification.message}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
+                    <span className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>
                       {getTimeAgo(notification.createdAt)}
                     </span>
-                    <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                    <span className="text-[11px] sm:text-xs font-semibold px-1.5 py-0.5 rounded-full"
                       style={{ background: prioConf.bg, color: prioConf.color }}>
                       {prioConf.label}
                     </span>
                     {notification.type && notification.type !== 'sistema' && (
-                      <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full"
+                      <span className="text-[11px] sm:text-xs px-1.5 py-0.5 rounded-full"
                         style={{ background: `${typeConf.color}10`, color: typeConf.color }}>
                         {typeConf.label}
                       </span>

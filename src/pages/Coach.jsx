@@ -144,7 +144,7 @@ export default function Coach() {
                 border: msg.role === 'assistant' ? '1px solid var(--border)' : 'none'
               }}>
               {msg.role === 'assistant' && (
-                <p className="text-[10px] font-semibold mb-1" style={{ color: modeColor }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: modeColor }}>
                   {user?.coachName}
                 </p>
               )}
@@ -181,7 +181,7 @@ export default function Coach() {
             <Send size={18} color="#000" />
           </button>
         </div>
-        <p className="text-[10px] mt-1.5 text-center" style={{ color: 'var(--text-muted)' }}>
+        <p className="text-xs mt-1.5 text-center" style={{ color: 'var(--text-muted)' }}>
           {user?.plan === 'premium' ? 'Mensagens ilimitadas' : `3 mensagens/dia (gratuito)`}
         </p>
       </div>

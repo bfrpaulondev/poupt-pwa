@@ -31,6 +31,7 @@ export default function Onboarding() {
       // Complete onboarding via API
       setSaving(true);
       try {
+        // Note: coachMode 'sargento'/'amigavel' maps to coachPersonality 'disciplinado'/'amigavel' used throughout the app
         const coachName = onboardingData.coachMode === 'sargento' ? 'Sargento' : 'Amigo';
         const coachPersonality = onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel';
         const defaultJars = useStore.getState().defaultJarPercentages;
@@ -241,6 +242,7 @@ function Step2Income({ theme }) {
       <input
         type="number"
         min={0}
+        max={100000}
         value={onboardingData.income}
         onChange={(e) => setOnboardingData({ income: Math.max(0, parseInt(e.target.value) || 0) })}
         className="w-full px-4 py-3 rounded-xl text-base font-medium outline-none mt-4"

@@ -140,6 +140,11 @@ export default function MoedasStore() {
 
   return (
     <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+      <button onClick={() => setScreen('dashboard')}
+        className="flex items-center gap-1 mb-3 text-xs font-medium"
+        style={{ color: 'var(--text-secondary)' }}>
+        ← Voltar
+      </button>
       {/* Balance Card with Animated Counter */}
       <div className="gold-gradient p-6 sm:p-8 rounded-2xl text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10"
@@ -326,7 +331,7 @@ export default function MoedasStore() {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{tx.action}</p>
-                    <p className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>{getTimeAgo(tx.date)}</p>
+                    <p className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>{getTimeAgo(tx.date)}</p>
                   </div>
                   <p className="text-xs font-bold"
                     style={{ color: tx.type === 'earn' ? '#10B981' : '#EF4444' }}>
