@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react';
+import { useEffect, useMemo, useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from './store/useStore';
 import { themes } from './themes';
@@ -22,6 +22,9 @@ import {
   Coins,
   Settings,
   ChevronRight,
+  Plus,
+  Sparkles,
+  PiggyBank,
 } from 'lucide-react';
 
 import Landing from './pages/Landing';
@@ -62,136 +65,241 @@ const screenComponents = {
   reports: Reports,
 };
 
-const tabs = [
-  { id: 'dashboard', label: 'Inicio', icon: Home },
+const primaryNav = [
+  { id: 'dashboard', label: 'Início', icon: Home },
   { id: 'jars', label: 'Frascos', icon: FlaskConical },
   { id: 'coach', label: 'Coach', icon: Bot },
-  { id: 'debts', label: 'Dividas', icon: CreditCard },
+  { id: 'debts', label: 'Dívidas', icon: CreditCard },
   { id: 'profile', label: 'Perfil', icon: User },
 ];
 
-const menuItems = [
+const secondaryNav = [
   { id: 'goals', label: 'Objetivos', icon: Target },
-  { id: 'reports', label: 'Relatorios', icon: BarChart3 },
+  { id: 'reports', label: 'Relatórios', icon: BarChart3 },
   { id: 'alerts', label: 'Alertas', icon: Bell },
   { id: 'investments', label: 'Investimentos', icon: Building2 },
-  { id: 'survival', label: 'Modo Sobrevivencia', icon: Shield },
+  { id: 'survival', label: 'Modo Sobrevivência', icon: Shield },
   { id: 'poupMoedas', label: 'Loja PoupMoedas', icon: Coins },
-  { id: 'settings', label: 'Configuracoes', icon: Settings },
+  { id: 'settings', label: 'Configurações', icon: Settings },
 ];
 
-function BottomNav({ theme, currentScreen, onTab }) {
-  return (
-    <div
-      className="flex items-center justify-around px-1 py-2 border-t safe-area-bottom"
-      style={{
-        background: theme.surface,
-        borderColor: theme.border,
-      }}
-    >
-      {tabs.map((tab) => {
-        const isActive = currentScreen === tab.id;
-        const Icon = tab.icon;
+const fullscreenScreens = ['landing', 'login', 'register', 'onboarding'];
+const allNavItems = [...primaryNav, ...secondaryNav, { id: 'addTransaction', label: 'Adicionar', icon: Plus }];
 
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onTab(tab.id)}
-            className="flex flex-1 flex-col items-center gap-0.5 py-1.5 rounded-xl transition-all duration-200"
-            style={{
-              color: isActive ? theme.primary : theme.textMuted,
-              background: isActive ? `${theme.primary}15` : 'transparent',
-            }}
-          >
-            <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
-            <span className="text-[10px] font-medium">{tab.label}</span>
-          </button>
-        );
-      })}
+function Logo({ theme }) {
+  return (
+    <div className="app-logo">
+      <div
+        className="app-logo-mark"
+        style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}
+      >
+        <PiggyBank size={19} />
+      </div>
+      <div className="min-w-0">
+        <p className="app-logo-title">PoupPT</p>
+        <p className="app-logo-subtitle">Gestão financeira</p>
+      </div>
     </div>
   );
 }
 
-function HamburgerMenu({ theme, isOpen, onClose, onNavigate, user }) {
+function NavButton({ item, isActive, onNavigate, compact = false }) {
+  const Icon = item.icon;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onNavigate(item.id)}
+      className={`app-nav-button ${isActive ? 'is-active' : ''} ${compact ? 'is-compact' : ''}`}
+      title={item.label}
+    >
+      <Icon size={19} />
+      {!compact && <span>{item.label}</span>}
+    </button>
+  );
+}
+
+function DesktopSidebar({ theme, currentScreen, onNavigate, user }) {
+  return (
+    <aside className="app-sidebar">
+      <div className="app-sidebar-header">
+        <Logo theme={theme} />
+      </div>
+
+      <nav className="app-sidebar-nav poupt-scroll">
+        <div className="app-nav-group">
+          <p className="app-nav-label">Principal</p>
+          {primaryNav.map((item) => (
+            <NavButton
+              key={item.id}
+              item={item}
+              isActive={currentScreen === item.id}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+
+        <div className="app-nav-group">
+          <p className="app-nav-label">Ferramentas</p>
+          {secondaryNav.map((item) => (
+            <NavButton
+              key={item.id}
+              item={item}
+              isActive={currentScreen === item.id}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </div>
+      </nav>
+
+      <div className="app-sidebar-footer">
+        <div className="app-balance-card">
+          <span>PoupMoedas</span>
+          <strong>{user?.poupMoedas || 0}</strong>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user }) {
   return (
     <AnimatePresence>
       {isOpen && (
         <>
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
+            animate={{ opacity: 0.62 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
-            style={{ background: '#000' }}
+            className="app-drawer-backdrop"
             onClick={onClose}
           />
 
-          <motion.div
-            initial={{ x: -280 }}
+          <motion.aside
+            initial={{ x: -320 }}
             animate={{ x: 0 }}
-            exit={{ x: -280 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed top-0 left-0 bottom-0 z-50 w-[280px] flex flex-col"
-            style={{ background: theme.surface }}
+            exit={{ x: -320 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            className="app-drawer"
           >
-            <div
-              className="flex items-center justify-between p-5 border-b"
-              style={{ borderColor: theme.border }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🐷</span>
-                <span
-                  className="font-bold text-lg gradient-text"
-                  style={{
-                    backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-                  }}
-                >
-                  PoupPT
-                </span>
-              </div>
-
-              <button onClick={onClose} style={{ color: theme.textMuted }}>
+            <div className="app-drawer-header">
+              <Logo theme={theme} />
+              <button type="button" onClick={onClose} className="app-icon-button">
                 <X size={20} />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto poupt-scroll py-2">
-              {menuItems.map((item) => {
+            <div className="app-drawer-user">
+              <div>
+                <span>{user?.name || 'Utilizador'}</span>
+                <small>{user?.email || 'Conta PoupPT'}</small>
+              </div>
+              <div className="app-drawer-coins">
+                <Coins size={14} />
+                {user?.poupMoedas || 0}
+              </div>
+            </div>
+
+            <nav className="app-drawer-nav poupt-scroll">
+              {allNavItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = currentScreen === item.id;
 
                 return (
                   <button
                     key={item.id}
+                    type="button"
                     onClick={() => {
                       onNavigate(item.id);
                       onClose();
                     }}
-                    className="flex items-center gap-3 w-full px-5 py-3.5 text-left transition-colors duration-150 hover:opacity-80"
-                    style={{ color: theme.text }}
+                    className={`app-drawer-link ${isActive ? 'is-active' : ''}`}
                   >
-                    <Icon size={18} style={{ color: theme.textMuted }} />
-                    <span className="text-sm font-medium flex-1">
-                      {item.label}
-                    </span>
-                    <ChevronRight size={14} style={{ color: theme.textMuted }} />
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                    <ChevronRight size={14} />
                   </button>
                 );
               })}
-            </div>
-
-            <div className="p-5 border-t" style={{ borderColor: theme.border }}>
-              <div
-                className="flex items-center gap-2 text-xs"
-                style={{ color: theme.textMuted }}
-              >
-                <span>🪙</span>
-                <span>PoupMoedas: {user?.poupMoedas || 0}</span>
-              </div>
-            </div>
-          </motion.div>
+            </nav>
+          </motion.aside>
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+function MobileBottomNav({ currentScreen, onNavigate }) {
+  return (
+    <nav className="app-bottom-nav safe-area-bottom">
+      {primaryNav.map((item) => {
+        const Icon = item.icon;
+        const isActive = currentScreen === item.id;
+
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onNavigate(item.id)}
+            className={`app-bottom-button ${isActive ? 'is-active' : ''}`}
+          >
+            <Icon size={20} strokeWidth={isActive ? 2.6 : 1.9} />
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+function Topbar({ theme, title, currentScreen, onMenu, onNavigate, user, unreadCount }) {
+  return (
+    <header className="app-topbar">
+      <div className="app-topbar-left">
+        <button type="button" onClick={onMenu} className="app-icon-button app-mobile-only">
+          <Menu size={22} />
+        </button>
+        <div>
+          <p className="app-eyebrow">PoupPT</p>
+          <h1>{title}</h1>
+        </div>
+      </div>
+
+      <div className="app-topbar-actions">
+        <button type="button" onClick={() => onNavigate('poupMoedas')} className="app-coin-pill">
+          <Coins size={15} />
+          <span>{user?.poupMoedas || 0}</span>
+        </button>
+
+        <button type="button" onClick={() => onNavigate('addTransaction')} className="app-action-button app-desktop-only">
+          <Plus size={16} />
+          <span>Adicionar</span>
+        </button>
+
+        <button type="button" onClick={() => onNavigate('alerts')} className="app-icon-button app-alert-button">
+          <Bell size={19} />
+          {unreadCount > 0 && <span>{unreadCount > 9 ? '9+' : unreadCount}</span>}
+        </button>
+
+        <button type="button" onClick={() => onNavigate('settings')} className="app-icon-button app-desktop-only">
+          <Settings size={19} />
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function LoadingScreen({ theme }) {
+  return (
+    <div className="app-loading" style={{ background: theme.background }}>
+      <div
+        className="app-loading-mark"
+        style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}
+      >
+        <PiggyBank size={32} />
+      </div>
+      <p>A carregar...</p>
+    </div>
   );
 }
 
@@ -205,10 +313,24 @@ function App() {
     restoreSession,
     user,
     logout,
+    notifications,
   } = useStore();
 
   const [ready, setReady] = useState(false);
   const theme = themes[currentTheme] || themes.darkGold;
+  const isFullscreen = fullscreenScreens.includes(currentScreen);
+  const ScreenComponent = screenComponents[currentScreen] || Dashboard;
+
+  const pageTitle = useMemo(() => {
+    return allNavItems.find((item) => item.id === currentScreen)?.label || 'PoupPT';
+  }, [currentScreen]);
+
+  const unreadCount = notifications.filter((item) => !item.read).length;
+
+  const navigate = (screen) => {
+    setScreen(screen);
+    window.location.hash = screen;
+  };
 
   useEffect(() => {
     if (user?.currency) {
@@ -218,17 +340,21 @@ function App() {
 
   useEffect(() => {
     const root = document.documentElement;
-
     root.style.setProperty('--gold', theme.primary);
     root.style.setProperty('--gold-light', theme.primaryLight);
     root.style.setProperty('--gold-dark', theme.primaryDark);
+    root.style.setProperty('--accent', theme.accent);
     root.style.setProperty('--text-primary', theme.text);
     root.style.setProperty('--text-secondary', theme.textMuted);
     root.style.setProperty('--text-muted', theme.textMuted);
+    root.style.setProperty('--text-inverse', theme.textInverse);
     root.style.setProperty('--bg-primary', theme.background);
     root.style.setProperty('--bg-secondary', theme.surface);
     root.style.setProperty('--bg-surface-hover', theme.surfaceHover);
     root.style.setProperty('--border', theme.border);
+    root.style.setProperty('--shadow', theme.shadow);
+    root.style.setProperty('--gradient-start', theme.gradient[0]);
+    root.style.setProperty('--gradient-end', theme.gradient[1]);
     root.style.setProperty('--danger', '#EF4444');
     root.style.setProperty('--success', '#10B981');
     root.style.setProperty('--warning', '#F59E0B');
@@ -239,7 +365,6 @@ function App() {
       restoreSession();
 
       const savedUser = JSON.parse(localStorage.getItem('poupt_user') || 'null');
-
       if (savedUser?.currency) {
         setCurrencyGlobal(savedUser.currency);
       }
@@ -247,175 +372,89 @@ function App() {
       setReady(true);
 
       const token = localStorage.getItem('poupt_token');
-
       if (token && token !== 'mock-token-123') {
         try {
           const res = await api.getMe();
-
           if (res.data?.user) {
-            const freshUser = res.data.user;
-            localStorage.setItem('poupt_user', JSON.stringify(freshUser));
-            useStore.getState().updateUser(freshUser);
+            useStore.getState().updateUser(res.data.user);
           }
         } catch (err) {
           const msg = (err.message || '').toLowerCase();
-
-          if (
-            msg.includes('401') ||
-            msg.includes('unauthorized') ||
-            msg.includes('invalid token') ||
-            msg.includes('jwt')
-          ) {
+          if (msg.includes('401') || msg.includes('unauthorized') || msg.includes('invalid token') || msg.includes('jwt')) {
             logout();
           }
         }
       }
 
       const hash = window.location.hash.slice(1);
-
-      if (hash && screenComponents[hash]) {
-        const savedToken = localStorage.getItem('poupt_token');
-
-        if (savedToken) {
-          setScreen(hash);
-        }
+      if (hash && screenComponents[hash] && localStorage.getItem('poupt_token')) {
+        setScreen(hash);
       }
     };
 
     init();
   }, []);
 
-  useEffect(() => {
-    const link = document.createElement('link');
-
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
-    link.rel = 'stylesheet';
-
-    document.head.appendChild(link);
-  }, []);
-
   if (!ready) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: theme.background }}
-      >
-        <div className="text-center">
-          <div
-            className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
-            style={{
-              background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-            }}
-          >
-            <span className="text-2xl font-bold text-black">P</span>
-          </div>
+    return <LoadingScreen theme={theme} />;
+  }
 
-          <p className="text-sm" style={{ color: theme.textMuted }}>
-            A carregar...
-          </p>
-        </div>
+  if (isFullscreen) {
+    return (
+      <div className="app-fullscreen" style={{ background: theme.background }}>
+        <Suspense fallback={<LoadingScreen theme={theme} />}>
+          <ErrorBoundary>
+            <ScreenComponent />
+          </ErrorBoundary>
+        </Suspense>
+        <OfflineIndicator />
       </div>
     );
   }
 
-  const isFullScreen = ['landing', 'login', 'register', 'onboarding'].includes(
-    currentScreen
-  );
-
-  const ScreenComponent = screenComponents[currentScreen] || Dashboard;
-
-  const handleTab = (id) => {
-    setScreen(id);
-    window.location.hash = id;
-  };
-
   return (
-    <div
-      className="relative flex flex-col w-full h-screen max-h-screen overflow-hidden"
-      style={{
-        background: theme.background,
-        transition: 'background-color 0.5s ease',
-      }}
-    >
-      {!isFullScreen && (
-        <div className="shrink-0" style={{ background: theme.background }}>
-          <div className="mx-auto flex w-full max-w-[390px] items-center justify-between px-3 py-2">
-            <button
-              onClick={() => setMenuOpen(true)}
-              className="p-2 rounded-xl transition-colors duration-150"
-              style={{ color: theme.text }}
-            >
-              <Menu size={22} />
-            </button>
+    <div className="app-shell" style={{ background: theme.background }}>
+      <DesktopSidebar theme={theme} currentScreen={currentScreen} onNavigate={navigate} user={user} />
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold" style={{ color: theme.primary }}>
-                🐷 PoupPT
-              </span>
-            </div>
+      <div className="app-main">
+        <Topbar
+          theme={theme}
+          title={pageTitle}
+          currentScreen={currentScreen}
+          onMenu={() => setMenuOpen(true)}
+          onNavigate={navigate}
+          user={user}
+          unreadCount={unreadCount}
+        />
 
-            <button
-              onClick={() => setScreen('alerts')}
-              className="p-2 rounded-xl relative"
-              style={{ color: theme.text }}
-            >
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#FF4D5E]" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="flex-1 overflow-y-auto poupt-scroll">
-        <div
-          className="mx-auto w-full"
-          style={{
-            maxWidth: isFullScreen ? 'none' : 390,
-          }}
-        >
+        <main className="app-content poupt-scroll">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentScreen}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
+              className={`app-page app-page-${currentScreen}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
             >
-              <Suspense
-                fallback={
-                  <div
-                    className="flex items-center justify-center h-64"
-                    style={{ color: theme.textMuted }}
-                  >
-                    A carregar...
-                  </div>
-                }
-              >
+              <Suspense fallback={<div className="app-page-loader">A carregar...</div>}>
                 <ErrorBoundary>
                   <ScreenComponent />
                 </ErrorBoundary>
               </Suspense>
             </motion.div>
           </AnimatePresence>
-        </div>
+        </main>
       </div>
 
-      {!isFullScreen && (
-        <div className="mx-auto w-full max-w-[390px] shrink-0">
-          <BottomNav
-            theme={theme}
-            currentScreen={currentScreen}
-            onTab={handleTab}
-          />
-        </div>
-      )}
+      <MobileBottomNav currentScreen={currentScreen} onNavigate={navigate} />
 
-      <HamburgerMenu
+      <MobileDrawer
         theme={theme}
         isOpen={menuOpen}
+        currentScreen={currentScreen}
         onClose={() => setMenuOpen(false)}
-        onNavigate={(id) => setScreen(id)}
+        onNavigate={navigate}
         user={user}
       />
 

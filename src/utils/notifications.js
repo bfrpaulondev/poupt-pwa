@@ -1,46 +1,32 @@
-export const requestNotificationPermission = async () => {
-  if (!('Notification' in window)) {
-    console.log('Notifications not supported');
-    return false;
-  }
-
-  if (Notification.permission === 'granted') return true;
-
-  if (Notification.permission !== 'denied') {
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
-  }
-
-  return false;
+export const notificationTypes = {
+  divida_vencida: 'Dívida vencida',
+  pagamento_proximo: 'Pagamento próximo',
+  meta_atingida: 'Meta atingida',
+  transicao_modo: 'Transição de modo',
+  streak_quebrado: 'Sequência quebrada',
+  conquista: 'Conquista',
+  lembrete_poupanca: 'Lembrete de poupança',
+  divida_informal: 'Dívida informal',
+  relatorio_semanal: 'Relatório semanal',
+  dica_coach: 'Dica do Coach',
+  sistema: 'Sistema',
 };
 
-export const showLocalNotification = (title, options = {}) => {
-  if (Notification.permission === 'granted') {
-    new Notification(title, {
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
-      ...options
-    });
-  }
+export const notificationPriorities = {
+  critica: 'Crítica',
+  alta: 'Alta',
+  media: 'Média',
+  baixa: 'Baixa',
 };
 
-export const registerPushSubscription = async () => {
-  if (!('serviceWorker' in navigator)) return null;
+export const getNotificationLabel = (type) => notificationTypes[type] || notificationTypes.sistema;
+export const getNotificationPriorityLabel = (priority) => notificationPriorities[priority] || notificationPriorities.media;
 
-  try {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    if (subscription) return subscription;
-
-    // In production, this would use a VAPID key from the server
-    // const newSubscription = await registration.pushManager.subscribe({
-    //   userVisibleOnly: true,
-    //   applicationServerKey: VAPID_PUBLIC_KEY
-    // });
-    // return newSubscription;
-    return null;
-  } catch (err) {
-    console.error('Push subscription error:', err);
-    return null;
-  }
+export const sortNotificationsByPriority = (notifications = []) => {
+  const priorityWeight = { critica: 4, alta: 3, media: 2, baixa: 1 };
+  return [...notifications].sort((a, b) => {
+    const priorityDiff = (priorityWeight[b.priority] || 0) - (priorityWeight[a.priority] || 0);
+    if (priorityDiff !== 0) return priorityDiff;
+    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+  });
 };
