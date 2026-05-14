@@ -368,7 +368,12 @@ function App() {
       )}
 
       <div className="flex-1 overflow-y-auto poupt-scroll">
-        <div className="mx-auto w-full max-w-[390px]">
+        <div
+          className="mx-auto w-full"
+          style={{
+            maxWidth: isFullScreen ? 'none' : 390,
+          }}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={currentScreen}

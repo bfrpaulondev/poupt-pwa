@@ -6,15 +6,115 @@ import { Bot, Snowflake, Sparkles } from 'lucide-react';
 
 function FlaskIcon({ color }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M9 3h6" />
       <path d="M10 9V3h4v6l5 8.5a2 2 0 0 1-1.7 3H6.7a2 2 0 0 1-1.7-3L10 9z" />
     </svg>
   );
 }
 
+function FeatureItem({ icon, title, description }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+      }}
+    >
+      <div
+        style={{
+          width: 42,
+          height: 42,
+          flexShrink: 0,
+          borderRadius: 13,
+          background: 'rgba(226, 185, 79, 0.15)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {icon}
+      </div>
+
+      <div style={{ minWidth: 0 }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 14,
+            lineHeight: '17px',
+            fontWeight: 800,
+            color: '#FFFFFF',
+          }}
+        >
+          {title}
+        </p>
+
+        <p
+          style={{
+            margin: '3px 0 0',
+            fontSize: 12,
+            lineHeight: '15px',
+            color: '#A8A7D8',
+          }}
+        >
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function TrustItem({ text }) {
+  return (
+    <span
+      style={{
+        fontSize: 11,
+        lineHeight: '14px',
+        color: '#A8A7D8',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {text}
+    </span>
+  );
+}
+
+function StoreBadge({ icon, text }) {
+  return (
+    <div
+      style={{
+        height: 34,
+        padding: '0 15px',
+        borderRadius: 9,
+        background: '#1B1A33',
+        color: '#B8B7DA',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        fontSize: 12,
+        fontWeight: 600,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <span>{icon}</span>
+      <span>{text}</span>
+    </div>
+  );
+}
+
 export default function Landing() {
-  const { setScreen, setOnboardingStep, onboardingComplete, currentTheme } = useStore();
+  const { setScreen, setOnboardingStep, currentTheme } = useStore();
   const theme = themes[currentTheme] || themes.darkGold;
 
   const handleStart = () => {
@@ -26,166 +126,227 @@ export default function Landing() {
     setScreen('login');
   };
 
+  const goldGradient = 'linear-gradient(135deg, #E2B94F 0%, #F5DB86 100%)';
+
   return (
     <div
-      className="flex flex-col items-center justify-between min-h-screen px-5 sm:px-8 py-6 sm:py-10 relative overflow-hidden"
-      style={{ background: theme.background }}
+      style={{
+        width: '100vw',
+        minHeight: '100dvh',
+        background: '#07080F',
+        overflow: 'hidden',
+        position: 'relative',
+      }}
     >
-      {/* Animated background gradient */}
       <div
-        className="absolute inset-0 opacity-30"
         style={{
-          background: `radial-gradient(ellipse at 50% 0%, ${theme.gradient[0]}30 0%, transparent 60%)`,
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          background:
+            'radial-gradient(ellipse at 50% -5%, rgba(226,185,79,0.13) 0%, rgba(226,185,79,0.04) 30%, transparent 60%)',
         }}
       />
 
-      {/* Logo */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 text-center mt-4 sm:mt-8"
+      <div
+        style={{
+          width: 'min(calc(100vw - 26px), 430px)',
+          minHeight: '100dvh',
+          margin: '0 auto',
+          paddingTop: 33,
+          paddingBottom: 12,
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
       >
-        <div className="text-6xl mb-3">🐷</div>
-        <h1
-          className="text-4xl font-extrabold gradient-text"
+        <motion.div
+          initial={{ opacity: 0, y: -14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
           style={{
-            backgroundImage: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
+            textAlign: 'center',
           }}
         >
-          PoupPT
-        </h1>
-        <p className="text-sm mt-2" style={{ color: theme.textMuted }}>
-          O teu treinador financeiro pessoal
-        </p>
-      </motion.div>
-
-      {/* Hero card */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="relative z-10 w-full glass rounded-2xl p-5 sm:p-6 mb-6"
-      >
-        <h2
-          className="text-xl font-bold mb-4 text-center"
-          style={{ color: theme.text }}
-        >
-          Sai da crise. Toma o controlo.
-        </h2>
-
-        <div className="flex flex-col gap-4 sm:gap-5">
-          <div className="flex items-center gap-4 sm:gap-5">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: `${theme.primary}20` }}
-            >
-              <FlaskIcon color={theme.primary} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold" style={{ color: theme.text }}>
-                6 Frascos
-              </p>
-              <p className="text-xs" style={{ color: theme.textMuted }}>
-                Metodo de gestao financeira comprovado
-              </p>
-            </div>
+          <div
+            style={{
+              fontSize: 58,
+              lineHeight: '58px',
+              height: 58,
+              marginBottom: 8,
+            }}
+          >
+            🐷
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-5">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: `${theme.primary}20` }}
-            >
-              <Bot size={20} color={theme.primary} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold" style={{ color: theme.text }}>
-                AI Coach
-              </p>
-              <p className="text-xs" style={{ color: theme.textMuted }}>
-                Treinador pessoal com 2 personalidades
-              </p>
-            </div>
-          </div>
+          <h1
+            className="gradient-text"
+            style={{
+              margin: 0,
+              fontSize: 35,
+              lineHeight: '38px',
+              fontWeight: 900,
+              letterSpacing: '-1px',
+              backgroundImage: goldGradient,
+            }}
+          >
+            PoupPT
+          </h1>
 
-          <div className="flex items-center gap-4 sm:gap-5">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: `${theme.primary}20` }}
-            >
-              <Snowflake size={20} color={theme.primary} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold" style={{ color: theme.text }}>
-                Snowball
-              </p>
-              <p className="text-xs" style={{ color: theme.textMuted }}>
-                Metodo bola de neve para eliminar dividas
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+          <p
+            style={{
+              margin: '7px 0 0',
+              fontSize: 14,
+              lineHeight: '18px',
+              color: '#A8A7D8',
+            }}
+          >
+            O teu treinador financeiro pessoal
+          </p>
+        </motion.div>
 
-      {/* Buttons */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        className="relative z-10 w-full flex flex-col gap-4 sm:gap-5"
-      >
-        <button
-          onClick={handleStart}
-          className="w-full py-3.5 sm:py-4 rounded-2xl font-bold text-base transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.35, delay: 0.12 }}
           style={{
-            background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
-            color: theme.textInverse,
-            boxShadow: `0 8px 24px ${theme.primary}40`,
+            marginTop: 8,
+            width: '100%',
+            borderRadius: 15,
+            padding: '22px 19px 18px',
+            background: 'rgba(255, 255, 255, 0.065)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 16px 50px rgba(0, 0, 0, 0.28)',
           }}
         >
-          <Sparkles size={16} className="inline mr-2" />
-          Comecar Gratis
-        </button>
+          <h2
+            style={{
+              margin: '0 0 19px',
+              textAlign: 'center',
+              fontSize: 20,
+              lineHeight: '24px',
+              fontWeight: 900,
+              color: '#FFFFFF',
+            }}
+          >
+            Sai da crise. Toma o controlo.
+          </h2>
 
-        <button
-          onClick={handleLogin}
-          className="w-full py-3 sm:py-3.5 rounded-2xl font-semibold text-sm transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+            }}
+          >
+            <FeatureItem
+              icon={<FlaskIcon color="#E2B94F" />}
+              title="6 Frascos"
+              description="Método de gestão financeira comprovado"
+            />
+
+            <FeatureItem
+              icon={<Bot size={20} color="#E2B94F" />}
+              title="AI Coach"
+              description="Treinador pessoal com 2 personalidades"
+            />
+
+            <FeatureItem
+              icon={<Snowflake size={20} color="#E2B94F" />}
+              title="Snowball"
+              description="Método bola de neve para eliminar dívidas"
+            />
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.2 }}
           style={{
-            background: 'transparent',
-            color: theme.primary,
-            border: `1.5px solid ${theme.primary}60`,
+            marginTop: 25,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 13,
           }}
         >
-          Ja tenho conta
-        </button>
-      </motion.div>
+          <button
+            onClick={handleStart}
+            style={{
+              width: '100%',
+              height: 55,
+              border: 'none',
+              borderRadius: 15,
+              background: goldGradient,
+              color: '#05060C',
+              fontSize: 16,
+              fontWeight: 900,
+              boxShadow: '0 12px 30px rgba(226,185,79,0.25)',
+              cursor: 'pointer',
+            }}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              <Sparkles size={16} />
+              Começar Grátis
+            </span>
+          </button>
 
-      {/* Trust badges */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.9 }}
-        className="relative z-10 flex items-center justify-center gap-6 mt-8"
-      >
-        <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Gratuito</span>
-        <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; Sem cartao</span>
-        <span className="text-xs" style={{ color: theme.textMuted }}>&#10003; +1000 users</span>
-      </motion.div>
+          <button
+            onClick={handleLogin}
+            style={{
+              width: '100%',
+              height: 46,
+              borderRadius: 15,
+              background: 'transparent',
+              color: '#E2B94F',
+              border: '1.5px solid rgba(226,185,79,0.55)',
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: 'pointer',
+            }}
+          >
+            Já tenho conta
+          </button>
+        </motion.div>
 
-      {/* App store badges (mock) */}
-      <div className="relative z-10 flex items-center gap-4 mt-6 mb-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.28 }}
+          style={{
+            marginTop: 27,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+            flexWrap: 'wrap',
+          }}
+        >
+          <TrustItem text="✓ Gratuito" />
+          <TrustItem text="✓ Sem cartão" />
+          <TrustItem text="✓ +1000 users" />
+        </motion.div>
+
         <div
-          className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1"
-          style={{ background: theme.surface, color: theme.textMuted, border: `1px solid ${theme.border}` }}
+          style={{
+            marginTop: 17,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+          }}
         >
-          🍎 App Store
-        </div>
-        <div
-          className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-1"
-          style={{ background: theme.surface, color: theme.textMuted, border: `1px solid ${theme.border}` }}
-        >
-          ▶️ Google Play
+          <StoreBadge icon="🍎" text="App Store" />
+          <StoreBadge icon="▶️" text="Google Play" />
         </div>
       </div>
     </div>
