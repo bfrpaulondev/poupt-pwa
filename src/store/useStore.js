@@ -9,7 +9,7 @@ const useStore = create((set, get) => ({
 
   // App state
   currentScreen: 'landing',
-  currentTheme: localStorage.getItem('poupt_theme') || 'darkGold',
+  currentTheme: localStorage.getItem('poupt_theme') || 'cleanFinance',
   menuOpen: false,
   isLoading: false,
 
@@ -145,7 +145,7 @@ const useStore = create((set, get) => ({
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
-        const savedTheme = localStorage.getItem('poupt_theme') || user.theme || 'darkGold';
+        const savedTheme = localStorage.getItem('poupt_theme') || user.theme || 'cleanFinance';
 
         // Check hash for deep link navigation
         const hash = window.location.hash.slice(1);
@@ -155,7 +155,7 @@ const useStore = create((set, get) => ({
           user,
           token,
           isAuthenticated: true,
-          currentTheme: (savedTheme && themes[savedTheme]) ? savedTheme : 'darkGold',
+          currentTheme: (savedTheme && themes[savedTheme]) ? savedTheme : 'cleanFinance',
           currentScreen: screen
         });
       } catch {
