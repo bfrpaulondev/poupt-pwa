@@ -1,11 +1,16 @@
 export default function JarDonut({ percentages, size = 200 }) {
-  const colors = {
-    necessities: '#3B82F6',
-    freedom: '#10B981',
-    savings: '#F59E0B',
-    education: '#8B5CF6',
-    play: '#EF4444',
-    give: '#EC4899'
+  // SVG cannot use CSS variables in Safari, so we read computed colors
+  const getJarColor = (key) => {
+    const cssVar = `--jar-${key}`;
+    const computed = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+    return computed || {
+      necessities: '#3B82F6',
+      freedom: '#10B981',
+      savings: '#F59E0B',
+      education: '#8B5CF6',
+      play: '#EF4444',
+      give: '#EC4899'
+    }[key] || '#64748B';
   };
 
   const jarOrder = ['necessities', 'freedom', 'savings', 'education', 'play', 'give'];
@@ -21,7 +26,7 @@ export default function JarDonut({ percentages, size = 200 }) {
     const dashLength = pct * circumference;
     const segment = {
       key,
-      color: colors[key],
+      color: getJarColor(key),
       dashArray: `${dashLength} ${circumference - dashLength}`,
       dashOffset: -currentOffset,
       percentage: percentages[key] || 0

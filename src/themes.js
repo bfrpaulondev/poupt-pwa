@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const jarColorsDefault = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
 
 export const themes = {
@@ -177,6 +178,71 @@ export const themes = {
     gradient: ['#00E5FF', '#7C4DFF'],
     jarColors: ['#FF1744', '#00E676', '#2979FF', '#FFEA00', '#FF9100', '#E040FB'],
   },
+=======
+export const cleanFinanceTheme = {
+  id: 'cleanFinance',
+  name: 'Financeiro Claro',
+  primary: '#2563EB',
+  primaryLight: '#60A5FA',
+  primaryDark: '#1D4ED8',
+  accent: '#16A34A',
+  accentLight: '#86EFAC',
+  background: '#F6F8FB',
+  surface: '#FFFFFF',
+  surfaceHover: '#F1F5F9',
+  text: '#111827',
+  textMuted: '#64748B',
+  textInverse: '#FFFFFF',
+  border: '#E2E8F0',
+  shadow: 'rgba(15, 23, 42, 0.10)',
+  gradient: ['#2563EB', '#16A34A'],
+  isDark: false,
+  glassBg: '#FFFFFF',
+  glassBorder: '#E2E8F0',
+  glassStrongBg: '#FFFFFF',
+  glassStrongBorder: '#CBD5E1',
+  jarColors: ['#2563EB', '#16A34A', '#F59E0B', '#7C3AED', '#DC2626', '#DB2777'],
+};
+
+const darkFinanceTheme = {
+  ...cleanFinanceTheme,
+  id: 'darkFinance',
+  name: 'Financeiro Escuro',
+  primary: '#60A5FA',
+  primaryLight: '#93C5FD',
+  primaryDark: '#2563EB',
+  accent: '#22C55E',
+  accentLight: '#86EFAC',
+  background: '#0F172A',
+  surface: '#111827',
+  surfaceHover: '#1E293B',
+  text: '#F8FAFC',
+  textMuted: '#94A3B8',
+  textInverse: '#0F172A',
+  border: '#243244',
+  shadow: 'rgba(0, 0, 0, 0.35)',
+  gradient: ['#60A5FA', '#22C55E'],
+  isDark: true,
+  glassBg: '#111827',
+  glassBorder: '#243244',
+  glassStrongBg: '#1E293B',
+  glassStrongBorder: '#334155',
+};
+
+export const themes = {
+  cleanFinance: cleanFinanceTheme,
+  darkFinance: darkFinanceTheme,
+
+  // Legacy aliases kept to avoid breaking users with old saved theme values.
+  darkGold: cleanFinanceTheme,
+  oceanBlue: cleanFinanceTheme,
+  forestGreen: cleanFinanceTheme,
+  rosePink: cleanFinanceTheme,
+  royalPurple: cleanFinanceTheme,
+  sunsetOrange: cleanFinanceTheme,
+  arcticWhite: cleanFinanceTheme,
+  midnightNeon: darkFinanceTheme,
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
 };
 
 export const themeKeys = Object.keys(themes);

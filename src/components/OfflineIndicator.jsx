@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff } from 'lucide-react';
 
 export default function OfflineIndicator() {
@@ -15,13 +16,21 @@ export default function OfflineIndicator() {
     };
   }, []);
 
-  if (!isOffline) return null;
-
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] px-4 py-2 text-center text-xs font-medium"
-      style={{ background: '#EF4444', color: 'white' }}>
-      <WifiOff size={12} className="inline mr-1" />
-      Sem ligacao a internet - alteracoes locais serao sincronizadas
-    </div>
+    <AnimatePresence>
+      {isOffline && (
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -30 }}
+          transition={{ duration: 0.3 }}
+          className="fixed left-0 right-0 z-[100] px-4 py-2 text-center text-xs font-medium"
+          style={{ top: 'calc(48px + env(safe-area-inset-top, 0px))', background: '#EF4444', color: 'white' }}
+        >
+          <WifiOff size={12} className="inline mr-1" />
+          Sem ligacao a internet - alteracoes locais serao sincronizadas
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -44,8 +44,12 @@ const useStore = create((set, get) => ({
   isAuthenticated: false,
 
   currentScreen: 'landing',
+<<<<<<< HEAD
   currentTheme: getStoredTheme(),
   ownedThemes: getStoredOwnedThemes(),
+=======
+  currentTheme: localStorage.getItem('poupt_theme') || 'cleanFinance',
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
   menuOpen: false,
   isLoading: false,
 
@@ -238,11 +242,21 @@ const useStore = create((set, get) => ({
     })),
 
   restoreSession: () => {
+<<<<<<< HEAD
     const token = localStorage.getItem(TOKEN_KEY);
     const userStr = localStorage.getItem(USER_KEY);
+=======
+    const token = localStorage.getItem('poupt_token');
+    const userStr = localStorage.getItem('poupt_user');
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const savedTheme = localStorage.getItem('poupt_theme') || user.theme || 'cleanFinance';
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
 
     if (!token || !userStr) return;
 
+<<<<<<< HEAD
     try {
       const user = JSON.parse(userStr);
       const ownedThemes = normalizeOwnedThemes(user.ownedThemes || user.unlockedThemes || getStoredOwnedThemes());
@@ -268,6 +282,19 @@ const useStore = create((set, get) => ({
     } catch {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
+=======
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+          currentTheme: (savedTheme && themes[savedTheme]) ? savedTheme : 'cleanFinance',
+          currentScreen: screen
+        });
+      } catch {
+        localStorage.removeItem('poupt_token');
+        localStorage.removeItem('poupt_user');
+      }
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
     }
   },
 }));

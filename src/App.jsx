@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { useEffect, useMemo, useState, Suspense } from 'react';
+=======
+import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from './store/useStore';
 import { themes } from './themes';
@@ -8,7 +12,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import OfflineIndicator from './components/OfflineIndicator';
 import {
   Home,
-  FlaskConical,
   Bot,
   CreditCard,
   User,
@@ -21,29 +24,32 @@ import {
   Shield,
   Coins,
   Settings,
+  Plus,
+  WalletCards,
+  FlaskConical,
   ChevronRight,
   Plus,
   Sparkles,
   PiggyBank,
 } from 'lucide-react';
 
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Onboarding from './pages/Onboarding';
-import Dashboard from './pages/Dashboard';
-import Jars from './pages/Jars';
-import Coach from './pages/Coach';
-import Debts from './pages/Debts';
-import Goals from './pages/Goals';
-import Profile from './pages/Profile';
-import SettingsPage from './pages/Settings';
-import AddTransaction from './pages/AddTransaction';
-import MoedasStore from './pages/MoedasStore';
-import Investments from './pages/Investments';
-import SurvivalMode from './pages/SurvivalMode';
-import Notifications from './pages/Notifications';
-import Reports from './pages/Reports';
+const Landing = lazy(() => import('./pages/Landing'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Onboarding = lazy(() => import('./pages/Onboarding'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Jars = lazy(() => import('./pages/Jars'));
+const Coach = lazy(() => import('./pages/Coach'));
+const Debts = lazy(() => import('./pages/Debts'));
+const Goals = lazy(() => import('./pages/Goals'));
+const Profile = lazy(() => import('./pages/Profile'));
+const SettingsPage = lazy(() => import('./pages/Settings'));
+const AddTransaction = lazy(() => import('./pages/AddTransaction'));
+const MoedasStore = lazy(() => import('./pages/MoedasStore'));
+const Investments = lazy(() => import('./pages/Investments'));
+const SurvivalMode = lazy(() => import('./pages/SurvivalMode'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Reports = lazy(() => import('./pages/Reports'));
 
 const screenComponents = {
   landing: Landing,
@@ -65,6 +71,7 @@ const screenComponents = {
   reports: Reports,
 };
 
+<<<<<<< HEAD
 const primaryNav = [
   { id: 'dashboard', label: 'Início', icon: Home },
   { id: 'jars', label: 'Frascos', icon: FlaskConical },
@@ -99,10 +106,52 @@ function Logo({ theme }) {
         <p className="app-logo-title">PoupPT</p>
         <p className="app-logo-subtitle">Gestão financeira</p>
       </div>
+=======
+const primaryTabs = [
+  { id: 'dashboard', label: 'Início', icon: Home },
+  { id: 'addTransaction', label: 'Adicionar', icon: Plus },
+  { id: 'reports', label: 'Relatórios', icon: BarChart3 },
+  { id: 'coach', label: 'Coach', icon: Bot },
+  { id: 'profile', label: 'Perfil', icon: User },
+];
+
+const menuItems = [
+  { id: 'jars', label: 'Frascos', description: 'Distribuição do rendimento', icon: FlaskConical },
+  { id: 'debts', label: 'Dívidas', description: 'Formais, informais e Snowball', icon: CreditCard },
+  { id: 'goals', label: 'Objetivos', description: 'Metas e poupanças', icon: Target },
+  { id: 'investments', label: 'Investimentos', description: 'Carteira e evolução', icon: Building2 },
+  { id: 'survival', label: 'Modo Sobrevivência', description: 'Plano de emergência', icon: Shield },
+  { id: 'poupMoedas', label: 'PoupMoedas', description: 'Saldo e loja', icon: Coins },
+  { id: 'settings', label: 'Definições', description: 'Conta, tema e privacidade', icon: Settings },
+];
+
+function BottomNav({ currentScreen, onTab }) {
+  return (
+    <div className="ui-bottom-nav-wrap">
+      <nav className="ui-bottom-nav" aria-label="Navegação principal">
+        {primaryTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = currentScreen === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => onTab(tab.id)}
+              className={isActive ? 'active' : ''}
+            >
+              <Icon size={20} strokeWidth={isActive ? 2.4 : 2} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
     </div>
   );
 }
 
+<<<<<<< HEAD
 function NavButton({ item, isActive, onNavigate, compact = false }) {
   const Icon = item.icon;
 
@@ -163,19 +212,56 @@ function DesktopSidebar({ theme, currentScreen, onNavigate, user }) {
 }
 
 function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user }) {
+=======
+function TopBar({ user, hasUnreadNotif, onMenu, onAlerts }) {
+  const firstName = user?.name ? user.name.split(' ')[0] : 'PoupPT';
+
+  return (
+    <header className="ui-app-topbar safe-area-top">
+      <div className="ui-app-topbar-inner">
+        <button type="button" onClick={onMenu} className="ui-icon-button" aria-label="Abrir menu">
+          <Menu size={20} />
+        </button>
+
+        <div className="ui-brand">
+          <div className="ui-brand-mark">P</div>
+          <div>
+            <p className="ui-brand-title">PoupPT</p>
+            <p className="ui-brand-subtitle">Olá, {firstName}</p>
+          </div>
+        </div>
+
+        <button type="button" onClick={onAlerts} className="ui-icon-button" aria-label="Notificações">
+          <Bell size={19} />
+          {hasUnreadNotif && <span className="ui-notification-dot" />}
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function AppMenu({ isOpen, onClose, onNavigate, user }) {
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
   return (
     <AnimatePresence>
       {isOpen && (
         <>
           <motion.div
+            className="ui-menu-backdrop"
             initial={{ opacity: 0 }}
+<<<<<<< HEAD
             animate={{ opacity: 0.62 }}
             exit={{ opacity: 0 }}
             className="app-drawer-backdrop"
+=======
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
             onClick={onClose}
           />
 
           <motion.aside
+<<<<<<< HEAD
             initial={{ x: -320 }}
             animate={{ x: 0 }}
             exit={{ x: -320 }}
@@ -202,6 +288,29 @@ function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user 
 
             <nav className="app-drawer-nav poupt-scroll">
               {allNavItems.map((item) => {
+=======
+            className="ui-menu-panel"
+            initial={{ x: 360 }}
+            animate={{ x: 0 }}
+            exit={{ x: 360 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+          >
+            <div className="ui-menu-header safe-area-top">
+              <div className="ui-brand">
+                <div className="ui-brand-mark">P</div>
+                <div>
+                  <p className="ui-brand-title">Menu</p>
+                  <p className="ui-brand-subtitle">{user?.poupMoedas || 0} PoupMoedas</p>
+                </div>
+              </div>
+              <button type="button" onClick={onClose} className="ui-icon-button" aria-label="Fechar menu">
+                <X size={19} />
+              </button>
+            </div>
+
+            <div className="ui-menu-list poupt-scroll">
+              {menuItems.map((item) => {
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
                 const Icon = item.icon;
                 const isActive = currentScreen === item.id;
 
@@ -209,10 +318,15 @@ function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user 
                   <button
                     key={item.id}
                     type="button"
+<<<<<<< HEAD
+=======
+                    className="ui-menu-item"
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
                     onClick={() => {
                       onNavigate(item.id);
                       onClose();
                     }}
+<<<<<<< HEAD
                     className={`app-drawer-link ${isActive ? 'is-active' : ''}`}
                   >
                     <Icon size={18} />
@@ -222,6 +336,21 @@ function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user 
                 );
               })}
             </nav>
+=======
+                  >
+                    <Icon size={19} />
+                    <span className="flex-1 min-w-0">
+                      <span className="block truncate">{item.label}</span>
+                      <span className="block truncate text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                        {item.description}
+                      </span>
+                    </span>
+                    <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
+                  </button>
+                );
+              })}
+            </div>
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
           </motion.aside>
         </>
       )}
@@ -229,6 +358,7 @@ function MobileDrawer({ theme, isOpen, currentScreen, onClose, onNavigate, user 
   );
 }
 
+<<<<<<< HEAD
 function MobileBottomNav({ currentScreen, onNavigate }) {
   return (
     <nav className="app-bottom-nav safe-area-bottom">
@@ -299,6 +429,15 @@ function LoadingScreen({ theme }) {
         <PiggyBank size={32} />
       </div>
       <p>A carregar...</p>
+=======
+function LoadingScreen({ theme }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
+      <div className="text-center">
+        <div className="ui-brand-mark mx-auto mb-4">P</div>
+        <p className="text-sm font-semibold" style={{ color: theme.textMuted }}>A carregar...</p>
+      </div>
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
     </div>
   );
 }
@@ -317,6 +456,7 @@ function App() {
   } = useStore();
 
   const [ready, setReady] = useState(false);
+<<<<<<< HEAD
   const theme = themes[currentTheme] || themes.darkGold;
   const isFullscreen = fullscreenScreens.includes(currentScreen);
   const ScreenComponent = screenComponents[currentScreen] || Dashboard;
@@ -331,6 +471,10 @@ function App() {
     setScreen(screen);
     window.location.hash = screen;
   };
+=======
+  const theme = themes[currentTheme] || themes.cleanFinance || themes.darkGold;
+  const hasUnreadNotif = useMemo(() => notifications?.some((n) => !n.read) || false, [notifications]);
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
 
   useEffect(() => {
     if (user?.currency) {
@@ -352,12 +496,39 @@ function App() {
     root.style.setProperty('--bg-secondary', theme.surface);
     root.style.setProperty('--bg-surface-hover', theme.surfaceHover);
     root.style.setProperty('--border', theme.border);
+<<<<<<< HEAD
     root.style.setProperty('--shadow', theme.shadow);
     root.style.setProperty('--gradient-start', theme.gradient[0]);
     root.style.setProperty('--gradient-end', theme.gradient[1]);
     root.style.setProperty('--danger', '#EF4444');
     root.style.setProperty('--success', '#10B981');
     root.style.setProperty('--warning', '#F59E0B');
+=======
+    root.style.setProperty('--danger', '#DC2626');
+    root.style.setProperty('--success', '#16A34A');
+    root.style.setProperty('--warning', '#D97706');
+    root.style.setProperty('--is-dark', theme.isDark ? '1' : '0');
+    root.style.setProperty('--glass-bg', theme.glassBg || theme.surface);
+    root.style.setProperty('--glass-border', theme.glassBorder || theme.border);
+    root.style.setProperty('--glass-strong-bg', theme.glassStrongBg || theme.surface);
+    root.style.setProperty('--glass-strong-border', theme.glassStrongBorder || theme.border);
+    root.style.setProperty('--gradient-start', theme.gradient[0]);
+    root.style.setProperty('--gradient-end', theme.gradient[1]);
+    root.style.setProperty('--shadow-color', theme.shadow);
+
+    const jarKeys = ['necessities', 'freedom', 'savings', 'education', 'play', 'give'];
+    const themeJarColors = theme.jarColors || [];
+    jarKeys.forEach((key, idx) => {
+      if (themeJarColors[idx]) {
+        root.style.setProperty(`--jar-${key}`, themeJarColors[idx]);
+      }
+    });
+
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme.background);
+    }
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
   }, [theme]);
 
   useEffect(() => {
@@ -385,20 +556,38 @@ function App() {
           }
         }
       }
+<<<<<<< HEAD
 
       const hash = window.location.hash.slice(1);
       if (hash && screenComponents[hash] && localStorage.getItem('poupt_token')) {
         setScreen(hash);
       }
+=======
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
     };
 
     init();
   }, []);
 
+<<<<<<< HEAD
+=======
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && hash !== currentScreen) {
+        setScreen(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [currentScreen, setScreen]);
+
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
   if (!ready) {
     return <LoadingScreen theme={theme} />;
   }
 
+<<<<<<< HEAD
   if (isFullscreen) {
     return (
       <div className="app-fullscreen" style={{ background: theme.background }}>
@@ -407,12 +596,38 @@ function App() {
             <ScreenComponent />
           </ErrorBoundary>
         </Suspense>
+=======
+  const isFullScreen = ['landing', 'login', 'register', 'onboarding'].includes(currentScreen);
+  const ScreenComponent = screenComponents[currentScreen] || Dashboard;
+
+  if (isFullScreen) {
+    return (
+      <div className="ui-app-shell">
+        <div className="ui-app-content poupt-scroll">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentScreen}
+              initial={{ opacity: 0, x: 18 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -18 }}
+              transition={{ duration: 0.18 }}
+            >
+              <Suspense fallback={<LoadingScreen theme={theme} />}>
+                <ErrorBoundary>
+                  <ScreenComponent />
+                </ErrorBoundary>
+              </Suspense>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
         <OfflineIndicator />
       </div>
     );
   }
 
   return (
+<<<<<<< HEAD
     <div className="app-shell" style={{ background: theme.background }}>
       <DesktopSidebar theme={theme} currentScreen={currentScreen} onNavigate={navigate} user={user} />
 
@@ -438,12 +653,40 @@ function App() {
               transition={{ duration: 0.18 }}
             >
               <Suspense fallback={<div className="app-page-loader">A carregar...</div>}>
+=======
+    <div className="ui-app-shell">
+      <TopBar
+        user={user}
+        hasUnreadNotif={hasUnreadNotif}
+        onMenu={() => setMenuOpen(true)}
+        onAlerts={() => setScreen('alerts')}
+      />
+
+      <main className="ui-app-content poupt-scroll">
+        <div className="ui-app-content-inner">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentScreen}
+              initial={{ opacity: 0, x: 18 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -18 }}
+              transition={{ duration: 0.18 }}
+            >
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center h-64" style={{ color: theme.textMuted }}>
+                    A carregar...
+                  </div>
+                }
+              >
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
                 <ErrorBoundary>
                   <ScreenComponent />
                 </ErrorBoundary>
               </Suspense>
             </motion.div>
           </AnimatePresence>
+<<<<<<< HEAD
         </main>
       </div>
 
@@ -451,10 +694,22 @@ function App() {
 
       <MobileDrawer
         theme={theme}
+=======
+        </div>
+      </main>
+
+      <BottomNav currentScreen={currentScreen} onTab={setScreen} />
+
+      <AppMenu
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
         isOpen={menuOpen}
         currentScreen={currentScreen}
         onClose={() => setMenuOpen(false)}
+<<<<<<< HEAD
         onNavigate={navigate}
+=======
+        onNavigate={setScreen}
+>>>>>>> 97e3dd26dab4973aee196010106563ce6ff4bc58
         user={user}
       />
 

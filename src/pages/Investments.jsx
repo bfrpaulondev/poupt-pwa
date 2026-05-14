@@ -37,7 +37,7 @@ const typeColors = {
 
 
 export default function Investments() {
-  const { user } = useStore();
+  const { user, setScreen } = useStore();
   const [investments, setInvestments] = useState([]);
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,6 +48,7 @@ export default function Investments() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [form, setForm] = useState({
     name: '', type: 'etf', quantity: '', avgPrice: '', currentPrice: '',
     platform: '', currency: 'EUR', dividendPerShare: ''
@@ -64,6 +65,7 @@ export default function Investments() {
       setPortfolio(res.data.portfolio);
     } catch (err) {
       console.error(err);
+      setErrorMsg('Erro ao carregar investimentos. Tenta novamente.');
     } finally {
       setLoading(false);
     }
@@ -153,7 +155,19 @@ export default function Investments() {
   }
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
+      <button onClick={() => setScreen('dashboard')}
+        className="flex items-center gap-1 mb-3 text-sm font-semibold"
+        style={{ color: 'var(--text-secondary)' }}>
+        ← Voltar
+      </button>
+      {errorMsg && (
+        <div className="p-3 rounded-xl text-xs font-medium"
+          style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}
+          onClick={() => setErrorMsg('')}>
+          {errorMsg} ← to dismiss
+        </div>
+      )}
       {/* Premium Notice for free users */}
       {!isPremium && (
         <div className="p-5 sm:p-6 rounded-2xl flex items-center gap-4"
@@ -171,7 +185,7 @@ export default function Investments() {
 
       {/* Portfolio Summary */}
       {portfolio && (
-        <div className="glass-card p-5 sm:p-6">
+        <div className="glass-card p-6 sm:p-7">
           <h3 className="text-xs font-semibold mb-3 uppercase" style={{ color: 'var(--text-muted)' }}>Portfolio</h3>
           <div className="grid grid-cols-2 gap-5">
             <div>
@@ -249,10 +263,10 @@ export default function Investments() {
 
           {/* Type selector with PPR label */}
           <div>
-            <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
+            <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
               Tipo de ativo
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 xs:grid-cols-3 gap-2">
               {Object.entries(typeLabels).map(([key, label]) => {
                 const Icon = typeIcons[key];
                 return (
@@ -264,9 +278,9 @@ export default function Investments() {
                       border: form.type === key ? `1px solid ${typeColors[key]}` : '1px solid var(--border)'
                     }}>
                     <Icon size={14} />
-                    <span className="text-[9px] sm:text-[10px]">{label}</span>
+                    <span className="text-[11px] sm:text-xs">{label}</span>
                     {key === 'ppr' && (
-                      <span className="text-[7px] sm:text-[8px] leading-none" style={{ color: typeColors[key] }}>
+                      <span className="text-[11px] sm:text-xs leading-none" style={{ color: typeColors[key] }}>
                         Poupanca Reforma
                       </span>
                     )}
@@ -278,13 +292,13 @@ export default function Investments() {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Quantidade</label>
+              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Quantidade</label>
               <input type="number" placeholder="0" value={form.quantity}
                 onChange={e => setForm({...form, quantity: e.target.value})} required min="0.01" step="0.01"
                 className="w-full input-field" />
             </div>
             <div>
-              <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco medio</label>
+              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco medio</label>
               <input type="number" placeholder="0.00 EUR" value={form.avgPrice}
                 onChange={e => setForm({...form, avgPrice: e.target.value})} required min="0.01" step="0.01"
                 className="w-full input-field" />
@@ -293,13 +307,13 @@ export default function Investments() {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco atual</label>
+              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Preco atual</label>
               <input type="number" placeholder="0.00 EUR" value={form.currentPrice}
                 onChange={e => setForm({...form, currentPrice: e.target.value})} min="0.01" step="0.01"
                 className="w-full input-field" />
             </div>
             <div>
-              <label className="text-[10px] sm:text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Dividendo/acao</label>
+              <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>Dividendo/acao</label>
               <input type="number" placeholder="0.00 EUR" value={form.dividendPerShare}
                 onChange={e => setForm({...form, dividendPerShare: e.target.value})} min="0" step="0.01"
                 className="w-full input-field" />
@@ -347,7 +361,7 @@ export default function Investments() {
                     <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                       {inv.name}
                     </p>
-                    <span className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full shrink-0"
+                    <span className="text-xs sm:text-xs px-1.5 py-0.5 rounded-full shrink-0"
                       style={{ background: `${typeColor}15`, color: typeColor }}>
                       {typeLabels[inv.type] || inv.type}
                     </span>
@@ -374,7 +388,7 @@ export default function Investments() {
               {/* Profit/Loss bar */}
               {inv.avgPrice > 0 && (
                 <div className="mt-3">
-                  <div className="flex justify-between text-[10px] sm:text-xs mb-1">
+                  <div className="flex justify-between text-xs sm:text-xs mb-1">
                     <span style={{ color: 'var(--text-secondary)' }}>
                       {inv.profitLossPercent >= 0 ? '+' : ''}{inv.profitLossPercent?.toFixed(1) || 0}%
                     </span>
@@ -397,33 +411,33 @@ export default function Investments() {
                 <div className="mt-3 pt-3 space-y-3 animate-fade-in" style={{ borderTop: '1px solid var(--border)' }}>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                      <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Investido</span>
+                      <span className="text-xs sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Investido</span>
                       <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
                         {formatCurrency(inv.quantity * inv.avgPrice)}
                       </p>
                     </div>
                     <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                      <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Valor atual</span>
+                      <span className="text-xs sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Valor atual</span>
                       <p className="text-xs font-semibold" style={{ color: '#10B981' }}>
                         {formatCurrency(inv.currentValue)}
                       </p>
                     </div>
                     {totalDividends > 0 && (
                       <div className="p-2 rounded-xl" style={{ background: 'rgba(255,215,0,0.1)' }}>
-                        <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--gold)' }}>
+                        <span className="text-xs sm:text-xs block" style={{ color: 'var(--gold)' }}>
                           <Percent size={8} className="inline mr-0.5" />Dividendos
                         </span>
                         <p className="text-xs font-semibold" style={{ color: 'var(--gold)' }}>
                           {formatCurrency(totalDividends)}
                         </p>
-                        <span className="text-[9px] sm:text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                        <span className="text-[11px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
                           {formatCurrency(inv.dividendPerShare)}/acao
                         </span>
                       </div>
                     )}
                     {inv.platform && (
                       <div className="p-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                        <span className="text-[10px] sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Plataforma</span>
+                        <span className="text-xs sm:text-xs block" style={{ color: 'var(--text-muted)' }}>Plataforma</span>
                         <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{inv.platform}</p>
                       </div>
                     )}

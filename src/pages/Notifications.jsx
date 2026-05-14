@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
+import { getTimeAgo } from '../utils/helpers';
 import {
   Bell, BellOff, CheckCheck, AlertTriangle, CreditCard, Target,
   TrendingUp, Flame, Trophy, Lightbulb, MessageCircle, FileText,
-  Shield, Info, ChevronDown, Filter, X, Circle
+  Shield, Info, ChevronDown, Filter, Circle
 } from 'lucide-react';
 
 const notificationTypeConfig = {
@@ -29,7 +30,7 @@ const priorityConfig = {
 };
 
 export default function Notifications() {
-  const { notifications, setNotifications } = useStore();
+  const { notifications, setNotifications, setScreen } = useStore();
   const [loading, setLoading] = useState(true);
   const [filterPriority, setFilterPriority] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -71,22 +72,6 @@ export default function Notifications() {
     }
   };
 
-  const getTimeAgo = (date) => {
-    if (!date) return '';
-    const now = new Date();
-    const diff = now - new Date(date);
-    const mins = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    const weeks = Math.floor(days / 7);
-
-    if (mins < 1) return 'agora';
-    if (mins < 60) return `ha ${mins} min`;
-    if (hours < 24) return `ha ${hours} hora${hours > 1 ? 's' : ''}`;
-    if (days < 7) return `ha ${days} dia${days > 1 ? 's' : ''}`;
-    return `ha ${weeks} semana${weeks > 1 ? 's' : ''}`;
-  };
-
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const filteredNotifications = filterPriority === 'all'
@@ -112,15 +97,20 @@ export default function Notifications() {
   }
 
   return (
-    <div className="px-5 sm:px-8 py-5 sm:py-6 space-y-5 animate-fade-in">
+    <div className="px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8 space-y-6 sm:space-y-7 animate-fade-in">
+      <button onClick={() => setScreen('dashboard')}
+        className="flex items-center gap-1 mb-3 text-sm font-semibold"
+        style={{ color: 'var(--text-secondary)' }}>
+        ← Voltar
+      </button>
       {/* Header with unread count */}
-      <div className="glass-card p-5 sm:p-6">
+      <div className="glass-card p-6 sm:p-7">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
               <Bell size={24} style={{ color: 'var(--gold)' }} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white"
                   style={{ background: '#EF4444' }}>
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
@@ -140,7 +130,7 @@ export default function Notifications() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setShowFilters(!showFilters)}
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              className="w-11 h-11 rounded-xl flex items-center justify-center"
               style={{ background: showFilters ? 'rgba(255,215,0,0.15)' : 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
               <Filter size={14} style={{ color: showFilters ? 'var(--gold)' : 'var(--text-muted)' }} />
             </button>
@@ -234,15 +224,15 @@ export default function Notifications() {
                     {notification.message}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px] sm:text-xs" style={{ color: 'var(--text-muted)' }}>
+                    <span className="text-xs sm:text-xs" style={{ color: 'var(--text-muted)' }}>
                       {getTimeAgo(notification.createdAt)}
                     </span>
-                    <span className="text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                    <span className="text-[11px] sm:text-xs font-semibold px-1.5 py-0.5 rounded-full"
                       style={{ background: prioConf.bg, color: prioConf.color }}>
                       {prioConf.label}
                     </span>
                     {notification.type && notification.type !== 'sistema' && (
-                      <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full"
+                      <span className="text-[11px] sm:text-xs px-1.5 py-0.5 rounded-full"
                         style={{ background: `${typeConf.color}10`, color: typeConf.color }}>
                         {typeConf.label}
                       </span>

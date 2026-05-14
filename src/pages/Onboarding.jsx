@@ -31,6 +31,7 @@ export default function Onboarding() {
       // Complete onboarding via API
       setSaving(true);
       try {
+        // Note: coachMode 'sargento'/'amigavel' maps to coachPersonality 'disciplinado'/'amigavel' used throughout the app
         const coachName = onboardingData.coachMode === 'sargento' ? 'Sargento' : 'Amigo';
         const coachPersonality = onboardingData.coachMode === 'sargento' ? 'disciplinado' : 'amigavel';
         const defaultJars = useStore.getState().defaultJarPercentages;
@@ -82,7 +83,7 @@ export default function Onboarding() {
 
   return (
     <div
-      className="flex flex-col min-h-screen px-5 sm:px-8 py-5 sm:py-6"
+      className="flex flex-col min-h-screen px-5 xs:px-6 sm:px-8 py-5 xs:py-6 sm:py-8"
       style={{ background: theme.background }}
     >
       {/* Progress bar */}
@@ -139,7 +140,7 @@ export default function Onboarding() {
         <button
           onClick={handleNext}
           disabled={saving || (onboardingStep === 0 && !onboardingData.name.trim())}
-          className="w-full py-4 sm:py-5 rounded-2xl font-bold text-base sm:text-lg transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+          className="w-full py-5 sm:py-6 rounded-2xl font-bold text-base sm:text-lg transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
           style={{
             background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})`,
             color: theme.textInverse,
@@ -172,7 +173,7 @@ function Step1Name({ theme }) {
           <button
             key={a}
             onClick={() => setOnboardingData({ avatar: a })}
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-2xl transition-all duration-200"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center text-2xl transition-all duration-200"
             style={{
               background: onboardingData.avatar === a ? `${theme.primary}30` : theme.surface,
               border: onboardingData.avatar === a ? `2px solid ${theme.primary}` : `2px solid ${theme.border}`,
@@ -225,7 +226,7 @@ function Step2Income({ theme }) {
       <input
         type="range"
         min={500}
-        max={3000}
+        max={10000}
         step={50}
         value={onboardingData.income}
         onChange={(e) => setOnboardingData({ income: parseInt(e.target.value) })}
@@ -235,13 +236,15 @@ function Step2Income({ theme }) {
 
       <div className="flex justify-between w-full text-xs" style={{ color: theme.textMuted }}>
         <span>€500</span>
-        <span>€3000</span>
+        <span>€10.000</span>
       </div>
 
       <input
         type="number"
+        min={0}
+        max={100000}
         value={onboardingData.income}
-        onChange={(e) => setOnboardingData({ income: parseInt(e.target.value) || 500 })}
+        onChange={(e) => setOnboardingData({ income: Math.max(0, parseInt(e.target.value) || 0) })}
         className="w-full px-4 py-3 rounded-xl text-base font-medium outline-none mt-4"
         style={{
           background: theme.surface,
@@ -328,7 +331,7 @@ function Step4Coach({ theme }) {
       <div className="flex gap-3 sm:gap-4 w-full">
         <button
           onClick={() => setOnboardingData({ coachMode: 'sargento' })}
-          className="flex-1 p-5 sm:p-6 rounded-2xl transition-all duration-200"
+          className="flex-1 p-6 sm:p-7 rounded-2xl transition-all duration-200"
           style={{
             background: onboardingData.coachMode === 'sargento' ? '#FF444420' : theme.surface,
             border: `2px solid ${onboardingData.coachMode === 'sargento' ? '#FF4444' : theme.border}`,
@@ -348,7 +351,7 @@ function Step4Coach({ theme }) {
 
         <button
           onClick={() => setOnboardingData({ coachMode: 'amigavel' })}
-          className="flex-1 p-5 sm:p-6 rounded-2xl transition-all duration-200"
+          className="flex-1 p-6 sm:p-7 rounded-2xl transition-all duration-200"
           style={{
             background: onboardingData.coachMode === 'amigavel' ? '#4CAF5020' : theme.surface,
             border: `2px solid ${onboardingData.coachMode === 'amigavel' ? '#4CAF50' : theme.border}`,
@@ -372,7 +375,7 @@ function Step4Coach({ theme }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="w-full mt-8 glass rounded-xl p-5 sm:p-6"
+        className="w-full mt-8 glass rounded-xl p-6 sm:p-7"
       >
         <p className="text-xs sm:text-sm" style={{ color: theme.textMuted }}>
           {onboardingData.coachMode === 'sargento'

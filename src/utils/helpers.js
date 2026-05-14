@@ -91,6 +91,16 @@ export const jarLabels = {
 };
 
 export const jarColors = {
+  necessities: 'var(--jar-necessities, #3B82F6)',
+  freedom: 'var(--jar-freedom, #10B981)',
+  savings: 'var(--jar-savings, #F59E0B)',
+  education: 'var(--jar-education, #8B5CF6)',
+  play: 'var(--jar-play, #EF4444)',
+  give: 'var(--jar-give, #EC4899)'
+};
+
+// Hardcoded fallback colors for SVG (which cannot use CSS variables)
+export const jarColorsFallback = {
   necessities: '#3B82F6',
   freedom: '#10B981',
   savings: '#F59E0B',
@@ -143,4 +153,33 @@ export const getDaysUntil = (date) => {
   if (!date) return null;
   const diff = new Date(date) - new Date();
   return Math.ceil(diff / (1000 * 60 * 60 * 24));
+};
+
+export const getTimeAgo = (date) => {
+  if (!date) return '';
+  const now = new Date();
+  const diff = now - new Date(date);
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  const weeks = Math.floor(days / 7);
+
+  if (mins < 1) return 'agora';
+  if (mins < 60) return `ha ${mins} min`;
+  if (hours < 24) return `ha ${hours} hora${hours > 1 ? 's' : ''}`;
+  if (days < 7) return `ha ${days} dia${days > 1 ? 's' : ''}`;
+  return `ha ${weeks} semana${weeks > 1 ? 's' : ''}`;
+};
+
+export const personalityLabels = {
+  disciplinado: 'Disciplinado',
+  amigavel: 'Amigavel',
+  estrategico: 'Estrategico',
+  espiritual: 'Espiritual',
+};
+
+export const genderLabels = {
+  masculino: 'Masculino',
+  feminino: 'Feminino',
+  neutro: 'Neutro',
 };
