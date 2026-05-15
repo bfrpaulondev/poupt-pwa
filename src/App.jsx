@@ -57,12 +57,22 @@ const secondaryNav = [
 ];
 
 const fullscreenScreens = ['landing', 'login', 'register', 'onboarding'];
-const allNavItems = [...primaryNav, ...secondaryNav, { id: 'addTransaction', label: 'Adicionar', icon: Plus }];
+// Telas que NÃO mostram bottom nav (têm o próprio layout fullscreen)
+const noBottomNavScreens = ['coach'];
+
+const allNavItems = [
+  ...primaryNav,
+  ...secondaryNav,
+  { id: 'addTransaction', label: 'Adicionar', icon: Plus },
+];
 
 function Logo() {
   return (
     <div className="app-logo">
-      <div className="app-logo-mark" style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold-light))' }}>
+      <div
+        className="app-logo-mark"
+        style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold-light))' }}
+      >
         <PiggyBank size={20} />
       </div>
       <div style={{ minWidth: 0 }}>
@@ -178,7 +188,7 @@ function MobileDrawer({ isOpen, currentScreen, onClose, onNavigate, user }) {
 
 function MobileBottomNav({ currentScreen, onNavigate }) {
   return (
-    <nav className="app-bottom-nav">
+    <nav className="app-bottom-nav" role="navigation" aria-label="Navegação principal">
       {primaryNav.map((item) => {
         const Icon = item.icon;
         const isActive = currentScreen === item.id;
@@ -188,6 +198,7 @@ function MobileBottomNav({ currentScreen, onNavigate }) {
             type="button"
             onClick={() => onNavigate(item.id)}
             className={`app-bottom-button ${isActive ? 'is-active' : ''}`}
+            aria-current={isActive ? 'page' : undefined}
           >
             <Icon size={20} strokeWidth={isActive ? 2.4 : 1.9} />
             <span>{item.label}</span>
@@ -234,7 +245,10 @@ function Topbar({ title, onMenu, onNavigate, user, unreadCount }) {
 function LoadingScreen({ theme }) {
   return (
     <div className="app-loading" style={{ background: theme.background }}>
-      <div className="app-loading-mark" style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}>
+      <div
+        className="app-loading-mark"
+        style={{ background: `linear-gradient(135deg, ${theme.gradient[0]}, ${theme.gradient[1]})` }}
+      >
         <PiggyBank size={32} />
       </div>
       <p>A carregar...</p>
@@ -251,6 +265,7 @@ function App() {
   const [ready, setReady] = useState(false);
   const theme = themes[currentTheme] || themes.darkGold;
   const isFullscreen = fullscreenScreens.includes(currentScreen);
+  const hideBottomNav = noBottomNavScreens.includes(currentScreen);
   const ScreenComponent = screenComponents[currentScreen] || Dashboard;
 
   const pageTitle = useMemo(() => {
@@ -320,7 +335,6 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fechar drawer ao redimensionar para desktop
   useEffect(() => {
     const onResize = () => {
       if (window.innerWidth >= 1024 && menuOpen) setMenuOpen(false);
@@ -329,61 +343,87 @@ function App() {
     return () => window.removeEventListener('resize', onResize);
   }, [menuOpen, setMenuOpen]);
 
-  // Bloquear scroll quando drawer aberto
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [menuOpen]);
 
+  // Atualiza um data-attribute no <html> para a bottom nav saber se está ativa
+  // (permite ajustar padding-bottom do conteúdo via CSS sem JS)
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isFullscreen || hideBottomNav) {
+      root.setAttribute('data-bottomnav', 'off');
+    } else {
+      root.setAttribute('data-bottomnav', 'on');
+    }
+    return () => root.removeAttribute('data-bottomnav');
+  }, [isFullscreen, hideBottomNav]);
+
   if (!ready) return <LoadingScreen theme={theme} />;
 
   if (isFullscreen) {
     return (
-      <div className="app-fullscreen" style={{ background: theme.background }}>
-        <Suspense fallback={<LoadingScreen theme={theme} />}>
-          <ErrorBoundary>
-            <ScreenComponent />
-          </ErrorBoundary>
-        </Suspense>
+      <>
+        <div className="app-fullscreen" style={{ background: theme.background }}>
+          <Suspense fallback={<LoadingScreen theme={theme} />}>
+            <ErrorBoundary>
+              <ScreenComponent />
+            </ErrorBoundary>
+          </Suspense>
+        </div>
         <OfflineIndicator />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="app-shell" style={{ background: theme.background }}>
-      <DesktopSidebar currentScreen={currentScreen} onNavigate={navigate} user={user} />
+    <>
+      <div className="app-shell" style={{ background: theme.background }}>
+        <DesktopSidebar currentScreen={currentScreen} onNavigate={navigate} user={user} />
 
-      <div className="app-main">
-        <Topbar
-          title={pageTitle}
-          onMenu={() => setMenuOpen(true)}
-          onNavigate={navigate}
-          user={user}
-          unreadCount={unreadCount}
-        />
+        <div className="app-main">
+          <Topbar
+            title={pageTitle}
+            onMenu={() => setMenuOpen(true)}
+            onNavigate={navigate}
+            user={user}
+            unreadCount={unreadCount}
+          />
 
-        <main className="app-content poupt-scroll">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentScreen}
-              className={`app-page app-page-${currentScreen}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.18 }}
-            >
-              <Suspense fallback={<div className="app-page-loader">A carregar...</div>}>
-                <ErrorBoundary>
-                  <ScreenComponent />
-                </ErrorBoundary>
-              </Suspense>
-            </motion.div>
-          </AnimatePresence>
-        </main>
+          {/*
+            IMPORTANTE: o motion.div já NÃO está dentro de .app-content como filho direto
+            do containing block da fixed nav. Pomos o AnimatePresence dentro de um wrapper
+            normal e a bottom-nav está renderizada FORA do .app-shell para nunca herdar
+            transform de nenhum ancestral.
+          */}
+          <main className="app-content poupt-scroll">
+            <div className="app-page-stage">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentScreen}
+                  className={`app-page app-page-${currentScreen}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <Suspense fallback={<div className="app-page-loader">A carregar...</div>}>
+                    <ErrorBoundary>
+                      <ScreenComponent />
+                    </ErrorBoundary>
+                  </Suspense>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </main>
+        </div>
       </div>
 
-      <MobileBottomNav currentScreen={currentScreen} onNavigate={navigate} />
+      {/* ⬇⬇⬇ Renderizados FORA do .app-shell — sem ancestral com transform ⬇⬇⬇ */}
+      {!hideBottomNav && (
+        <MobileBottomNav currentScreen={currentScreen} onNavigate={navigate} />
+      )}
 
       <MobileDrawer
         isOpen={menuOpen}
@@ -394,7 +434,7 @@ function App() {
       />
 
       <OfflineIndicator />
-    </div>
+    </>
   );
 }
 

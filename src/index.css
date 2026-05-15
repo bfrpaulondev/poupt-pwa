@@ -79,6 +79,12 @@ body {
   overscroll-behavior-y: none;
 }
 
+#root {
+  /* IMPORTANTE: o #root NÃO pode ter transform/filter/perspective
+     senão quebra position:fixed dos seus descendentes (bottom nav, drawer) */
+  isolation: isolate;
+}
+
 button {
   font-family: inherit;
   cursor: pointer;
@@ -117,7 +123,10 @@ img, svg { display: block; max-width: 100%; }
 .poupt-scroll::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* ============================================================
-   APP SHELL — Layout principal
+   APP SHELL — Layout principal (CORRIGIDO)
+   IMPORTANTE: NUNCA aplicar transform/will-change/filter/perspective
+   nestes containers — qualquer um deles quebra position:fixed dos
+   descendentes (bottom nav, drawer, modals).
    ============================================================ */
 .app-shell {
   display: grid;
@@ -150,8 +159,16 @@ img, svg { display: block; max-width: 100%; }
   min-width: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  /* Espaço para a bottom nav no mobile */
-  padding-bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px);
+  /* Sem padding-bottom por defeito — controlado por [data-bottomnav] no <html> */
+}
+
+/* Stage isola o motion.div para que o transform dele NÃO crie um containing
+   block que afete a bottom nav (que está fora do shell). contain: layout paint
+   limita o impacto do transform interno ao próprio stage. */
+.app-page-stage {
+  width: 100%;
+  min-width: 0;
+  contain: layout paint;
 }
 
 .app-page {
@@ -166,12 +183,18 @@ img, svg { display: block; max-width: 100%; }
   font-weight: 600;
 }
 
+/* Quando a bottom nav está ativa (mobile), reserva espaço no fim do conteúdo */
+html[data-bottomnav="on"] .app-content {
+  padding-bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px);
+}
+
 /* >= 1024: sidebar fixa, sem bottom nav */
 @media (min-width: 1024px) {
   .app-shell {
     grid-template-columns: var(--sidebar-w) 1fr;
   }
-  .app-content {
+  html[data-bottomnav="on"] .app-content,
+  html[data-bottomnav="off"] .app-content {
     padding-bottom: 24px;
   }
 }
@@ -253,7 +276,7 @@ img, svg { display: block; max-width: 100%; }
   font-weight: 600;
   color: var(--text-secondary);
   background: transparent;
-  transition: background 0.18s, color 0.18s, transform 0.1s;
+  transition: background 0.18s, color 0.18s;
   text-align: left;
   min-height: 44px;
 }
@@ -327,6 +350,8 @@ img, svg { display: block; max-width: 100%; }
 
 /* ============================================================
    TOPBAR
+   IMPORTANTE: backdrop-filter REMOVIDO — em iOS Safari cria um
+   containing block que quebra position:fixed dos descendentes.
    ============================================================ */
 .app-topbar {
   display: flex;
@@ -341,11 +366,21 @@ img, svg { display: block; max-width: 100%; }
   position: sticky;
   top: 0;
   z-index: 30;
-  backdrop-filter: blur(10px);
+  /* backdrop-filter foi REMOVIDO de propósito */
 }
 
-@media (min-width: 640px) { .app-topbar { padding: 14px 22px; padding-top: calc(14px + var(--safe-top)); } }
-@media (min-width: 1024px) { .app-topbar { padding: 16px 28px; } }
+@media (min-width: 640px) {
+  .app-topbar {
+    padding: 14px 22px;
+    padding-top: calc(14px + var(--safe-top));
+  }
+}
+@media (min-width: 1024px) {
+  .app-topbar {
+    padding: 16px 28px;
+    padding-top: calc(16px + var(--safe-top));
+  }
+}
 
 .app-topbar-left {
   display: flex;
@@ -392,7 +427,7 @@ img, svg { display: block; max-width: 100%; }
   background: var(--bg-primary);
   color: var(--text-secondary);
   border: 1px solid var(--border);
-  transition: background 0.15s, color 0.15s, transform 0.1s;
+  transition: background 0.15s, color 0.15s;
   position: relative;
   flex-shrink: 0;
 }
@@ -400,7 +435,7 @@ img, svg { display: block; max-width: 100%; }
   background: var(--bg-surface-hover);
   color: var(--text-primary);
 }
-.app-icon-button:active { transform: scale(0.95); }
+.app-icon-button:active { opacity: 0.85; }
 
 .app-alert-button > span {
   position: absolute;
@@ -433,7 +468,7 @@ img, svg { display: block; max-width: 100%; }
   height: 40px;
   flex-shrink: 0;
 }
-.app-coin-pill:active { transform: scale(0.96); }
+.app-coin-pill:active { opacity: 0.85; }
 
 .app-action-button {
   display: inline-flex;
@@ -449,7 +484,7 @@ img, svg { display: block; max-width: 100%; }
   box-shadow: 0 6px 16px rgba(212, 168, 67, 0.28);
 }
 .app-action-button:hover { filter: brightness(1.05); }
-.app-action-button:active { transform: scale(0.96); }
+.app-action-button:active { opacity: 0.9; }
 
 /* Mostrar / esconder por breakpoint */
 .app-mobile-only { display: inline-flex; }
@@ -461,13 +496,13 @@ img, svg { display: block; max-width: 100%; }
 }
 
 /* ============================================================
-   MOBILE DRAWER
+   MOBILE DRAWER — renderizado fora do .app-shell
    ============================================================ */
 .app-drawer-backdrop {
   position: fixed;
   inset: 0;
   background: #000;
-  z-index: 70;
+  z-index: 100;
 }
 
 .app-drawer {
@@ -476,7 +511,7 @@ img, svg { display: block; max-width: 100%; }
   left: 0;
   bottom: 0;
   width: min(86vw, 320px);
-  z-index: 80;
+  z-index: 110;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border);
   display: flex;
@@ -569,22 +604,28 @@ img, svg { display: block; max-width: 100%; }
 .app-drawer-link:not(.is-active):hover { background: var(--bg-surface-hover); color: var(--text-primary); }
 
 /* ============================================================
-   BOTTOM NAV (Mobile + Tablet)
+   BOTTOM NAV (Mobile + Tablet) — renderizada fora do .app-shell
+   Crítico: nunca herdar transform de ancestrais.
    ============================================================ */
 .app-bottom-nav {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 2px;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 50;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  z-index: 90;
   background: var(--bg-secondary);
   border-top: 1px solid var(--border);
   padding: 6px 4px;
   padding-bottom: calc(6px + var(--safe-bottom));
+  padding-left: calc(4px + var(--safe-left));
+  padding-right: calc(4px + var(--safe-right));
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  /* Cinto de segurança: garante que nunca tem transform herdado */
+  transform: none !important;
+  will-change: auto;
 }
 
 @media (min-width: 1024px) {
@@ -601,7 +642,11 @@ img, svg { display: block; max-width: 100%; }
   border-radius: 12px;
   color: var(--text-muted);
   min-height: 56px;
-  transition: color 0.15s;
+  min-width: 0;
+  transition: color 0.15s, background 0.15s;
+}
+.app-bottom-button:active {
+  background: var(--bg-surface-hover);
 }
 .app-bottom-button span {
   font-size: 10px;
@@ -714,14 +759,14 @@ img, svg { display: block; max-width: 100%; }
 }
 .ui-card--compact { padding: clamp(14px, 2vw, 18px); border-radius: var(--radius-lg); }
 .ui-card--interactive {
-  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
   cursor: pointer;
 }
 .ui-card--interactive:hover {
   border-color: var(--gold);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
-.ui-card--interactive:active { transform: scale(0.99); }
+.ui-card--interactive:active { opacity: 0.95; }
 
 /* ---------- Section header ---------- */
 .ui-section-header {
@@ -755,10 +800,10 @@ img, svg { display: block; max-width: 100%; }
   gap: 8px;
   font-weight: 800;
   border-radius: 14px;
-  transition: transform 0.1s, filter 0.15s, background 0.15s;
+  transition: filter 0.15s, background 0.15s;
   white-space: nowrap;
 }
-.ui-button:active:not(:disabled) { transform: scale(0.97); }
+.ui-button:active:not(:disabled) { opacity: 0.9; }
 .ui-button:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .ui-button--sm { padding: 8px 14px; font-size: 12px; min-height: 36px; }
@@ -898,11 +943,11 @@ img, svg { display: block; max-width: 100%; }
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   text-align: left;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.15s;
   min-width: 0;
 }
 .ui-transaction-item:hover { background: var(--bg-surface-hover); }
-.ui-transaction-item:active { transform: scale(0.99); }
+.ui-transaction-item:active { opacity: 0.95; }
 
 .ui-transaction-dot {
   width: 10px;
@@ -967,11 +1012,12 @@ textarea.input-field { min-height: 92px; line-height: 1.5; }
 
 /* ============================================================
    UTILITÁRIOS
+   IMPORTANTE: .glass perdeu o backdrop-filter para não criar
+   containing block que afete fixed descendants.
    ============================================================ */
 .glass {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  backdrop-filter: blur(10px);
 }
 .glass-card {
   background: var(--bg-secondary);
@@ -1019,4 +1065,16 @@ textarea.input-field { min-height: 92px; line-height: 1.5; }
 /* Extra small breakpoint helper (xs) — usado nas grids */
 @media (min-width: 420px) {
   .xs\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Typing dots animation (usado no Coach) */
+.typing-dot {
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
 }
