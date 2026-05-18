@@ -40,7 +40,7 @@ export default function Profile() {
     let alive = true;
     (async () => {
       try {
-        const res = await api.getUserStats?.();
+        const res = await api.getReportSummary?.();
         if (alive) setStats(res?.data || res || null);
       } catch (e) {
         console.warn('stats error', e);
@@ -71,7 +71,7 @@ export default function Profile() {
     if (!coachName.trim()) return;
     setSaving(true);
     try {
-      await api.updateUser?.({ coachName: coachName.trim() });
+      await api.updateMe?.({ coachName: coachName.trim() });
       updateUser({ coachName: coachName.trim() });
       setEditingCoach(false);
     } catch (e) {
