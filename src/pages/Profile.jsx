@@ -4,7 +4,7 @@ import useStore from '../store/useStore';
 import { api } from '../services/api';
 import { formatCurrency } from '../utils/helpers';
 import {
-  User, Edit2, Save, X, Trophy, Coins, Settings as SettingsIcon,
+  Edit2, Save, X, Trophy, Coins, Settings as SettingsIcon,
   LogOut, Crown, TrendingUp, Target, Award, ChevronRight,
   Shield, Heart, Brain, Smile, Star, Sparkles, Calendar,
   Mail, AlertTriangle, Trash2, BarChart3, Wallet, Flame,
@@ -24,8 +24,16 @@ const modeMeta = {
   liberdade: { label: 'Liberdade', color: '#D4AF37', icon: Crown },
 };
 
+const DEFAULT_PERSONALITY = personalityIcons.amigavel;
+const DEFAULT_MODE = modeMeta.estabilidade;
+
+function normalizeKey(value) {
+  if (typeof value !== 'string') return '';
+  return value.trim().toLowerCase();
+}
+
 export default function Profile() {
-  const { user, updateUser, logout, setScreen, currentTheme } = useStore();
+  const { user, updateUser, logout, setScreen } = useStore();
 
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -52,18 +60,20 @@ export default function Profile() {
   }, []);
 
   // --- Derived ---
-  const currentMode = user?.financialMode || 'estabilidade';
-  const mode = modeMeta[currentMode] || modeMeta.estabilidade;
-  const personality = personalityIcons[user?.coachPersonality || 'amigavel'];
-  const PersonalityIcon = personality.icon;
-  const ModeIcon = mode.icon;
+  const currentMode = normalizeKey(user?.financialMode);
+  const mode = modeMeta[currentMode] || DEFAULT_MODE;
+
+  const coachPersonality = normalizeKey(user?.coachPersonality);
+  const personality = personalityIcons[coachPersonality] || DEFAULT_PERSONALITY;
+
+  const PersonalityIcon = personality?.icon || Heart;
+  const ModeIcon = mode?.icon || Target;
 
   const level = useMemo(() => {
     const coins = user?.poupMoedas || 0;
     return Math.max(1, Math.floor(coins / 100) + 1);
   }, [user?.poupMoedas]);
 
-  const nextLevelCoins = level * 100;
   const currentLevelProgress = ((user?.poupMoedas || 0) % 100);
 
   // --- Handlers ---
@@ -248,7 +258,7 @@ export default function Profile() {
             >
               <Mail size={14} style={{ flexShrink: 0 }} />
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user?.email}
+                {user?.email || '—'}
               </span>
             </div>
 
@@ -320,7 +330,7 @@ export default function Profile() {
         }}
       >
         {statCards.map((s, i) => {
-          const Icon = s.icon;
+          const Icon = s.icon || Award;
           return (
             <motion.div
               key={s.label}
@@ -653,7 +663,7 @@ export default function Profile() {
                     minWidth: 0,
                   }}
                 >
-                  <div style={{ fontSize: 28 }}>{t.icon || '🏆'}</div>
+                  <div style={{ fontSize: 28 }}>{t?.icon || '🏆'}</div>
                   <div
                     style={{
                       fontSize: 11,
@@ -664,7 +674,7 @@ export default function Profile() {
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {t.name}
+                    {t?.name || 'Troféu'}
                   </div>
                 </div>
               ))}
@@ -757,7 +767,7 @@ export default function Profile() {
         <h3 style={{ margin: '0 0 14px', fontSize: 16, fontWeight: 700 }}>Informações da conta</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[
-            { icon: Mail, label: 'Email', value: user?.email },
+            { icon: Mail, label: 'Email', value: user?.email || '—' },
             {
               icon: Calendar,
               label: 'Membro desde',
@@ -767,7 +777,7 @@ export default function Profile() {
             },
             { icon: Star, label: 'Plano', value: user?.isPremium ? 'Premium' : 'Gratuito' },
           ].map((row, i) => {
-            const Icon = row.icon;
+            const Icon = row.icon || Star;
             return (
               <div
                 key={i}
