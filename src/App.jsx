@@ -58,7 +58,7 @@ const secondaryNav = [
   { id: 'settings', label: 'Configurações', icon: Settings },
 ];
 
-const fullscreenScreens = ['landing', 'login', 'register', 'onboarding'];
+const fullscreenScreens = ['landing', 'login', 'register', 'onboarding', 'coach'];
 // Telas que NÃO mostram bottom nav (têm o próprio layout fullscreen)
 const noBottomNavScreens = ['coach'];
 
