@@ -127,6 +127,7 @@ export const api = {
     request('/coach/chat', { method: 'POST', body: { message } }),
   getCoachHistory: () => request('/coach/history'),
   clearCoachHistory: () => request('/coach/history', { method: 'DELETE' }),
+  getCoachUsage: () => request('/coach/usage'),
 
   // Investments
   getInvestments: () => request('/investments'),

@@ -6,7 +6,7 @@ import { modeColors } from '../utils/helpers';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import {
   Send, Trash2, Sparkles, Bot, User as UserIcon, ChevronLeft,
-  AlertCircle, X, Check, Copy, RefreshCw, Crown, MessageCircle,
+  AlertCircle, X, Check, Copy, RefreshCw, Crown, MessageCircle, Coins,
   TrendingUp, Target, PiggyBank, Wallet, Zap, Lightbulb,
 } from 'lucide-react';
 
@@ -131,6 +131,8 @@ export default function Coach() {
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [dailyUsed, setDailyUsed] = useState(0);
   const [dailyLimit, setDailyLimit] = useState(15);
+  const [extraPurchased, setExtraPurchased] = useState(0);
+  const [buyingMessages, setBuyingMessages] = useState(false);
 
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -141,8 +143,57 @@ export default function Coach() {
   const userName = user?.name || 'amigo';
   const isPremium = user?.plan === 'premium' || user?.plan === 'pro';
 
-  /* ---------- Load history ---------- */
-  useEffect(() => { loadHistory(); }, []);
+  /* ---------- Load history + usage ---------- */
+  useEffect(() => {
+    loadHistory();
+    loadUsage();
+  }, []);
+
+  const loadUsage = async () => {
+    try {
+      const res = await api.getCoachUsage();
+      if (res?.data) {
+        setDailyUsed(res.data.dailyUsed || 0);
+        setDailyLimit(res.data.dailyLimit || 15);
+        setExtraPurchased(res.data.extraPurchased || 0);
+      }
+    } catch (err) {
+      // Silencioso - não bloqueia o chat
+      console.error('Erro ao carregar uso:', err?.message);
+    }
+  };
+
+  const handleBuyMessages = async () => {
+    if (buyingMessages) return;
+    setBuyingMessages(true);
+    setErrorMsg('');
+    try {
+      const res = await api.spendMoedas('extra_coach_messages');
+      if (res?.data?.coachUsage) {
+        setDailyUsed(res.data.coachUsage.dailyUsed);
+        setDailyLimit(res.data.coachUsage.dailyLimit);
+        setExtraPurchased(res.data.coachUsage.extraPurchased);
+      }
+      // Atualizar saldo de PoupMoedas no store global
+      if (res?.data?.balance !== undefined) {
+        const { addPoupMoedas, spendPoupMoedas } = useStore.getState();
+        // spendMoedas já descontou no backend, precisamos sincronizar o store
+        const currentUser = useStore.getState().user || {};
+        const newBalance = res.data.balance;
+        const diff = newBalance - (currentUser.poupMoedas || 0);
+        if (diff < 0) {
+          spendPoupMoedas(Math.abs(diff));
+        } else {
+          addPoupMoedas(diff);
+        }
+      }
+      setErrorMsg('');
+    } catch (err) {
+      setErrorMsg(err?.message || 'Não foi possível comprar mensagens.');
+    } finally {
+      setBuyingMessages(false);
+    }
+  };
 
   const loadHistory = async () => {
     const token = localStorage.getItem('poupt_token');
@@ -231,6 +282,7 @@ export default function Coach() {
       // Atualiza contadores de uso diário retornados pelo backend
       if (res?.data?.dailyLimit) setDailyLimit(res.data.dailyLimit);
       if (typeof res?.data?.dailyUsed === 'number') setDailyUsed(res.data.dailyUsed);
+      if (typeof res?.data?.extraPurchased === 'number') setExtraPurchased(res.data.extraPurchased);
     } catch (err) {
       const msg = err?.message || 'Erro ao comunicar com o Coach.';
       setErrorMsg(msg);
@@ -767,12 +819,45 @@ export default function Coach() {
             {isPremium ? (
               <>
                 <Crown size={10} color="#D4AF37" />
-                <span>Mensagens ilimitadas</span>
+                <span>Mensagens ilimitadas (Premium)</span>
               </>
             ) : (
               <>
                 <MessageCircle size={10} />
-                <span>{dailyUsed}/{dailyLimit} mensagens/dia (gratuito)</span>
+                <span>
+                  {dailyUsed}/{dailyLimit} mensagens/dia
+                  {extraPurchased > 0 && (
+                    <span style={{ color: '#10B981', fontWeight: 700 }}>
+                      {' '}({extraPurchased} extra)
+                    </span>
+                  )}
+                </span>
+                {/* Botão comprar +5 mensagens quando restam <= 3 */}
+                {(dailyLimit - dailyUsed) <= 3 && (
+                  <button
+                    type="button"
+                    onClick={handleBuyMessages}
+                    disabled={buyingMessages}
+                    style={{
+                      background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+                      color: '#0B0B0B',
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '3px 8px',
+                      fontSize: 10,
+                      fontWeight: 800,
+                      cursor: buyingMessages ? 'not-allowed' : 'pointer',
+                      opacity: buyingMessages ? 0.6 : 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 3,
+                    }}
+                    title="Comprar +5 mensagens por 50 PoupMoedas"
+                  >
+                    <Coins size={10} />
+                    {buyingMessages ? '...' : '+5 msg (50 moedas)'}
+                  </button>
+                )}
               </>
             )}
             <span style={{ opacity: 0.5 }}>·</span>
