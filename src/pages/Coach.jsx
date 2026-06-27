@@ -128,6 +128,8 @@ export default function Coach() {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState(null);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [dailyUsed, setDailyUsed] = useState(0);
+  const [dailyLimit, setDailyLimit] = useState(15);
 
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -223,6 +225,9 @@ export default function Coach() {
         timestamp: new Date().toISOString(),
       };
       addCoachMessage(assistantMessage);
+      // Atualiza contadores de uso diário retornados pelo backend
+      if (res?.data?.dailyLimit) setDailyLimit(res.data.dailyLimit);
+      if (typeof res?.data?.dailyUsed === 'number') setDailyUsed(res.data.dailyUsed);
     } catch (err) {
       const msg = err?.message || 'Erro ao comunicar com o Coach.';
       setErrorMsg(msg);
@@ -764,7 +769,7 @@ export default function Coach() {
             ) : (
               <>
                 <MessageCircle size={10} />
-                <span>3 mensagens/dia (gratuito)</span>
+                <span>{dailyUsed}/{dailyLimit} mensagens/dia (gratuito)</span>
               </>
             )}
             <span style={{ opacity: 0.5 }}>·</span>
