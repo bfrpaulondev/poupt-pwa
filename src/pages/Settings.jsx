@@ -669,16 +669,11 @@ export default function Settings() {
   const confirmDeleteAccount = async () => {
     setDeleting(true);
     try {
-      await fetch(
-        `${import.meta.env.VITE_API_URL || 'https://poupt-api.onrender.com/api'}/auth/me`,
-        {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${localStorage.getItem('poupt_token')}` },
-        }
-      );
+      await api.deleteAccount();
       logout();
     } catch (err) {
       console.error(err);
+      alert('Não foi possível eliminar a conta. Tenta novamente.');
     } finally {
       setDeleting(false);
       setShowDeleteModal(false);

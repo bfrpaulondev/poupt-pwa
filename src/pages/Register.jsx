@@ -7,7 +7,7 @@ import { Mail, Lock, ArrowLeft, Eye, EyeOff, User, Check } from 'lucide-react';
 
 export default function Register() {
   const { setScreen, login, currentTheme } = useStore();
-  const theme = themes[currentTheme] || themes.dark;
+  const theme = themes[currentTheme] || themes.darkGold;
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -97,7 +97,7 @@ export default function Register() {
         {/* Back */}
         <button
           type="button"
-          onClick={() => setScreen('welcome')}
+          onClick={() => setScreen('landing')}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
