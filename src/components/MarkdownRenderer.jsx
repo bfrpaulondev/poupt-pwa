@@ -1,4 +1,26 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import mermaid from 'mermaid';
+
+// Configurar Mermaid uma vez
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  themeVariables: {
+    primaryColor: '#D4AF37',
+    primaryTextColor: '#fff',
+    primaryBorderColor: '#B8941F',
+    lineColor: '#9CA3AF',
+    secondaryColor: '#1a1a1a',
+    tertiaryColor: '#0B0B0B',
+    fontFamily: 'Inter, sans-serif',
+  },
+  flowchart: {
+    curve: 'basis',
+    padding: 20,
+  },
+});
+
+let mermaidIdCounter = 0;
 
 /**
  * MarkdownRenderer ROBUSTO - converte markdown para React elements.
@@ -223,13 +245,78 @@ const MarkdownRenderer = ({ content, isUser = false }) => {
     quoteItems = [];
   };
 
-  lines.forEach((line, lineIdx) => {
+  // Primeiro, extrair blocos de código (```...```) antes de processar linhas
+  const codeBlocks = [];
+  const processedLines = [];
+  let inCodeBlock = false;
+  let currentCodeBlock = [];
+  let currentLang = '';
+
+  lines.forEach((line) => {
+    const codeBlockStart = line.match(/^```(\w*)$/);
+    if (codeBlockStart && !inCodeBlock) {
+      inCodeBlock = true;
+      currentLang = codeBlockStart[1] || '';
+      currentCodeBlock = [];
+      return;
+    }
+    if (line.trim() === '```' && inCodeBlock) {
+      inCodeBlock = false;
+      codeBlocks.push({ lang: currentLang, content: currentCodeBlock.join('\n') });
+      processedLines.push(`__CODE_BLOCK_${codeBlocks.length - 1}__`);
+      return;
+    }
+    if (inCodeBlock) {
+      currentCodeBlock.push(line);
+    } else {
+      processedLines.push(line);
+    }
+  });
+
+  processedLines.forEach((line, lineIdx) => {
     const trimmed = line.trim();
 
     // Linha vazia
     if (trimmed === '') {
       flushList(lineIdx);
       flushQuote(lineIdx);
+      return;
+    }
+
+    // Bloco de código (placeholder)
+    const codeBlockMatch = trimmed.match(/^__CODE_BLOCK_(\d+)__$/);
+    if (codeBlockMatch) {
+      const blockIdx = parseInt(codeBlockMatch[1]);
+      const block = codeBlocks[blockIdx];
+      if (block) {
+        flushList(lineIdx);
+        flushQuote(lineIdx);
+        if (block.lang === 'mermaid') {
+          elements.push(
+            <MermaidBlock key={`mermaid-${lineIdx}`} code={block.content} />
+          );
+        } else {
+          // Bloco de código normal
+          elements.push(
+            <pre key={`code-${lineIdx}`} style={{
+              margin: '10px 0',
+              padding: '12px 14px',
+              background: isUser ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.3)',
+              borderRadius: 10,
+              overflowX: 'auto',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}>
+              <code style={{
+                fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
+                fontSize: '0.88em',
+                color: isUser ? '#0B0B0B' : '#10B981',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}>{block.content}</code>
+            </pre>
+          );
+        }
+      }
       return;
     }
 
@@ -243,6 +330,46 @@ const MarkdownRenderer = ({ content, isUser = false }) => {
           borderTop: `1px solid ${isUser ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)'}`,
           margin: '12px 0',
         }} />
+      );
+      return;
+    }
+
+    // IMAGEM markdown: ![alt](url)
+    const imgMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imgMatch) {
+      flushList(lineIdx);
+      flushQuote(lineIdx);
+      const alt = imgMatch[1] || 'imagem';
+      const url = imgMatch[2];
+      elements.push(
+        <div key={`img-${lineIdx}`} style={{
+          margin: '12px 0',
+          borderRadius: 12,
+          overflow: 'hidden',
+          background: 'rgba(0,0,0,0.2)',
+        }}>
+          <img
+            src={url}
+            alt={alt}
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+              borderRadius: 12,
+            }}
+            loading="lazy"
+          />
+          {alt && alt !== 'imagem' && alt !== 'grafico' && alt !== 'fluxograma' && (
+            <p style={{
+              margin: 0,
+              padding: '6px 12px',
+              fontSize: 11,
+              color: 'var(--text-muted, #6B7280)',
+              textAlign: 'center',
+              fontWeight: 600,
+            }}>{alt}</p>
+          )}
+        </div>
       );
       return;
     }
@@ -347,5 +474,60 @@ const MarkdownRenderer = ({ content, isUser = false }) => {
 
   return <div>{elements}</div>;
 };
+
+// Componente para renderizar Mermaid
+function MermaidBlock({ code }) {
+  const [svg, setSvg] = useState('');
+  const [error, setError] = useState('');
+  const idRef = useRef(`mermaid-${++mermaidIdCounter}`);
+
+  useEffect(() => {
+    const renderMermaid = async () => {
+      try {
+        const { svg: renderedSvg } = await mermaid.render(idRef.current, code);
+        setSvg(renderedSvg);
+      } catch (err) {
+        console.error('Mermaid render error:', err);
+        setError(err.message || 'Erro ao renderizar fluxograma');
+      }
+    };
+    renderMermaid();
+  }, [code]);
+
+  if (error) {
+    return (
+      <div style={{
+        margin: '12px 0',
+        padding: '14px',
+        background: 'rgba(239,68,68,0.08)',
+        border: '1px solid rgba(239,68,68,0.3)',
+        borderRadius: 10,
+        color: '#FCA5A5',
+        fontSize: 12,
+      }}>
+        ⚠️ Erro ao renderizar fluxograma. Código:
+        <pre style={{ marginTop: 8, fontSize: 11, color: '#9CA3AF' }}>{code}</pre>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      margin: '12px 0',
+      padding: '16px',
+      background: 'rgba(255,255,255,0.03)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 12,
+      overflowX: 'auto',
+      textAlign: 'center',
+    }}>
+      {svg ? (
+        <div dangerouslySetInnerHTML={{ __html: svg }} />
+      ) : (
+        <div style={{ color: '#9CA3AF', fontSize: 12 }}>A renderizar fluxograma...</div>
+      )}
+    </div>
+  );
+}
 
 export default MarkdownRenderer;
