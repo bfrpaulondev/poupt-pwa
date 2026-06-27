@@ -176,6 +176,12 @@ export const api = {
   getSnowballDetailed: (extraBudget) =>
     request('/debts/snowball/detailed', { method: 'POST', body: { extraBudget: extraBudget || 0 } }),
 
+  // Debt Templates (renegociação de dívidas)
+  getDebtTemplates: () => request('/debt-templates'),
+  getDebtTemplate: (id) => request(`/debt-templates/${id}`),
+  generateDebtLetter: (id, values) =>
+    request(`/debt-templates/${id}/generate`, { method: 'POST', body: { values } }),
+
   // Goal Progress
   updateGoalProgress: (id, amount) =>
     request(`/goals/${id}/progress`, { method: 'POST', body: { amount } }),

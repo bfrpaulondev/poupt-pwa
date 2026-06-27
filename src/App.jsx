@@ -9,7 +9,7 @@ import OfflineIndicator from './components/OfflineIndicator';
 import {
   Home, FlaskConical, Bot, CreditCard, User, Menu, X, Target,
   BarChart3, Bell, Building2, Shield, Coins, Settings,
-  ChevronRight, Plus, PiggyBank,
+  ChevronRight, Plus, PiggyBank, FileText,
 } from 'lucide-react';
 
 import Landing from './pages/Landing';
@@ -29,13 +29,14 @@ import Investments from './pages/Investments';
 import SurvivalMode from './pages/SurvivalMode';
 import Notifications from './pages/Notifications';
 import Reports from './pages/Reports';
+import DebtTemplates from './pages/DebtTemplates';
 
 const screenComponents = {
   landing: Landing, login: Login, register: Register, onboarding: Onboarding,
   dashboard: Dashboard, jars: Jars, coach: Coach, debts: Debts, goals: Goals,
   profile: Profile, settings: SettingsPage, addTransaction: AddTransaction,
   poupMoedas: MoedasStore, investments: Investments, survival: SurvivalMode,
-  alerts: Notifications, reports: Reports,
+  alerts: Notifications, reports: Reports, debtTemplates: DebtTemplates,
 };
 
 const primaryNav = [
@@ -53,6 +54,7 @@ const secondaryNav = [
   { id: 'investments', label: 'Investimentos', icon: Building2 },
   { id: 'survival', label: 'Modo Sobrevivência', icon: Shield },
   { id: 'poupMoedas', label: 'Loja PoupMoedas', icon: Coins },
+  { id: 'debtTemplates', label: 'Renegociar Dívidas', icon: FileText },
   { id: 'settings', label: 'Configurações', icon: Settings },
 ];
 

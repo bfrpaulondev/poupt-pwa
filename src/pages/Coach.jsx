@@ -149,15 +149,29 @@ export default function Coach() {
     }
     try {
       const res = await api.getCoachHistory();
-      if (res?.data?.messages?.length) {
-        setCoachMessages(res.data.messages);
+      // Backend retorna { success, data: { messages: [...] } }
+      // Cada message: { role, content, timestamp, _id }
+      const messages = res?.data?.messages || res?.messages || [];
+      if (Array.isArray(messages) && messages.length > 0) {
+        // Garante que cada message tem timestamp (fallback para createdAt do ChatLog)
+        const normalized = messages.map((m, i) => ({
+          role: m.role || 'assistant',
+          content: m.content || '',
+          timestamp: m.timestamp || m.createdAt || new Date().toISOString(),
+        }));
+        setCoachMessages(normalized);
       }
     } catch (err) {
-      if (
-        !err?.message?.includes('401') &&
-        !err?.message?.includes('autenticado')
+      // 429 = rate limit. Não mostrar erro para não assustar o utilizador.
+      const msg = (err?.message || '').toLowerCase();
+      if (msg.includes('demasiados') || msg.includes('rate') || msg.includes('429')) {
+        // Tentar novamente em 30s silenciosamente
+        setTimeout(() => loadHistory(), 30000);
+      } else if (
+        !msg.includes('401') &&
+        !msg.includes('autenticado')
       ) {
-        console.error(err);
+        console.error('Erro ao carregar histórico:', err?.message);
       }
     } finally {
       setLoadingHistory(false);
