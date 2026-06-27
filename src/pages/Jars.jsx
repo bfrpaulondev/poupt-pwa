@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
@@ -103,6 +103,32 @@ export default function Jars() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [jarBalances, setJarBalances] = useState(null);
+  const [loadingBalances, setLoadingBalances] = useState(true);
+
+  /* ---------- Fetch real jar balances from backend ---------- */
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await api.getJars();
+        if (alive && res?.data?.frascos) {
+          // Converte array de frascos para objeto { necessities: 425, freedom: 250, ... }
+          const balances = {};
+          res.data.frascos.forEach((f) => {
+            balances[f.key] = f.saldo || 0;
+          });
+          setJarBalances(balances);
+        }
+      } catch (err) {
+        // Falha silenciosa — a UI funciona sem saldos
+        if (alive) console.error('Erro ao carregar saldos dos frascos:', err?.message);
+      } finally {
+        if (alive) setLoadingBalances(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   /* ---------- Derived ---------- */
   const total = useMemo(
@@ -130,6 +156,15 @@ export default function Jars() {
       updateUser({ jarPercentages: percentages });
       setSaved(true);
       setTimeout(() => setSaved(false), 2400);
+      // Recarrega saldos após salvar
+      try {
+        const res = await api.getJars();
+        if (res?.data?.frascos) {
+          const balances = {};
+          res.data.frascos.forEach((f) => { balances[f.key] = f.saldo || 0; });
+          setJarBalances(balances);
+        }
+      } catch {}
     } catch (err) {
       setError(err?.message || 'Não foi possível guardar.');
     } finally {
@@ -369,6 +404,8 @@ export default function Jars() {
           const color = jarColors?.[key] || '#D4AF37';
           const isRecommended = pct === recommended;
           const emoji = JAR_EMOJI[key] || '🫙';
+          const realBalance = jarBalances?.[key];
+          const showBalance = realBalance !== undefined && realBalance !== null;
 
           return (
             <motion.div
@@ -514,6 +551,32 @@ export default function Jars() {
                   ['--thumb-color']: color,
                 }}
               />
+
+              {/* ===== QUICK CHIPS + RECOMMENDED ===== */}
+              {showBalance && (
+                <div
+                  style={{
+                    marginTop: 10,
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    background: realBalance >= 0
+                      ? hexToRgba('#10B981', 0.08)
+                      : hexToRgba('#EF4444', 0.08),
+                    color: realBalance >= 0 ? '#10B981' : '#EF4444',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 8,
+                  }}
+                >
+                  <span>Saldo atual neste frasco:</span>
+                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {formatCurrency(realBalance)}
+                  </span>
+                </div>
+              )}
 
               {/* ===== QUICK CHIPS + RECOMMENDED ===== */}
               <div

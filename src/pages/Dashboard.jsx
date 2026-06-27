@@ -1308,7 +1308,7 @@ function CoachPanel({ user, modeColor, onOpen }) {
    DASHBOARD PRINCIPAL
    ============================================================ */
 export default function Dashboard() {
-  const { user, setScreen } = useStore();
+  const { user, setScreen, updateUser } = useStore();
 
   const [summary, setSummary] = useState(null);
   const [recentTransactions, setRecentTransactions] = useState([]);
@@ -1334,6 +1334,16 @@ export default function Dashboard() {
       }
       if (debtRes.status === 'fulfilled') {
         setOverdueDebts(debtRes.value?.data?.summary?.overdueCount || 0);
+      }
+
+      // Detectar modo financeiro automaticamente (uma vez por sessão)
+      try {
+        const modeRes = await api.detectMode();
+        if (modeRes?.data?.financialMode && modeRes.data.financialMode !== user?.financialMode) {
+          updateUser({ financialMode: modeRes.data.financialMode });
+        }
+      } catch (err) {
+        // Detecção de modo é best-effort — não bloqueia o dashboard
       }
 
       setLastUpdated(new Date());

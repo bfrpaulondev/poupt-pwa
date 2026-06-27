@@ -82,6 +82,11 @@ export const api = {
   completeOnboarding: (data) =>
     request('/auth/me/onboarding', { method: 'PUT', body: data }),
 
+  // Jars (Frascos)
+  getJars: () => request('/jars'),
+  updateJar: (id, percentage) =>
+    request(`/jars/${id}`, { method: 'PUT', body: { percentage } }),
+
   // Transactions
   getTransactions: (params = '') =>
     request(`/transactions${params}`),
@@ -167,9 +172,9 @@ export const api = {
   forgotPassword: (email) => request('/auth/forgot-password', { method: 'POST', body: { email } }),
   resetPassword: (token, password) => request('/auth/reset-password', { method: 'PUT', body: { token, password } }),
 
-  // Snowball Detailed
+  // Snowball Detailed (backend expõe POST /debts/snowball/detailed)
   getSnowballDetailed: (extraBudget) =>
-    request(`/debts/snowball-detailed${extraBudget ? `?extraBudget=${extraBudget}` : ''}`),
+    request('/debts/snowball/detailed', { method: 'POST', body: { extraBudget: extraBudget || 0 } }),
 
   // Goal Progress
   updateGoalProgress: (id, amount) =>
