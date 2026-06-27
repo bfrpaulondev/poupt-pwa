@@ -45,7 +45,7 @@ export default function Register() {
 
     setLoading(true);
     try {
-      const res = await api.register({ name: name.trim(), email: email.trim().toLowerCase(), password });
+      const res = await api.register(name.trim(), email.trim().toLowerCase(), password);
       const token = res?.token || res?.data?.token || res?.accessToken;
       const user = res?.user || res?.data?.user || res?.data || { name, email };
 
