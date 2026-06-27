@@ -841,44 +841,112 @@ function MessageBubble({ msg, isUser, coachName, modeColor, onCopy, copied }) {
   const isError = msg.isError;
   const isBlocked = msg.blocked === true;
 
+  // Cores por tipo de mensagem
+  const getBubbleStyle = () => {
+    if (isUser) {
+      return {
+        background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+        color: '#0B0B0B',
+        border: 'none',
+        boxShadow: '0 4px 16px rgba(212,175,55,0.25)',
+      };
+    }
+    if (isError) {
+      return {
+        background: 'rgba(239,68,68,0.08)',
+        color: '#FCA5A5',
+        border: '1px solid rgba(239,68,68,0.25)',
+        boxShadow: '0 2px 8px rgba(239,68,68,0.1)',
+      };
+    }
+    if (isBlocked) {
+      return {
+        background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0.06) 100%)',
+        color: '#FCD34D',
+        border: '1px solid rgba(245,158,11,0.3)',
+        boxShadow: '0 2px 12px rgba(245,158,11,0.12)',
+      };
+    }
+    // Coach normal
+    return {
+      background: 'linear-gradient(135deg, rgba(26,26,26,0.95) 0%, rgba(20,20,20,0.95) 100%)',
+      color: 'var(--text, #fff)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+    };
+  };
+
+  const getAvatarStyle = () => {
+    if (isUser) {
+      return {
+        background: 'linear-gradient(135deg, #D4AF37, #B8941F)',
+        color: '#0B0B0B',
+      };
+    }
+    if (isBlocked) {
+      return {
+        background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+        color: '#fff',
+      };
+    }
+    if (isError) {
+      return {
+        background: 'linear-gradient(135deg, #EF4444, #DC2626)',
+        color: '#fff',
+      };
+    }
+    return {
+      background: `linear-gradient(135deg, ${modeColor}, ${modeColor}DD)`,
+      color: '#fff',
+    };
+  };
+
+  const bubbleStyle = getBubbleStyle();
+  const avatarStyle = getAvatarStyle();
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+      initial={{ opacity: 0, y: 10, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.22, ease: 'easeOut' }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       style={{
         display: 'flex',
         flexDirection: isUser ? 'row-reverse' : 'row',
-        alignItems: 'flex-end',
-        gap: 8,
+        alignItems: 'flex-start',
+        gap: 10,
         minWidth: 0,
         width: '100%',
+        padding: '2px 0',
       }}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      {/* Avatar */}
-      <div
+      {/* Avatar melhorado */}
+      <motion.div
+        whileHover={{ scale: 1.05 }}
         style={{
-          width: 30,
-          height: 30,
-          borderRadius: 10,
+          width: 36,
+          height: 36,
+          borderRadius: 12,
           flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: isUser
-            ? 'rgba(212,175,55,0.18)'
-            : isBlocked
-              ? 'rgba(245,158,11,0.18)'
-              : hexToRgba(modeColor, 0.18),
-          color: isUser ? '#D4AF37' : isBlocked ? '#F59E0B' : modeColor,
-          marginBottom: 2,
+          ...avatarStyle,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}
       >
-        {isUser ? <UserIcon size={15} /> : isBlocked ? <AlertCircle size={15} /> : <Bot size={15} />}
-      </div>
+        {isUser ? (
+          <UserIcon size={18} strokeWidth={2.2} />
+        ) : isBlocked ? (
+          <AlertCircle size={18} strokeWidth={2.2} />
+        ) : isError ? (
+          <AlertCircle size={18} strokeWidth={2.2} />
+        ) : (
+          <Bot size={18} strokeWidth={2.2} />
+        )}
+      </motion.div>
 
       {/* Bubble + meta */}
       <div
@@ -886,147 +954,117 @@ function MessageBubble({ msg, isUser, coachName, modeColor, onCopy, copied }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: isUser ? 'flex-end' : 'flex-start',
-          gap: 3,
-          maxWidth: 'min(85%, 720px)',
+          gap: 4,
+          maxWidth: 'min(82%, 680px)',
           minWidth: 0,
         }}
       >
-        <div
-          style={{
-            padding: 'clamp(10px, 2.2vw, 14px) clamp(12px, 2.5vw, 16px)',
-            borderRadius: 16,
-            background: isUser
-              ? 'linear-gradient(135deg, #D4AF37, #B8941F)'
-              : isError
-                ? 'rgba(239,68,68,0.1)'
-                : isBlocked
-                  ? 'rgba(245,158,11,0.08)'
-                  : 'var(--card, #1a1a1a)',
-            border: isUser
-              ? 'none'
-              : isError
-                ? '1px solid rgba(239,68,68,0.3)'
-                : isBlocked
-                  ? '1px solid rgba(245,158,11,0.3)'
-                  : '1px solid var(--border, rgba(255,255,255,0.08))',
-            color: isUser
-              ? '#0B0B0B'
-              : isError
-                ? '#FCA5A5'
-                : isBlocked
-                  ? '#FCD34D'
-                  : 'var(--text, #fff)',
-            borderBottomRightRadius: isUser ? 4 : 16,
-            borderBottomLeftRadius: isUser ? 16 : 4,
-            minWidth: 0,
-            wordBreak: 'break-word',
-            overflowWrap: 'anywhere',
-            position: 'relative',
-            boxShadow: isUser
-              ? '0 4px 12px rgba(212,175,55,0.2)'
-              : '0 2px 8px rgba(0,0,0,0.15)',
-          }}
-        >
-          {!isUser && !isError && (
-            <p
-              style={{
-                margin: 0,
-                fontSize: 10,
-                fontWeight: 800,
-                color: isBlocked ? '#F59E0B' : modeColor,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                marginBottom: 4,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-              }}
-            >
-              {isBlocked && <AlertCircle size={10} />}
-              {isBlocked ? 'Aviso' : coachName}
-            </p>
-          )}
-          {/* Usar MarkdownRenderer para respostas do coach; texto simples para user */}
-          {isUser ? (
-            <p
-              style={{
-                margin: 0,
-                fontSize: 'clamp(13px, 3vw, 14px)',
-                lineHeight: 1.55,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                overflowWrap: 'anywhere',
-              }}
-            >
-              {msg.content}
-            </p>
-          ) : (
-            <div
-              style={{
-                fontSize: 'clamp(13px, 3vw, 14px)',
-                lineHeight: 1.55,
-                wordBreak: 'break-word',
-                overflowWrap: 'anywhere',
-              }}
-            >
-              <MarkdownRenderer content={msg.content} isUser={isUser} />
-            </div>
-          )}
-        </div>
-
-        {/* Meta row: time + copy */}
-        <div
-          style={{
+        {/* Header do bubble (nome + timestamp) */}
+        {!isUser && (
+          <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: 6,
             padding: '0 4px',
-            minHeight: 14,
+          }}>
+            <span style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: isBlocked ? '#F59E0B' : isError ? '#EF4444' : modeColor,
+              letterSpacing: '0.02em',
+            }}>
+              {isBlocked ? 'Aviso do Sistema' : isError ? 'Erro' : coachName}
+            </span>
+            <span style={{
+              fontSize: 10,
+              color: 'var(--text-muted, #6B7280)',
+              fontWeight: 500,
+            }}>
+              · {time}
+            </span>
+          </div>
+        )}
+
+        {/* Bubble */}
+        <div
+          style={{
+            padding: '14px 18px',
+            borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+            minWidth: 0,
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere',
+            position: 'relative',
+            ...bubbleStyle,
           }}
         >
-          {time && (
-            <span
-              style={{
-                fontSize: 10,
-                color: 'var(--text-muted, #6B7280)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              {time}
-            </span>
+          {/* Conteúdo - User usa texto simples, Coach usa MarkdownRenderer */}
+          {isUser ? (
+            <p style={{
+              margin: 0,
+              fontSize: 'clamp(13px, 3vw, 14px)',
+              lineHeight: 1.55,
+              whiteSpace: 'pre-wrap',
+              fontWeight: 500,
+            }}>
+              {msg.content}
+            </p>
+          ) : (
+            <div style={{
+              fontSize: 'clamp(13px, 3vw, 14px)',
+              lineHeight: 1.6,
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+            }}>
+              <MarkdownRenderer content={msg.content} isUser={isUser} />
+            </div>
           )}
+
+          {/* Botão copiar (aparece no hover) */}
           {!isUser && !isError && (
-            <button
-              type="button"
-              onClick={onCopy}
-              aria-label="Copiar mensagem"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: copied ? '#10B981' : 'var(--text-muted, #6B7280)',
-                padding: 2,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 3,
-                fontSize: 10,
-                fontWeight: 600,
-                opacity: showActions || copied ? 1 : 0.5,
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {copied ? (
-                <>
-                  <Check size={11} /> Copiado
-                </>
-              ) : (
-                <>
-                  <Copy size={11} /> Copiar
-                </>
+            <AnimatePresence>
+              {showActions && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  type="button"
+                  onClick={onCopy}
+                  aria-label="Copiar mensagem"
+                  style={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'var(--text-muted, #9CA3AF)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
+                </motion.button>
               )}
-            </button>
+            </AnimatePresence>
           )}
         </div>
+
+        {/* Timestamp para mensagens do user */}
+        {isUser && (
+          <span style={{
+            fontSize: 10,
+            color: 'var(--text-muted, #6B7280)',
+            fontWeight: 500,
+            padding: '0 4px',
+          }}>
+            {time}
+          </span>
+        )}
       </div>
     </motion.div>
   );
@@ -1035,68 +1073,85 @@ function MessageBubble({ msg, isUser, coachName, modeColor, onCopy, copied }) {
 function TypingIndicator({ modeColor, coachName }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 8 }}
-      transition={{ duration: 0.2 }}
+      initial={{ opacity: 0, y: 10, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 10, scale: 0.96 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       style={{
         display: 'flex',
-        alignItems: 'flex-end',
-        gap: 8,
+        alignItems: 'flex-start',
+        gap: 10,
         minWidth: 0,
+        padding: '2px 0',
       }}
     >
       <div
         style={{
-          width: 30,
-          height: 30,
-          borderRadius: 10,
+          width: 36,
+          height: 36,
+          borderRadius: 12,
           flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: hexToRgba(modeColor, 0.18),
-          color: modeColor,
+          background: `linear-gradient(135deg, ${modeColor}, ${modeColor}DD)`,
+          color: '#fff',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
         }}
       >
-        <Bot size={15} />
+        <Bot size={18} strokeWidth={2.2} />
       </div>
-      <div
-        style={{
-          padding: '12px 16px',
-          borderRadius: 16,
-          borderBottomLeftRadius: 4,
-          background: 'var(--card, #1a1a1a)',
-          border: '1px solid var(--border, rgba(255,255,255,0.08))',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          minWidth: 0,
-        }}
-        aria-label={`${coachName} está a escrever`}
-      >
-        {[0, 1, 2].map((i) => (
-          <motion.span
-            key={i}
-            animate={{
-              y: [0, -4, 0],
-              opacity: [0.4, 1, 0.4],
-            }}
-            transition={{
-              duration: 1,
-              repeat: Infinity,
-              delay: i * 0.18,
-              ease: 'easeInOut',
-            }}
-            style={{
-              display: 'inline-block',
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              background: modeColor,
-            }}
-          />
-        ))}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+      }}>
+        <span style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: modeColor,
+          padding: '0 4px',
+        }}>
+          {coachName} está a escrever...
+        </span>
+        <div
+          style={{
+            padding: '14px 18px',
+            borderRadius: '18px 18px 18px 4px',
+            background: 'linear-gradient(135deg, rgba(26,26,26,0.95) 0%, rgba(20,20,20,0.95) 100%)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            minWidth: 60,
+            boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+          }}
+          aria-label={`${coachName} está a escrever`}
+        >
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              animate={{
+                y: [0, -5, 0],
+                opacity: [0.3, 1, 0.3],
+                scale: [0.8, 1.1, 0.8],
+              }}
+              transition={{
+                duration: 1.2,
+                repeat: Infinity,
+                delay: i * 0.2,
+                ease: 'easeInOut',
+              }}
+              style={{
+                display: 'inline-block',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: modeColor,
+              }}
+            />
+          ))}
+        </div>
       </div>
     </motion.div>
   );
@@ -1198,7 +1253,7 @@ function EmptyState({ coachName, userName, modeColor, onPromptClick, isPremium }
               fontWeight: 600,
             }}
           >
-            Tens 3 mensagens gratuitas por dia.
+            Tens 15 mensagens gratuitas por dia.
           </p>
         )}
       </div>
