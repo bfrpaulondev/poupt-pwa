@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import useStore from '../store/useStore';
 import { api } from '../services/api';
 import { modeColors } from '../utils/helpers';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import {
   Send, Trash2, Sparkles, Bot, User as UserIcon, ChevronLeft,
   AlertCircle, X, Check, Copy, RefreshCw, Crown, MessageCircle,
@@ -223,6 +224,8 @@ export default function Coach() {
         role: 'assistant',
         content: res?.data?.reply || 'Sem resposta.',
         timestamp: new Date().toISOString(),
+        blocked: res?.data?.blocked || false,
+        motivo: res?.data?.motivo || null,
       };
       addCoachMessage(assistantMessage);
       // Atualiza contadores de uso diário retornados pelo backend
@@ -836,6 +839,7 @@ function MessageBubble({ msg, isUser, coachName, modeColor, onCopy, copied }) {
   const [showActions, setShowActions] = useState(false);
   const time = formatTime(msg.timestamp);
   const isError = msg.isError;
+  const isBlocked = msg.blocked === true;
 
   return (
     <motion.div
@@ -866,12 +870,14 @@ function MessageBubble({ msg, isUser, coachName, modeColor, onCopy, copied }) {
           justifyContent: 'center',
           background: isUser
             ? 'rgba(212,175,55,0.18)'
-            : hexToRgba(modeColor, 0.18),
-          color: isUser ? '#D4AF37' : modeColor,
+            : isBlocked
+              ? 'rgba(245,158,11,0.18)'
+              : hexToRgba(modeColor, 0.18),
+          color: isUser ? '#D4AF37' : isBlocked ? '#F59E0B' : modeColor,
           marginBottom: 2,
         }}
       >
-        {isUser ? <UserIcon size={15} /> : <Bot size={15} />}
+        {isUser ? <UserIcon size={15} /> : isBlocked ? <AlertCircle size={15} /> : <Bot size={15} />}
       </div>
 
       {/* Bubble + meta */}
@@ -893,17 +899,23 @@ function MessageBubble({ msg, isUser, coachName, modeColor, onCopy, copied }) {
               ? 'linear-gradient(135deg, #D4AF37, #B8941F)'
               : isError
                 ? 'rgba(239,68,68,0.1)'
-                : 'var(--card, #1a1a1a)',
+                : isBlocked
+                  ? 'rgba(245,158,11,0.08)'
+                  : 'var(--card, #1a1a1a)',
             border: isUser
               ? 'none'
               : isError
                 ? '1px solid rgba(239,68,68,0.3)'
-                : '1px solid var(--border, rgba(255,255,255,0.08))',
+                : isBlocked
+                  ? '1px solid rgba(245,158,11,0.3)'
+                  : '1px solid var(--border, rgba(255,255,255,0.08))',
             color: isUser
               ? '#0B0B0B'
               : isError
                 ? '#FCA5A5'
-                : 'var(--text, #fff)',
+                : isBlocked
+                  ? '#FCD34D'
+                  : 'var(--text, #fff)',
             borderBottomRightRadius: isUser ? 4 : 16,
             borderBottomLeftRadius: isUser ? 16 : 4,
             minWidth: 0,
@@ -921,27 +933,45 @@ function MessageBubble({ msg, isUser, coachName, modeColor, onCopy, copied }) {
                 margin: 0,
                 fontSize: 10,
                 fontWeight: 800,
-                color: modeColor,
+                color: isBlocked ? '#F59E0B' : modeColor,
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
                 marginBottom: 4,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
               }}
             >
-              {coachName}
+              {isBlocked && <AlertCircle size={10} />}
+              {isBlocked ? 'Aviso' : coachName}
             </p>
           )}
-          <p
-            style={{
-              margin: 0,
-              fontSize: 'clamp(13px, 3vw, 14px)',
-              lineHeight: 1.55,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              overflowWrap: 'anywhere',
-            }}
-          >
-            {msg.content}
-          </p>
+          {/* Usar MarkdownRenderer para respostas do coach; texto simples para user */}
+          {isUser ? (
+            <p
+              style={{
+                margin: 0,
+                fontSize: 'clamp(13px, 3vw, 14px)',
+                lineHeight: 1.55,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere',
+              }}
+            >
+              {msg.content}
+            </p>
+          ) : (
+            <div
+              style={{
+                fontSize: 'clamp(13px, 3vw, 14px)',
+                lineHeight: 1.55,
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere',
+              }}
+            >
+              <MarkdownRenderer content={msg.content} isUser={isUser} />
+            </div>
+          )}
         </div>
 
         {/* Meta row: time + copy */}
